@@ -1,3 +1,9 @@
+---
+title: Course Description for Tax Return Guide (2025)
+description: A detailed course description for the Tax Return Guide including overview, topics covered, and learning objectives in the format of the 2001 Bloom Taxonomy
+quality_score: 89
+---
+
 # Course Description
 
 ## Course Title
@@ -29,6 +35,7 @@ The book covers W-2 employees, 1099 contractors, side hustlers, investors, renta
 - **Primary:** General public adults filing US taxes
 - **Includes:** First-time filers, W-2 employees, 1099 contractors, side hustlers, gig workers, investors, landlords, and anyone who wants to pay less in taxes legally
 - **Age range:** 18 and older
+- **Educational level:** Adult continuing education / general public
 - **Prior knowledge required:** Basic arithmetic and reading comprehension — no tax or financial background needed
 
 ---
@@ -60,15 +67,23 @@ The book covers W-2 employees, 1099 contractors, side hustlers, investors, renta
 
 ## Learning Objectives by Bloom's Taxonomy
 
+After this course, students will be able to demonstrate competencies at each of the following levels:
+
 ### Remember
 - Recall the 2025 federal tax brackets and standard deduction amounts
 - Name the most common tax forms (W-2, 1099, 1040, Schedule C)
 - Identify the four filing statuses and their eligibility requirements
+- Recall IRS record retention rules (3-year, 6-year, and 7-year requirements)
+- Recognize the difference between a W-2 (employee) and a 1099 (contractor) form
+- List categories of income that are NOT taxable (gifts, inheritances, certain employer benefits)
 
 ### Understand
 - Explain the difference between a tax deduction and a tax credit
 - Describe how marginal tax brackets work (and bust the "higher bracket" myth)
 - Explain what self-employment tax is and who pays it
+- Explain the difference between a tax refund and actually reducing your tax liability
+- Describe the consequences of filing late or missing a payment deadline
+- Explain what adjusted gross income (AGI) is and why it determines eligibility for many deductions and credits
 
 ### Apply
 - Calculate your taxable income after standard deduction
@@ -78,18 +93,23 @@ The book covers W-2 employees, 1099 contractors, side hustlers, investors, renta
 
 ### Analyze
 - Compare the after-tax cost of traditional vs Roth retirement contributions
-- Analyze whether a side hustle business deduction is legitimate vs risky
-- Evaluate which tax-advantaged accounts best match your situation
+- Analyze whether a side hustle business deduction is legitimate vs a personal expense
+- Compare tax-advantaged account options (HSA, FSA, IRA, 401k) based on income and tax situation
+- Distinguish between legitimate business deductions and personal expenses that do not qualify
+- Break down the components of a total tax bill (federal income tax vs self-employment tax vs FICA)
 
 ### Evaluate
 - Assess which legal tax reduction strategies apply to your specific situation
 - Judge when to file yourself vs hire a tax professional
 - Evaluate the audit risk of specific deductions before claiming them
+- Evaluate whether an advanced strategy (Augusta Rule, Backdoor Roth, Solo 401k) applies to your financial situation
+- Assess the true cost of underpaying estimated taxes vs overpaying and receiving a large refund
 
 ### Create
-- Build a personalized year-round tax calendar
-- Design a record-keeping system for business expenses
+- Build a personalized year-round tax calendar with key deadlines and action items
+- Design a record-keeping system for business and investment expenses
 - Create a tax projection to estimate your refund or balance due before April
+- **Capstone:** Produce a complete personal tax blueprint — a mock completed 1040, annotated W-2 and 1099 forms, a quarterly estimated tax payment schedule, and a 12-month business deduction tracking log
 
 ---
 
