@@ -1,0 +1,2690 @@
+{
+  "metadata": {
+    "title": "Tax Return Guide (2025)",
+    "description": "Learning graph with 200 concepts for the Tax Return Guide course",
+    "creator": "Zvaj",
+    "date": "2026-02-21",
+    "version": "1.0",
+    "format": "Learning Graph JSON v1.0",
+    "schema": "https://raw.githubusercontent.com/dmccreary/learning-graphs/refs/heads/main/src/schema/learning-graph-schema.json",
+    "license": "CC BY-NC-SA 4.0 DEED"
+  },
+  "groups": {
+    "FORMS": {
+      "classifierName": "Tax Forms Guide",
+      "color": "MistyRose",
+      "font": {
+        "color": "black"
+      }
+    },
+    "TOOLS": {
+      "classifierName": "Filing Resources & Tools",
+      "color": "PeachPuff",
+      "font": {
+        "color": "black"
+      }
+    },
+    "CREDIT": {
+      "classifierName": "Deductions & Credits",
+      "color": "LightYellow",
+      "font": {
+        "color": "black"
+      }
+    },
+    "PLAN": {
+      "classifierName": "Year-Round Tax Planning",
+      "color": "Honeydew",
+      "font": {
+        "color": "black"
+      }
+    },
+    "FOUND": {
+      "classifierName": "Tax Foundations",
+      "color": "PaleTurquoise",
+      "font": {
+        "color": "black"
+      }
+    },
+    "RENTAL": {
+      "classifierName": "Real Estate & Rental",
+      "color": "SteelBlue",
+      "font": {
+        "color": "black"
+      }
+    },
+    "AUDIT": {
+      "classifierName": "IRS Audits & Compliance",
+      "color": "Lavender",
+      "font": {
+        "color": "black"
+      }
+    },
+    "FSTAT": {
+      "classifierName": "Filing Status & Returns",
+      "color": "LavenderBlush",
+      "font": {
+        "color": "black"
+      }
+    },
+    "STATE": {
+      "classifierName": "State Taxes",
+      "color": "Thistle",
+      "font": {
+        "color": "black"
+      }
+    },
+    "RETIRE": {
+      "classifierName": "Retirement Accounts",
+      "color": "MintCream",
+      "font": {
+        "color": "black"
+      }
+    },
+    "ADVSTR": {
+      "classifierName": "Advanced Tax Strategies",
+      "color": "LightCoral",
+      "font": {
+        "color": "black"
+      }
+    },
+    "INVEST": {
+      "classifierName": "Investment Taxation",
+      "color": "Plum",
+      "font": {
+        "color": "black"
+      }
+    },
+    "SELFEM": {
+      "classifierName": "Self-Employment Taxes",
+      "color": "Gainsboro",
+      "font": {
+        "color": "black"
+      }
+    }
+  },
+  "nodes": [
+    {
+      "id": 1,
+      "label": "US Tax System Overview",
+      "group": "FOUND",
+      "shape": "box"
+    },
+    {
+      "id": 2,
+      "label": "Filing Status Types",
+      "group": "FSTAT"
+    },
+    {
+      "id": 3,
+      "label": "Married Filing Jointly",
+      "group": "FSTAT"
+    },
+    {
+      "id": 4,
+      "label": "Married Filing Separately",
+      "group": "FSTAT"
+    },
+    {
+      "id": 5,
+      "label": "Head of Household Status",
+      "group": "FSTAT"
+    },
+    {
+      "id": 6,
+      "label": "Single Filing Status",
+      "group": "FSTAT"
+    },
+    {
+      "id": 7,
+      "label": "Qualifying Widow(er) Status",
+      "group": "FSTAT"
+    },
+    {
+      "id": 8,
+      "label": "Taxable Income Definition",
+      "group": "FOUND"
+    },
+    {
+      "id": 9,
+      "label": "Non-Taxable Income Types",
+      "group": "FOUND"
+    },
+    {
+      "id": 10,
+      "label": "Gross Income Concept",
+      "group": "FOUND"
+    },
+    {
+      "id": 11,
+      "label": "Adjusted Gross Income (AGI)",
+      "group": "FOUND"
+    },
+    {
+      "id": 12,
+      "label": "Modified AGI (MAGI)",
+      "group": "FOUND"
+    },
+    {
+      "id": 13,
+      "label": "Federal Tax Brackets 2025",
+      "group": "FOUND"
+    },
+    {
+      "id": 14,
+      "label": "Marginal Tax Rate",
+      "group": "FOUND"
+    },
+    {
+      "id": 15,
+      "label": "Effective Tax Rate",
+      "group": "FOUND"
+    },
+    {
+      "id": 16,
+      "label": "Progressive Tax System",
+      "group": "FOUND"
+    },
+    {
+      "id": 17,
+      "label": "Tax Liability Calculation",
+      "group": "FOUND"
+    },
+    {
+      "id": 18,
+      "label": "Standard Deduction 2025",
+      "group": "CREDIT"
+    },
+    {
+      "id": 19,
+      "label": "Itemized Deductions Overview",
+      "group": "CREDIT"
+    },
+    {
+      "id": 20,
+      "label": "Standard vs Itemized Choice",
+      "group": "CREDIT"
+    },
+    {
+      "id": 21,
+      "label": "Tax Credits Overview",
+      "group": "CREDIT"
+    },
+    {
+      "id": 22,
+      "label": "Refundable Tax Credits",
+      "group": "CREDIT"
+    },
+    {
+      "id": 23,
+      "label": "Non-Refundable Tax Credits",
+      "group": "CREDIT"
+    },
+    {
+      "id": 24,
+      "label": "Form 1040 Overview",
+      "group": "FSTAT"
+    },
+    {
+      "id": 25,
+      "label": "Filing Deadline April 15",
+      "group": "FSTAT"
+    },
+    {
+      "id": 26,
+      "label": "Tax Extension Filing",
+      "group": "FSTAT"
+    },
+    {
+      "id": 27,
+      "label": "Free File Eligible Programs",
+      "group": "FSTAT"
+    },
+    {
+      "id": 28,
+      "label": "Tax Refund Defined",
+      "group": "PLAN"
+    },
+    {
+      "id": 29,
+      "label": "Federal Withholding Explained",
+      "group": "PLAN"
+    },
+    {
+      "id": 30,
+      "label": "Amended Return 1040-X",
+      "group": "FSTAT"
+    },
+    {
+      "id": 31,
+      "label": "Electronic Filing Basics",
+      "group": "FSTAT"
+    },
+    {
+      "id": 32,
+      "label": "Dependent Definition IRS",
+      "group": "PLAN"
+    },
+    {
+      "id": 33,
+      "label": "Child Tax Credit",
+      "group": "CREDIT"
+    },
+    {
+      "id": 34,
+      "label": "Earned Income Tax Credit",
+      "group": "CREDIT"
+    },
+    {
+      "id": 35,
+      "label": "American Opportunity Credit",
+      "group": "CREDIT"
+    },
+    {
+      "id": 36,
+      "label": "Lifetime Learning Credit",
+      "group": "CREDIT"
+    },
+    {
+      "id": 37,
+      "label": "FICA Taxes Overview",
+      "group": "FOUND"
+    },
+    {
+      "id": 38,
+      "label": "Traditional IRA Contributions",
+      "group": "RETIRE"
+    },
+    {
+      "id": 39,
+      "label": "Roth IRA Contributions",
+      "group": "RETIRE"
+    },
+    {
+      "id": 40,
+      "label": "401(k) Contribution Limits",
+      "group": "RETIRE"
+    },
+    {
+      "id": 41,
+      "label": "IRA Deductibility Rules",
+      "group": "RETIRE"
+    },
+    {
+      "id": 42,
+      "label": "Health Savings Account (HSA)",
+      "group": "RETIRE"
+    },
+    {
+      "id": 43,
+      "label": "HSA Triple Tax Advantage",
+      "group": "RETIRE"
+    },
+    {
+      "id": 44,
+      "label": "Flexible Spending Account (FSA)",
+      "group": "RETIRE"
+    },
+    {
+      "id": 45,
+      "label": "Dependent Care FSA",
+      "group": "RETIRE"
+    },
+    {
+      "id": 46,
+      "label": "Charitable Giving Deduction",
+      "group": "CREDIT"
+    },
+    {
+      "id": 47,
+      "label": "Charitable Distribution (QCD)",
+      "group": "CREDIT"
+    },
+    {
+      "id": 48,
+      "label": "Mortgage Interest Deduction",
+      "group": "CREDIT"
+    },
+    {
+      "id": 49,
+      "label": "SALT Deduction Cap",
+      "group": "CREDIT"
+    },
+    {
+      "id": 50,
+      "label": "Medical Expense Threshold",
+      "group": "CREDIT"
+    },
+    {
+      "id": 51,
+      "label": "Energy Efficiency Credits",
+      "group": "CREDIT"
+    },
+    {
+      "id": 52,
+      "label": "Electric Vehicle Tax Credit",
+      "group": "CREDIT"
+    },
+    {
+      "id": 53,
+      "label": "Saver's Credit",
+      "group": "CREDIT"
+    },
+    {
+      "id": 54,
+      "label": "Child and Dependent Care Credit",
+      "group": "CREDIT"
+    },
+    {
+      "id": 55,
+      "label": "Above-the-Line Deductions",
+      "group": "CREDIT"
+    },
+    {
+      "id": 56,
+      "label": "Self-Employment Tax Rate",
+      "group": "SELFEM"
+    },
+    {
+      "id": 57,
+      "label": "SE Tax Calculation Method",
+      "group": "SELFEM"
+    },
+    {
+      "id": 58,
+      "label": "Schedule C Overview",
+      "group": "SELFEM"
+    },
+    {
+      "id": 59,
+      "label": "Business Income Reporting",
+      "group": "SELFEM"
+    },
+    {
+      "id": 60,
+      "label": "Business Expense Deductions",
+      "group": "SELFEM"
+    },
+    {
+      "id": 61,
+      "label": "Home Office Deduction",
+      "group": "SELFEM"
+    },
+    {
+      "id": 62,
+      "label": "Vehicle Business Use Deduction",
+      "group": "SELFEM"
+    },
+    {
+      "id": 63,
+      "label": "Standard Mileage Rate 2025",
+      "group": "SELFEM"
+    },
+    {
+      "id": 64,
+      "label": "Quarterly Estimated Tax Payments",
+      "group": "SELFEM"
+    },
+    {
+      "id": 65,
+      "label": "Estimated Tax Due Dates",
+      "group": "SELFEM"
+    },
+    {
+      "id": 66,
+      "label": "Safe Harbor Tax Rule",
+      "group": "SELFEM"
+    },
+    {
+      "id": 67,
+      "label": "Self-Employed Health Insurance",
+      "group": "RETIRE"
+    },
+    {
+      "id": 68,
+      "label": "Solo 401(k) Overview",
+      "group": "RETIRE"
+    },
+    {
+      "id": 69,
+      "label": "SEP-IRA Overview",
+      "group": "RETIRE"
+    },
+    {
+      "id": 70,
+      "label": "1099-NEC Form Overview",
+      "group": "SELFEM"
+    },
+    {
+      "id": 71,
+      "label": "Business vs Hobby Rules",
+      "group": "SELFEM"
+    },
+    {
+      "id": 72,
+      "label": "Hobby Loss Limitation",
+      "group": "SELFEM"
+    },
+    {
+      "id": 73,
+      "label": "W-4 Withholding Form",
+      "group": "PLAN"
+    },
+    {
+      "id": 74,
+      "label": "Withholding Adjustment Steps",
+      "group": "PLAN"
+    },
+    {
+      "id": 75,
+      "label": "Over-Withholding Downsides",
+      "group": "PLAN"
+    },
+    {
+      "id": 76,
+      "label": "Under-Withholding Penalties",
+      "group": "PLAN"
+    },
+    {
+      "id": 77,
+      "label": "Tax Calendar Key Dates",
+      "group": "PLAN"
+    },
+    {
+      "id": 78,
+      "label": "Roth Conversion Strategy",
+      "group": "PLAN"
+    },
+    {
+      "id": 79,
+      "label": "Tax-Loss Harvesting Timing",
+      "group": "PLAN"
+    },
+    {
+      "id": 80,
+      "label": "Qualified Business Income (QBI)",
+      "group": "SELFEM"
+    },
+    {
+      "id": 81,
+      "label": "QBI Deduction 20% Rule",
+      "group": "SELFEM"
+    },
+    {
+      "id": 82,
+      "label": "Bunching Deductions Strategy",
+      "group": "PLAN"
+    },
+    {
+      "id": 83,
+      "label": "Income Timing Strategy",
+      "group": "PLAN"
+    },
+    {
+      "id": 84,
+      "label": "Year-End Tax Checklist",
+      "group": "PLAN"
+    },
+    {
+      "id": 85,
+      "label": "Tax Bracket Management",
+      "group": "PLAN"
+    },
+    {
+      "id": 86,
+      "label": "Retirement Account Deadlines",
+      "group": "RETIRE"
+    },
+    {
+      "id": 87,
+      "label": "W-2 Box by Box Guide",
+      "group": "FORMS"
+    },
+    {
+      "id": 88,
+      "label": "W-2 Box 12 Codes",
+      "group": "FORMS"
+    },
+    {
+      "id": 89,
+      "label": "W-2 Box 14 Codes",
+      "group": "FORMS"
+    },
+    {
+      "id": 90,
+      "label": "1099-NEC Explained",
+      "group": "FORMS"
+    },
+    {
+      "id": 91,
+      "label": "1099-MISC vs 1099-NEC",
+      "group": "FORMS"
+    },
+    {
+      "id": 92,
+      "label": "1099-INT Explained",
+      "group": "FORMS"
+    },
+    {
+      "id": 93,
+      "label": "1099-DIV Explained",
+      "group": "FORMS"
+    },
+    {
+      "id": 94,
+      "label": "1099-B Explained",
+      "group": "FORMS"
+    },
+    {
+      "id": 95,
+      "label": "1099-R Explained",
+      "group": "RETIRE"
+    },
+    {
+      "id": 96,
+      "label": "1099-G Explained",
+      "group": "FORMS"
+    },
+    {
+      "id": 97,
+      "label": "1099-K Reporting Rules",
+      "group": "FORMS"
+    },
+    {
+      "id": 98,
+      "label": "1040 Line by Line Guide",
+      "group": "FORMS"
+    },
+    {
+      "id": 99,
+      "label": "Schedule A Itemized Deductions",
+      "group": "CREDIT"
+    },
+    {
+      "id": 100,
+      "label": "Schedule B Interest Dividends",
+      "group": "FORMS"
+    },
+    {
+      "id": 101,
+      "label": "Schedule D Capital Gains",
+      "group": "FORMS"
+    },
+    {
+      "id": 102,
+      "label": "Schedule E Rental Income",
+      "group": "FORMS"
+    },
+    {
+      "id": 103,
+      "label": "Schedule SE Self-Employment Tax",
+      "group": "FORMS"
+    },
+    {
+      "id": 104,
+      "label": "Form 8949 Asset Sales",
+      "group": "FORMS"
+    },
+    {
+      "id": 105,
+      "label": "Form 2441 Child Care Credit",
+      "group": "FORMS"
+    },
+    {
+      "id": 106,
+      "label": "Form 4868 Extension Request",
+      "group": "FSTAT"
+    },
+    {
+      "id": 107,
+      "label": "Form 8606 Nondeductible IRA",
+      "group": "RETIRE"
+    },
+    {
+      "id": 108,
+      "label": "Form 5329 Retirement Penalties",
+      "group": "RETIRE"
+    },
+    {
+      "id": 109,
+      "label": "Short-Term Capital Gains Tax",
+      "group": "INVEST"
+    },
+    {
+      "id": 110,
+      "label": "Long-Term Capital Gains Tax",
+      "group": "INVEST"
+    },
+    {
+      "id": 111,
+      "label": "Capital Gains Tax Rates 2025",
+      "group": "INVEST"
+    },
+    {
+      "id": 112,
+      "label": "Capital Loss Deduction Rules",
+      "group": "INVEST"
+    },
+    {
+      "id": 113,
+      "label": "Capital Loss Carryforward",
+      "group": "INVEST"
+    },
+    {
+      "id": 114,
+      "label": "Wash Sale Rule",
+      "group": "INVEST"
+    },
+    {
+      "id": 115,
+      "label": "Qualified Dividends Tax Rate",
+      "group": "INVEST"
+    },
+    {
+      "id": 116,
+      "label": "Ordinary Dividends Tax Rate",
+      "group": "INVEST"
+    },
+    {
+      "id": 117,
+      "label": "Cryptocurrency as Property IRS",
+      "group": "INVEST"
+    },
+    {
+      "id": 118,
+      "label": "Crypto Cost Basis Tracking",
+      "group": "INVEST"
+    },
+    {
+      "id": 119,
+      "label": "NFT Tax Treatment",
+      "group": "INVEST"
+    },
+    {
+      "id": 120,
+      "label": "Cost Basis Methods Overview",
+      "group": "INVEST"
+    },
+    {
+      "id": 121,
+      "label": "FIFO Cost Basis Method",
+      "group": "INVEST"
+    },
+    {
+      "id": 122,
+      "label": "Specific Identification Method",
+      "group": "INVEST"
+    },
+    {
+      "id": 123,
+      "label": "Mutual Fund Capital Gains",
+      "group": "INVEST"
+    },
+    {
+      "id": 124,
+      "label": "ETF Tax Efficiency",
+      "group": "INVEST"
+    },
+    {
+      "id": 125,
+      "label": "Municipal Bond Tax Exemption",
+      "group": "INVEST"
+    },
+    {
+      "id": 126,
+      "label": "Stock Options Tax Overview",
+      "group": "INVEST"
+    },
+    {
+      "id": 127,
+      "label": "Incentive Stock Options (ISO)",
+      "group": "INVEST"
+    },
+    {
+      "id": 128,
+      "label": "Non-Qualified Stock Options",
+      "group": "INVEST"
+    },
+    {
+      "id": 129,
+      "label": "Rental Income Reporting",
+      "group": "RENTAL"
+    },
+    {
+      "id": 130,
+      "label": "Rental Expense Deductions",
+      "group": "RENTAL"
+    },
+    {
+      "id": 131,
+      "label": "Rental Property Depreciation",
+      "group": "RENTAL"
+    },
+    {
+      "id": 132,
+      "label": "MACRS Depreciation Schedule",
+      "group": "RENTAL"
+    },
+    {
+      "id": 133,
+      "label": "Depreciation Recapture Tax",
+      "group": "RENTAL"
+    },
+    {
+      "id": 134,
+      "label": "Passive Activity Loss Rules",
+      "group": "RENTAL"
+    },
+    {
+      "id": 135,
+      "label": "Real Estate Professional Status",
+      "group": "RENTAL"
+    },
+    {
+      "id": 136,
+      "label": "Short-Term Rental Tax Rules",
+      "group": "RENTAL"
+    },
+    {
+      "id": 137,
+      "label": "Primary Residence Sale Exclusion",
+      "group": "RENTAL"
+    },
+    {
+      "id": 138,
+      "label": "$250K/$500K Exclusion Rules",
+      "group": "RENTAL"
+    },
+    {
+      "id": 139,
+      "label": "1031 Like-Kind Exchange",
+      "group": "RENTAL"
+    },
+    {
+      "id": 140,
+      "label": "Installment Sale Method",
+      "group": "RENTAL"
+    },
+    {
+      "id": 141,
+      "label": "Rental Mortgage Interest",
+      "group": "RENTAL"
+    },
+    {
+      "id": 142,
+      "label": "Vacation Home Tax Rules",
+      "group": "RENTAL"
+    },
+    {
+      "id": 143,
+      "label": "Mixed Personal Rental Use",
+      "group": "RENTAL"
+    },
+    {
+      "id": 144,
+      "label": "Home Equity Loan Deduction",
+      "group": "RENTAL"
+    },
+    {
+      "id": 145,
+      "label": "Qualified Improvement Property",
+      "group": "RENTAL"
+    },
+    {
+      "id": 146,
+      "label": "Backdoor Roth IRA Strategy",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 147,
+      "label": "Mega Backdoor Roth",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 148,
+      "label": "Augusta Rule Section 280A",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 149,
+      "label": "Qualified Opportunity Zone",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 150,
+      "label": "Donor Advised Fund",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 151,
+      "label": "Charitable Remainder Trust",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 152,
+      "label": "S-Corp Election Strategy",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 153,
+      "label": "S-Corp Reasonable Salary",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 154,
+      "label": "S-Corp vs Sole Proprietor Tax",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 155,
+      "label": "Health Reimbursement Account",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 156,
+      "label": "Qualified Small Business Stock",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 157,
+      "label": "Section 1202 Exclusion",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 158,
+      "label": "Net Operating Loss (NOL)",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 159,
+      "label": "NOL Carryforward Rules",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 160,
+      "label": "Cost Segregation Study",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 161,
+      "label": "Bonus Depreciation 2025 Rules",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 162,
+      "label": "Section 179 Deduction",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 163,
+      "label": "Hire Family Members Strategy",
+      "group": "ADVSTR"
+    },
+    {
+      "id": 164,
+      "label": "Energy Efficient Home Credit",
+      "group": "CREDIT"
+    },
+    {
+      "id": 165,
+      "label": "Retirement Plan Design",
+      "group": "RETIRE"
+    },
+    {
+      "id": 166,
+      "label": "State Income Tax Overview",
+      "group": "STATE"
+    },
+    {
+      "id": 167,
+      "label": "No-Income-Tax States List",
+      "group": "STATE"
+    },
+    {
+      "id": 168,
+      "label": "Multi-State Filing Rules",
+      "group": "STATE"
+    },
+    {
+      "id": 169,
+      "label": "State Domicile vs Residency",
+      "group": "STATE"
+    },
+    {
+      "id": 170,
+      "label": "State Tax Reciprocity",
+      "group": "STATE"
+    },
+    {
+      "id": 171,
+      "label": "State-Specific Deductions",
+      "group": "STATE"
+    },
+    {
+      "id": 172,
+      "label": "State Standard Deduction",
+      "group": "STATE"
+    },
+    {
+      "id": 173,
+      "label": "Conformity to Federal Tax Law",
+      "group": "STATE"
+    },
+    {
+      "id": 174,
+      "label": "State Estimated Tax Payments",
+      "group": "STATE"
+    },
+    {
+      "id": 175,
+      "label": "Remote Worker State Tax Rules",
+      "group": "STATE"
+    },
+    {
+      "id": 176,
+      "label": "Moving to a No-Tax State",
+      "group": "STATE"
+    },
+    {
+      "id": 177,
+      "label": "State Tax Refund Taxability",
+      "group": "STATE"
+    },
+    {
+      "id": 178,
+      "label": "IRS Audit Types Overview",
+      "group": "AUDIT"
+    },
+    {
+      "id": 179,
+      "label": "Correspondence Audit",
+      "group": "AUDIT"
+    },
+    {
+      "id": 180,
+      "label": "Office Audit Procedures",
+      "group": "AUDIT"
+    },
+    {
+      "id": 181,
+      "label": "Field Audit Procedures",
+      "group": "AUDIT"
+    },
+    {
+      "id": 182,
+      "label": "Audit Trigger Red Flags",
+      "group": "AUDIT"
+    },
+    {
+      "id": 183,
+      "label": "Home Office Audit Risk",
+      "group": "AUDIT"
+    },
+    {
+      "id": 184,
+      "label": "IRS Audit Response Steps",
+      "group": "AUDIT"
+    },
+    {
+      "id": 185,
+      "label": "Documentation Best Practices",
+      "group": "AUDIT"
+    },
+    {
+      "id": 186,
+      "label": "Tax Record Retention Rules",
+      "group": "AUDIT"
+    },
+    {
+      "id": 187,
+      "label": "Statute of Limitations IRS",
+      "group": "AUDIT"
+    },
+    {
+      "id": 188,
+      "label": "IRS Notice CP2000",
+      "group": "AUDIT"
+    },
+    {
+      "id": 189,
+      "label": "Penalty Abatement Request",
+      "group": "AUDIT"
+    },
+    {
+      "id": 190,
+      "label": "Offer in Compromise IRS",
+      "group": "AUDIT"
+    },
+    {
+      "id": 191,
+      "label": "IRS Free File Program",
+      "group": "TOOLS"
+    },
+    {
+      "id": 192,
+      "label": "IRS Direct File Tool",
+      "group": "TOOLS"
+    },
+    {
+      "id": 193,
+      "label": "VITA Program Overview",
+      "group": "TOOLS"
+    },
+    {
+      "id": 194,
+      "label": "AARP Tax Aide Program",
+      "group": "TOOLS"
+    },
+    {
+      "id": 195,
+      "label": "Free Tax Software Options",
+      "group": "TOOLS"
+    },
+    {
+      "id": 196,
+      "label": "TurboTax Free Edition",
+      "group": "TOOLS"
+    },
+    {
+      "id": 197,
+      "label": "When to Hire a CPA",
+      "group": "TOOLS"
+    },
+    {
+      "id": 198,
+      "label": "Tax Professional Types",
+      "group": "TOOLS"
+    },
+    {
+      "id": 199,
+      "label": "Power of Attorney IRS",
+      "group": "TOOLS"
+    },
+    {
+      "id": 200,
+      "label": "IRS Online Account Access",
+      "group": "TOOLS"
+    }
+  ],
+  "edges": [
+    {
+      "from": 2,
+      "to": 1
+    },
+    {
+      "from": 3,
+      "to": 2
+    },
+    {
+      "from": 4,
+      "to": 2
+    },
+    {
+      "from": 5,
+      "to": 2
+    },
+    {
+      "from": 6,
+      "to": 2
+    },
+    {
+      "from": 7,
+      "to": 2
+    },
+    {
+      "from": 8,
+      "to": 1
+    },
+    {
+      "from": 9,
+      "to": 8
+    },
+    {
+      "from": 10,
+      "to": 8
+    },
+    {
+      "from": 11,
+      "to": 10
+    },
+    {
+      "from": 12,
+      "to": 11
+    },
+    {
+      "from": 13,
+      "to": 16
+    },
+    {
+      "from": 14,
+      "to": 13
+    },
+    {
+      "from": 14,
+      "to": 16
+    },
+    {
+      "from": 15,
+      "to": 13
+    },
+    {
+      "from": 15,
+      "to": 14
+    },
+    {
+      "from": 16,
+      "to": 1
+    },
+    {
+      "from": 17,
+      "to": 11
+    },
+    {
+      "from": 17,
+      "to": 13
+    },
+    {
+      "from": 17,
+      "to": 2
+    },
+    {
+      "from": 18,
+      "to": 2
+    },
+    {
+      "from": 18,
+      "to": 11
+    },
+    {
+      "from": 19,
+      "to": 18
+    },
+    {
+      "from": 20,
+      "to": 18
+    },
+    {
+      "from": 20,
+      "to": 19
+    },
+    {
+      "from": 21,
+      "to": 1
+    },
+    {
+      "from": 21,
+      "to": 8
+    },
+    {
+      "from": 22,
+      "to": 21
+    },
+    {
+      "from": 23,
+      "to": 21
+    },
+    {
+      "from": 24,
+      "to": 2
+    },
+    {
+      "from": 24,
+      "to": 11
+    },
+    {
+      "from": 25,
+      "to": 24
+    },
+    {
+      "from": 26,
+      "to": 25
+    },
+    {
+      "from": 27,
+      "to": 24
+    },
+    {
+      "from": 28,
+      "to": 17
+    },
+    {
+      "from": 28,
+      "to": 29
+    },
+    {
+      "from": 29,
+      "to": 13
+    },
+    {
+      "from": 29,
+      "to": 17
+    },
+    {
+      "from": 30,
+      "to": 24
+    },
+    {
+      "from": 31,
+      "to": 24
+    },
+    {
+      "from": 32,
+      "to": 2
+    },
+    {
+      "from": 33,
+      "to": 32
+    },
+    {
+      "from": 33,
+      "to": 23
+    },
+    {
+      "from": 34,
+      "to": 32
+    },
+    {
+      "from": 34,
+      "to": 22
+    },
+    {
+      "from": 34,
+      "to": 11
+    },
+    {
+      "from": 35,
+      "to": 21
+    },
+    {
+      "from": 35,
+      "to": 23
+    },
+    {
+      "from": 36,
+      "to": 21
+    },
+    {
+      "from": 36,
+      "to": 23
+    },
+    {
+      "from": 37,
+      "to": 1
+    },
+    {
+      "from": 37,
+      "to": 8
+    },
+    {
+      "from": 38,
+      "to": 11
+    },
+    {
+      "from": 38,
+      "to": 40
+    },
+    {
+      "from": 39,
+      "to": 11
+    },
+    {
+      "from": 39,
+      "to": 12
+    },
+    {
+      "from": 40,
+      "to": 11
+    },
+    {
+      "from": 41,
+      "to": 38
+    },
+    {
+      "from": 41,
+      "to": 11
+    },
+    {
+      "from": 41,
+      "to": 12
+    },
+    {
+      "from": 42,
+      "to": 11
+    },
+    {
+      "from": 43,
+      "to": 42
+    },
+    {
+      "from": 44,
+      "to": 11
+    },
+    {
+      "from": 45,
+      "to": 44
+    },
+    {
+      "from": 45,
+      "to": 32
+    },
+    {
+      "from": 46,
+      "to": 19
+    },
+    {
+      "from": 46,
+      "to": 20
+    },
+    {
+      "from": 47,
+      "to": 38
+    },
+    {
+      "from": 47,
+      "to": 46
+    },
+    {
+      "from": 48,
+      "to": 19
+    },
+    {
+      "from": 48,
+      "to": 20
+    },
+    {
+      "from": 49,
+      "to": 19
+    },
+    {
+      "from": 49,
+      "to": 20
+    },
+    {
+      "from": 50,
+      "to": 19
+    },
+    {
+      "from": 50,
+      "to": 11
+    },
+    {
+      "from": 51,
+      "to": 21
+    },
+    {
+      "from": 52,
+      "to": 51
+    },
+    {
+      "from": 52,
+      "to": 23
+    },
+    {
+      "from": 53,
+      "to": 11
+    },
+    {
+      "from": 53,
+      "to": 38
+    },
+    {
+      "from": 53,
+      "to": 39
+    },
+    {
+      "from": 53,
+      "to": 40
+    },
+    {
+      "from": 54,
+      "to": 32
+    },
+    {
+      "from": 54,
+      "to": 22
+    },
+    {
+      "from": 54,
+      "to": 44
+    },
+    {
+      "from": 55,
+      "to": 11
+    },
+    {
+      "from": 55,
+      "to": 18
+    },
+    {
+      "from": 56,
+      "to": 37
+    },
+    {
+      "from": 56,
+      "to": 1
+    },
+    {
+      "from": 57,
+      "to": 56
+    },
+    {
+      "from": 58,
+      "to": 57
+    },
+    {
+      "from": 58,
+      "to": 10
+    },
+    {
+      "from": 59,
+      "to": 58
+    },
+    {
+      "from": 59,
+      "to": 10
+    },
+    {
+      "from": 60,
+      "to": 58
+    },
+    {
+      "from": 61,
+      "to": 60
+    },
+    {
+      "from": 62,
+      "to": 60
+    },
+    {
+      "from": 63,
+      "to": 62
+    },
+    {
+      "from": 64,
+      "to": 57
+    },
+    {
+      "from": 64,
+      "to": 13
+    },
+    {
+      "from": 64,
+      "to": 17
+    },
+    {
+      "from": 65,
+      "to": 64
+    },
+    {
+      "from": 65,
+      "to": 25
+    },
+    {
+      "from": 66,
+      "to": 64
+    },
+    {
+      "from": 66,
+      "to": 29
+    },
+    {
+      "from": 67,
+      "to": 56
+    },
+    {
+      "from": 67,
+      "to": 19
+    },
+    {
+      "from": 67,
+      "to": 20
+    },
+    {
+      "from": 68,
+      "to": 56
+    },
+    {
+      "from": 68,
+      "to": 40
+    },
+    {
+      "from": 69,
+      "to": 56
+    },
+    {
+      "from": 69,
+      "to": 40
+    },
+    {
+      "from": 70,
+      "to": 56
+    },
+    {
+      "from": 70,
+      "to": 59
+    },
+    {
+      "from": 71,
+      "to": 58
+    },
+    {
+      "from": 71,
+      "to": 60
+    },
+    {
+      "from": 72,
+      "to": 71
+    },
+    {
+      "from": 73,
+      "to": 29
+    },
+    {
+      "from": 73,
+      "to": 2
+    },
+    {
+      "from": 74,
+      "to": 73
+    },
+    {
+      "from": 74,
+      "to": 17
+    },
+    {
+      "from": 75,
+      "to": 74
+    },
+    {
+      "from": 75,
+      "to": 28
+    },
+    {
+      "from": 76,
+      "to": 74
+    },
+    {
+      "from": 76,
+      "to": 64
+    },
+    {
+      "from": 77,
+      "to": 25
+    },
+    {
+      "from": 77,
+      "to": 65
+    },
+    {
+      "from": 78,
+      "to": 39
+    },
+    {
+      "from": 78,
+      "to": 13
+    },
+    {
+      "from": 78,
+      "to": 12
+    },
+    {
+      "from": 79,
+      "to": 113
+    },
+    {
+      "from": 79,
+      "to": 109
+    },
+    {
+      "from": 79,
+      "to": 110
+    },
+    {
+      "from": 80,
+      "to": 56
+    },
+    {
+      "from": 80,
+      "to": 58
+    },
+    {
+      "from": 80,
+      "to": 11
+    },
+    {
+      "from": 81,
+      "to": 80
+    },
+    {
+      "from": 81,
+      "to": 20
+    },
+    {
+      "from": 82,
+      "to": 19
+    },
+    {
+      "from": 82,
+      "to": 20
+    },
+    {
+      "from": 82,
+      "to": 46
+    },
+    {
+      "from": 82,
+      "to": 48
+    },
+    {
+      "from": 83,
+      "to": 13
+    },
+    {
+      "from": 83,
+      "to": 17
+    },
+    {
+      "from": 83,
+      "to": 11
+    },
+    {
+      "from": 84,
+      "to": 77
+    },
+    {
+      "from": 84,
+      "to": 17
+    },
+    {
+      "from": 85,
+      "to": 13
+    },
+    {
+      "from": 85,
+      "to": 14
+    },
+    {
+      "from": 85,
+      "to": 17
+    },
+    {
+      "from": 86,
+      "to": 25
+    },
+    {
+      "from": 86,
+      "to": 38
+    },
+    {
+      "from": 86,
+      "to": 39
+    },
+    {
+      "from": 86,
+      "to": 40
+    },
+    {
+      "from": 86,
+      "to": 77
+    },
+    {
+      "from": 87,
+      "to": 29
+    },
+    {
+      "from": 87,
+      "to": 37
+    },
+    {
+      "from": 87,
+      "to": 73
+    },
+    {
+      "from": 88,
+      "to": 87
+    },
+    {
+      "from": 88,
+      "to": 40
+    },
+    {
+      "from": 88,
+      "to": 42
+    },
+    {
+      "from": 88,
+      "to": 44
+    },
+    {
+      "from": 89,
+      "to": 87
+    },
+    {
+      "from": 90,
+      "to": 70
+    },
+    {
+      "from": 90,
+      "to": 56
+    },
+    {
+      "from": 91,
+      "to": 90
+    },
+    {
+      "from": 92,
+      "to": 10
+    },
+    {
+      "from": 93,
+      "to": 115
+    },
+    {
+      "from": 93,
+      "to": 116
+    },
+    {
+      "from": 94,
+      "to": 109
+    },
+    {
+      "from": 94,
+      "to": 110
+    },
+    {
+      "from": 95,
+      "to": 38
+    },
+    {
+      "from": 95,
+      "to": 39
+    },
+    {
+      "from": 96,
+      "to": 8
+    },
+    {
+      "from": 96,
+      "to": 28
+    },
+    {
+      "from": 97,
+      "to": 59
+    },
+    {
+      "from": 97,
+      "to": 70
+    },
+    {
+      "from": 98,
+      "to": 24
+    },
+    {
+      "from": 98,
+      "to": 11
+    },
+    {
+      "from": 98,
+      "to": 17
+    },
+    {
+      "from": 99,
+      "to": 19
+    },
+    {
+      "from": 99,
+      "to": 20
+    },
+    {
+      "from": 99,
+      "to": 46
+    },
+    {
+      "from": 99,
+      "to": 48
+    },
+    {
+      "from": 99,
+      "to": 49
+    },
+    {
+      "from": 99,
+      "to": 50
+    },
+    {
+      "from": 100,
+      "to": 92
+    },
+    {
+      "from": 100,
+      "to": 93
+    },
+    {
+      "from": 101,
+      "to": 109
+    },
+    {
+      "from": 101,
+      "to": 110
+    },
+    {
+      "from": 101,
+      "to": 104
+    },
+    {
+      "from": 101,
+      "to": 113
+    },
+    {
+      "from": 102,
+      "to": 129
+    },
+    {
+      "from": 102,
+      "to": 130
+    },
+    {
+      "from": 103,
+      "to": 57
+    },
+    {
+      "from": 103,
+      "to": 56
+    },
+    {
+      "from": 104,
+      "to": 94
+    },
+    {
+      "from": 104,
+      "to": 109
+    },
+    {
+      "from": 104,
+      "to": 110
+    },
+    {
+      "from": 104,
+      "to": 120
+    },
+    {
+      "from": 105,
+      "to": 54
+    },
+    {
+      "from": 105,
+      "to": 44
+    },
+    {
+      "from": 106,
+      "to": 26
+    },
+    {
+      "from": 106,
+      "to": 25
+    },
+    {
+      "from": 107,
+      "to": 38
+    },
+    {
+      "from": 107,
+      "to": 41
+    },
+    {
+      "from": 108,
+      "to": 38
+    },
+    {
+      "from": 108,
+      "to": 39
+    },
+    {
+      "from": 108,
+      "to": 40
+    },
+    {
+      "from": 108,
+      "to": 86
+    },
+    {
+      "from": 109,
+      "to": 13
+    },
+    {
+      "from": 109,
+      "to": 110
+    },
+    {
+      "from": 109,
+      "to": 8
+    },
+    {
+      "from": 110,
+      "to": 13
+    },
+    {
+      "from": 110,
+      "to": 8
+    },
+    {
+      "from": 111,
+      "to": 109
+    },
+    {
+      "from": 111,
+      "to": 110
+    },
+    {
+      "from": 111,
+      "to": 13
+    },
+    {
+      "from": 112,
+      "to": 109
+    },
+    {
+      "from": 112,
+      "to": 110
+    },
+    {
+      "from": 113,
+      "to": 112
+    },
+    {
+      "from": 114,
+      "to": 112
+    },
+    {
+      "from": 114,
+      "to": 109
+    },
+    {
+      "from": 115,
+      "to": 13
+    },
+    {
+      "from": 115,
+      "to": 8
+    },
+    {
+      "from": 116,
+      "to": 13
+    },
+    {
+      "from": 116,
+      "to": 8
+    },
+    {
+      "from": 117,
+      "to": 8
+    },
+    {
+      "from": 117,
+      "to": 1
+    },
+    {
+      "from": 118,
+      "to": 117
+    },
+    {
+      "from": 118,
+      "to": 120
+    },
+    {
+      "from": 119,
+      "to": 117
+    },
+    {
+      "from": 120,
+      "to": 109
+    },
+    {
+      "from": 120,
+      "to": 110
+    },
+    {
+      "from": 120,
+      "to": 8
+    },
+    {
+      "from": 121,
+      "to": 120
+    },
+    {
+      "from": 122,
+      "to": 120
+    },
+    {
+      "from": 123,
+      "to": 109
+    },
+    {
+      "from": 123,
+      "to": 110
+    },
+    {
+      "from": 123,
+      "to": 115
+    },
+    {
+      "from": 124,
+      "to": 109
+    },
+    {
+      "from": 124,
+      "to": 110
+    },
+    {
+      "from": 124,
+      "to": 123
+    },
+    {
+      "from": 125,
+      "to": 8
+    },
+    {
+      "from": 125,
+      "to": 13
+    },
+    {
+      "from": 125,
+      "to": 9
+    },
+    {
+      "from": 126,
+      "to": 13
+    },
+    {
+      "from": 126,
+      "to": 8
+    },
+    {
+      "from": 127,
+      "to": 126
+    },
+    {
+      "from": 128,
+      "to": 126
+    },
+    {
+      "from": 129,
+      "to": 10
+    },
+    {
+      "from": 129,
+      "to": 8
+    },
+    {
+      "from": 130,
+      "to": 129
+    },
+    {
+      "from": 130,
+      "to": 60
+    },
+    {
+      "from": 131,
+      "to": 129
+    },
+    {
+      "from": 131,
+      "to": 8
+    },
+    {
+      "from": 132,
+      "to": 131
+    },
+    {
+      "from": 133,
+      "to": 132
+    },
+    {
+      "from": 133,
+      "to": 110
+    },
+    {
+      "from": 134,
+      "to": 129
+    },
+    {
+      "from": 134,
+      "to": 130
+    },
+    {
+      "from": 134,
+      "to": 131
+    },
+    {
+      "from": 135,
+      "to": 134
+    },
+    {
+      "from": 136,
+      "to": 129
+    },
+    {
+      "from": 136,
+      "to": 134
+    },
+    {
+      "from": 137,
+      "to": 2
+    },
+    {
+      "from": 137,
+      "to": 17
+    },
+    {
+      "from": 138,
+      "to": 137
+    },
+    {
+      "from": 138,
+      "to": 3
+    },
+    {
+      "from": 138,
+      "to": 4
+    },
+    {
+      "from": 139,
+      "to": 110
+    },
+    {
+      "from": 139,
+      "to": 129
+    },
+    {
+      "from": 139,
+      "to": 134
+    },
+    {
+      "from": 140,
+      "to": 110
+    },
+    {
+      "from": 140,
+      "to": 129
+    },
+    {
+      "from": 141,
+      "to": 130
+    },
+    {
+      "from": 141,
+      "to": 48
+    },
+    {
+      "from": 142,
+      "to": 129
+    },
+    {
+      "from": 142,
+      "to": 136
+    },
+    {
+      "from": 143,
+      "to": 142
+    },
+    {
+      "from": 143,
+      "to": 129
+    },
+    {
+      "from": 144,
+      "to": 48
+    },
+    {
+      "from": 144,
+      "to": 19
+    },
+    {
+      "from": 145,
+      "to": 131
+    },
+    {
+      "from": 145,
+      "to": 132
+    },
+    {
+      "from": 146,
+      "to": 39
+    },
+    {
+      "from": 146,
+      "to": 12
+    },
+    {
+      "from": 146,
+      "to": 41
+    },
+    {
+      "from": 147,
+      "to": 146
+    },
+    {
+      "from": 147,
+      "to": 40
+    },
+    {
+      "from": 148,
+      "to": 59
+    },
+    {
+      "from": 148,
+      "to": 129
+    },
+    {
+      "from": 148,
+      "to": 60
+    },
+    {
+      "from": 149,
+      "to": 110
+    },
+    {
+      "from": 149,
+      "to": 113
+    },
+    {
+      "from": 150,
+      "to": 46
+    },
+    {
+      "from": 150,
+      "to": 47
+    },
+    {
+      "from": 151,
+      "to": 150
+    },
+    {
+      "from": 151,
+      "to": 46
+    },
+    {
+      "from": 152,
+      "to": 56
+    },
+    {
+      "from": 152,
+      "to": 57
+    },
+    {
+      "from": 153,
+      "to": 152
+    },
+    {
+      "from": 153,
+      "to": 37
+    },
+    {
+      "from": 154,
+      "to": 152
+    },
+    {
+      "from": 154,
+      "to": 57
+    },
+    {
+      "from": 154,
+      "to": 56
+    },
+    {
+      "from": 155,
+      "to": 42
+    },
+    {
+      "from": 155,
+      "to": 67
+    },
+    {
+      "from": 156,
+      "to": 8
+    },
+    {
+      "from": 156,
+      "to": 10
+    },
+    {
+      "from": 157,
+      "to": 156
+    },
+    {
+      "from": 158,
+      "to": 59
+    },
+    {
+      "from": 158,
+      "to": 17
+    },
+    {
+      "from": 159,
+      "to": 158
+    },
+    {
+      "from": 160,
+      "to": 131
+    },
+    {
+      "from": 160,
+      "to": 132
+    },
+    {
+      "from": 161,
+      "to": 131
+    },
+    {
+      "from": 161,
+      "to": 160
+    },
+    {
+      "from": 162,
+      "to": 60
+    },
+    {
+      "from": 162,
+      "to": 131
+    },
+    {
+      "from": 163,
+      "to": 60
+    },
+    {
+      "from": 163,
+      "to": 56
+    },
+    {
+      "from": 164,
+      "to": 51
+    },
+    {
+      "from": 164,
+      "to": 23
+    },
+    {
+      "from": 165,
+      "to": 38
+    },
+    {
+      "from": 165,
+      "to": 39
+    },
+    {
+      "from": 165,
+      "to": 40
+    },
+    {
+      "from": 165,
+      "to": 68
+    },
+    {
+      "from": 165,
+      "to": 69
+    },
+    {
+      "from": 166,
+      "to": 1
+    },
+    {
+      "from": 166,
+      "to": 13
+    },
+    {
+      "from": 166,
+      "to": 2
+    },
+    {
+      "from": 167,
+      "to": 166
+    },
+    {
+      "from": 168,
+      "to": 166
+    },
+    {
+      "from": 168,
+      "to": 2
+    },
+    {
+      "from": 169,
+      "to": 166
+    },
+    {
+      "from": 169,
+      "to": 168
+    },
+    {
+      "from": 170,
+      "to": 168
+    },
+    {
+      "from": 170,
+      "to": 169
+    },
+    {
+      "from": 171,
+      "to": 166
+    },
+    {
+      "from": 171,
+      "to": 19
+    },
+    {
+      "from": 172,
+      "to": 18
+    },
+    {
+      "from": 172,
+      "to": 166
+    },
+    {
+      "from": 173,
+      "to": 166
+    },
+    {
+      "from": 173,
+      "to": 1
+    },
+    {
+      "from": 174,
+      "to": 64
+    },
+    {
+      "from": 174,
+      "to": 166
+    },
+    {
+      "from": 175,
+      "to": 168
+    },
+    {
+      "from": 175,
+      "to": 169
+    },
+    {
+      "from": 176,
+      "to": 167
+    },
+    {
+      "from": 176,
+      "to": 169
+    },
+    {
+      "from": 177,
+      "to": 166
+    },
+    {
+      "from": 177,
+      "to": 28
+    },
+    {
+      "from": 178,
+      "to": 1
+    },
+    {
+      "from": 178,
+      "to": 17
+    },
+    {
+      "from": 179,
+      "to": 178
+    },
+    {
+      "from": 180,
+      "to": 178
+    },
+    {
+      "from": 181,
+      "to": 178
+    },
+    {
+      "from": 182,
+      "to": 178
+    },
+    {
+      "from": 182,
+      "to": 20
+    },
+    {
+      "from": 182,
+      "to": 19
+    },
+    {
+      "from": 183,
+      "to": 61
+    },
+    {
+      "from": 183,
+      "to": 182
+    },
+    {
+      "from": 184,
+      "to": 178
+    },
+    {
+      "from": 184,
+      "to": 179
+    },
+    {
+      "from": 184,
+      "to": 180
+    },
+    {
+      "from": 185,
+      "to": 178
+    },
+    {
+      "from": 185,
+      "to": 60
+    },
+    {
+      "from": 186,
+      "to": 185
+    },
+    {
+      "from": 187,
+      "to": 186
+    },
+    {
+      "from": 188,
+      "to": 179
+    },
+    {
+      "from": 188,
+      "to": 24
+    },
+    {
+      "from": 189,
+      "to": 184
+    },
+    {
+      "from": 189,
+      "to": 179
+    },
+    {
+      "from": 190,
+      "to": 189
+    },
+    {
+      "from": 190,
+      "to": 17
+    },
+    {
+      "from": 191,
+      "to": 27
+    },
+    {
+      "from": 191,
+      "to": 24
+    },
+    {
+      "from": 192,
+      "to": 24
+    },
+    {
+      "from": 192,
+      "to": 27
+    },
+    {
+      "from": 193,
+      "to": 24
+    },
+    {
+      "from": 193,
+      "to": 191
+    },
+    {
+      "from": 194,
+      "to": 193
+    },
+    {
+      "from": 195,
+      "to": 191
+    },
+    {
+      "from": 195,
+      "to": 192
+    },
+    {
+      "from": 196,
+      "to": 195
+    },
+    {
+      "from": 197,
+      "to": 24
+    },
+    {
+      "from": 197,
+      "to": 178
+    },
+    {
+      "from": 197,
+      "to": 165
+    },
+    {
+      "from": 197,
+      "to": 152
+    },
+    {
+      "from": 198,
+      "to": 197
+    },
+    {
+      "from": 199,
+      "to": 197
+    },
+    {
+      "from": 199,
+      "to": 198
+    },
+    {
+      "from": 200,
+      "to": 24
+    },
+    {
+      "from": 200,
+      "to": 186
+    }
+  ]
+}
