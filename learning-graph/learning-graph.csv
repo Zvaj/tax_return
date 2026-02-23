@@ -1,0 +1,201 @@
+ConceptID,ConceptLabel,Dependencies,TaxonomyID
+1,US Tax System Overview,,FOUND
+2,Filing Status Types,1,FSTAT
+3,Married Filing Jointly,2,FSTAT
+4,Married Filing Separately,2,FSTAT
+5,Head of Household Status,2,FSTAT
+6,Single Filing Status,2,FSTAT
+7,Qualifying Widow(er) Status,2,FSTAT
+8,Taxable Income Definition,1,FOUND
+9,Non-Taxable Income Types,8,FOUND
+10,Gross Income Concept,8,FOUND
+11,Adjusted Gross Income (AGI),10,FOUND
+12,Modified AGI (MAGI),11,FOUND
+13,Federal Tax Brackets 2025,16,FOUND
+14,Marginal Tax Rate,13|16,FOUND
+15,Effective Tax Rate,13|14,FOUND
+16,Progressive Tax System,1,FOUND
+17,Tax Liability Calculation,11|13|2,FOUND
+18,Standard Deduction 2025,2|11,CREDIT
+19,Itemized Deductions Overview,18,CREDIT
+20,Standard vs Itemized Choice,18|19,CREDIT
+21,Tax Credits Overview,1|8,CREDIT
+22,Refundable Tax Credits,21,CREDIT
+23,Non-Refundable Tax Credits,21,CREDIT
+24,Form 1040 Overview,2|11,FSTAT
+25,Filing Deadline April 15,24,FSTAT
+26,Tax Extension Filing,25,FSTAT
+27,Free File Eligible Programs,24,FSTAT
+28,Tax Refund Defined,17|29,PLAN
+29,Federal Withholding Explained,13|17,PLAN
+30,Amended Return 1040-X,24,FSTAT
+31,Electronic Filing Basics,24,FSTAT
+32,Dependent Definition IRS,2,PLAN
+33,Child Tax Credit,32|23,CREDIT
+34,Earned Income Tax Credit,32|22|11,CREDIT
+35,American Opportunity Credit,21|23,CREDIT
+36,Lifetime Learning Credit,21|23,CREDIT
+37,FICA Taxes Overview,1|8,FOUND
+38,Traditional IRA Contributions,11|40,RETIRE
+39,Roth IRA Contributions,11|12,RETIRE
+40,401(k) Contribution Limits,11,RETIRE
+41,IRA Deductibility Rules,38|11|12,RETIRE
+42,Health Savings Account (HSA),11,RETIRE
+43,HSA Triple Tax Advantage,42,RETIRE
+44,Flexible Spending Account (FSA),11,RETIRE
+45,Dependent Care FSA,44|32,RETIRE
+46,Charitable Giving Deduction,19|20,CREDIT
+47,Charitable Distribution (QCD),38|46,CREDIT
+48,Mortgage Interest Deduction,19|20,CREDIT
+49,SALT Deduction Cap,19|20,CREDIT
+50,Medical Expense Threshold,19|11,CREDIT
+51,Energy Efficiency Credits,21,CREDIT
+52,Electric Vehicle Tax Credit,51|23,CREDIT
+53,Saver's Credit,11|38|39|40,CREDIT
+54,Child and Dependent Care Credit,32|22|44,CREDIT
+55,Above-the-Line Deductions,11|18,CREDIT
+56,Self-Employment Tax Rate,37|1,SELFEM
+57,SE Tax Calculation Method,56,SELFEM
+58,Schedule C Overview,57|10,SELFEM
+59,Business Income Reporting,58|10,SELFEM
+60,Business Expense Deductions,58,SELFEM
+61,Home Office Deduction,60,SELFEM
+62,Vehicle Business Use Deduction,60,SELFEM
+63,Standard Mileage Rate 2025,62,SELFEM
+64,Quarterly Estimated Tax Payments,57|13|17,SELFEM
+65,Estimated Tax Due Dates,64|25,SELFEM
+66,Safe Harbor Tax Rule,64|29,SELFEM
+67,Self-Employed Health Insurance,56|19|20,RETIRE
+68,Solo 401(k) Overview,56|40,RETIRE
+69,SEP-IRA Overview,56|40,RETIRE
+70,1099-NEC Form Overview,56|59,SELFEM
+71,Business vs Hobby Rules,58|60,SELFEM
+72,Hobby Loss Limitation,71,SELFEM
+73,W-4 Withholding Form,29|2,PLAN
+74,Withholding Adjustment Steps,73|17,PLAN
+75,Over-Withholding Downsides,74|28,PLAN
+76,Under-Withholding Penalties,74|64,PLAN
+77,Tax Calendar Key Dates,25|65,PLAN
+78,Roth Conversion Strategy,39|13|12,PLAN
+79,Tax-Loss Harvesting Timing,113|109|110,PLAN
+80,Qualified Business Income (QBI),56|58|11,SELFEM
+81,QBI Deduction 20% Rule,80|20,SELFEM
+82,Bunching Deductions Strategy,19|20|46|48,PLAN
+83,Income Timing Strategy,13|17|11,PLAN
+84,Year-End Tax Checklist,77|17,PLAN
+85,Tax Bracket Management,13|14|17,PLAN
+86,Retirement Account Deadlines,25|38|39|40|77,RETIRE
+87,W-2 Box by Box Guide,29|37|73,FORMS
+88,W-2 Box 12 Codes,87|40|42|44,FORMS
+89,W-2 Box 14 Codes,87,FORMS
+90,1099-NEC Explained,70|56,FORMS
+91,1099-MISC vs 1099-NEC,90,FORMS
+92,1099-INT Explained,10,FORMS
+93,1099-DIV Explained,115|116,FORMS
+94,1099-B Explained,109|110,FORMS
+95,1099-R Explained,38|39,RETIRE
+96,1099-G Explained,8|28,FORMS
+97,1099-K Reporting Rules,59|70,FORMS
+98,1040 Line by Line Guide,24|11|17,FORMS
+99,Schedule A Itemized Deductions,19|20|46|48|49|50,CREDIT
+100,Schedule B Interest Dividends,92|93,FORMS
+101,Schedule D Capital Gains,109|110|104|113,FORMS
+102,Schedule E Rental Income,129|130,FORMS
+103,Schedule SE Self-Employment Tax,57|56,FORMS
+104,Form 8949 Asset Sales,94|109|110|120,FORMS
+105,Form 2441 Child Care Credit,54|44,FORMS
+106,Form 4868 Extension Request,26|25,FSTAT
+107,Form 8606 Nondeductible IRA,38|41,RETIRE
+108,Form 5329 Retirement Penalties,38|39|40|86,RETIRE
+109,Short-Term Capital Gains Tax,13|110|8,INVEST
+110,Long-Term Capital Gains Tax,13|8,INVEST
+111,Capital Gains Tax Rates 2025,109|110|13,INVEST
+112,Capital Loss Deduction Rules,109|110,INVEST
+113,Capital Loss Carryforward,112,INVEST
+114,Wash Sale Rule,112|109,INVEST
+115,Qualified Dividends Tax Rate,13|8,INVEST
+116,Ordinary Dividends Tax Rate,13|8,INVEST
+117,Cryptocurrency as Property IRS,8|1,INVEST
+118,Crypto Cost Basis Tracking,117|120,INVEST
+119,NFT Tax Treatment,117,INVEST
+120,Cost Basis Methods Overview,109|110|8,INVEST
+121,FIFO Cost Basis Method,120,INVEST
+122,Specific Identification Method,120,INVEST
+123,Mutual Fund Capital Gains,109|110|115,INVEST
+124,ETF Tax Efficiency,109|110|123,INVEST
+125,Municipal Bond Tax Exemption,8|13|9,INVEST
+126,Stock Options Tax Overview,13|8,INVEST
+127,Incentive Stock Options (ISO),126,INVEST
+128,Non-Qualified Stock Options,126,INVEST
+129,Rental Income Reporting,10|8,RENTAL
+130,Rental Expense Deductions,129|60,RENTAL
+131,Rental Property Depreciation,129|8,RENTAL
+132,MACRS Depreciation Schedule,131,RENTAL
+133,Depreciation Recapture Tax,132|110,RENTAL
+134,Passive Activity Loss Rules,129|130|131,RENTAL
+135,Real Estate Professional Status,134,RENTAL
+136,Short-Term Rental Tax Rules,129|134,RENTAL
+137,Primary Residence Sale Exclusion,2|17,RENTAL
+138,$250K/$500K Exclusion Rules,137|3|4,RENTAL
+139,1031 Like-Kind Exchange,110|129|134,RENTAL
+140,Installment Sale Method,110|129,RENTAL
+141,Rental Mortgage Interest,130|48,RENTAL
+142,Vacation Home Tax Rules,129|136,RENTAL
+143,Mixed Personal Rental Use,142|129,RENTAL
+144,Home Equity Loan Deduction,48|19,RENTAL
+145,Qualified Improvement Property,131|132,RENTAL
+146,Backdoor Roth IRA Strategy,39|12|41,ADVSTR
+147,Mega Backdoor Roth,146|40,ADVSTR
+148,Augusta Rule Section 280A,59|129|60,ADVSTR
+149,Qualified Opportunity Zone,110|113,ADVSTR
+150,Donor Advised Fund,46|47,ADVSTR
+151,Charitable Remainder Trust,150|46,ADVSTR
+152,S-Corp Election Strategy,56|57,ADVSTR
+153,S-Corp Reasonable Salary,152|37,ADVSTR
+154,S-Corp vs Sole Proprietor Tax,152|57|56,ADVSTR
+155,Health Reimbursement Account,42|67,ADVSTR
+156,Qualified Small Business Stock,8|10,ADVSTR
+157,Section 1202 Exclusion,156,ADVSTR
+158,Net Operating Loss (NOL),59|17,ADVSTR
+159,NOL Carryforward Rules,158,ADVSTR
+160,Cost Segregation Study,131|132,ADVSTR
+161,Bonus Depreciation 2025 Rules,131|160,ADVSTR
+162,Section 179 Deduction,60|131,ADVSTR
+163,Hire Family Members Strategy,60|56,ADVSTR
+164,Energy Efficient Home Credit,51|23,CREDIT
+165,Retirement Plan Design,38|39|40|68|69,RETIRE
+166,State Income Tax Overview,1|13|2,STATE
+167,No-Income-Tax States List,166,STATE
+168,Multi-State Filing Rules,166|2,STATE
+169,State Domicile vs Residency,166|168,STATE
+170,State Tax Reciprocity,168|169,STATE
+171,State-Specific Deductions,166|19,STATE
+172,State Standard Deduction,18|166,STATE
+173,Conformity to Federal Tax Law,166|1,STATE
+174,State Estimated Tax Payments,64|166,STATE
+175,Remote Worker State Tax Rules,168|169,STATE
+176,Moving to a No-Tax State,167|169,STATE
+177,State Tax Refund Taxability,166|28,STATE
+178,IRS Audit Types Overview,1|17,AUDIT
+179,Correspondence Audit,178,AUDIT
+180,Office Audit Procedures,178,AUDIT
+181,Field Audit Procedures,178,AUDIT
+182,Audit Trigger Red Flags,178|20|19,AUDIT
+183,Home Office Audit Risk,61|182,AUDIT
+184,IRS Audit Response Steps,178|179|180,AUDIT
+185,Documentation Best Practices,178|60,AUDIT
+186,Tax Record Retention Rules,185,AUDIT
+187,Statute of Limitations IRS,186,AUDIT
+188,IRS Notice CP2000,179|24,AUDIT
+189,Penalty Abatement Request,184|179,AUDIT
+190,Offer in Compromise IRS,189|17,AUDIT
+191,IRS Free File Program,27|24,TOOLS
+192,IRS Direct File Tool,24|27,TOOLS
+193,VITA Program Overview,24|191,TOOLS
+194,AARP Tax Aide Program,193,TOOLS
+195,Free Tax Software Options,191|192,TOOLS
+196,TurboTax Free Edition,195,TOOLS
+197,When to Hire a CPA,24|178|165|152,TOOLS
+198,Tax Professional Types,197,TOOLS
+199,Power of Attorney IRS,197|198,TOOLS
+200,IRS Online Account Access,24|186,TOOLS
