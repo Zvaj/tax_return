@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capital Gains Rate Optimizer</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    color: #fff;
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+  }
+
+  header h1 {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px;
+  }
+
+  .panel-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  /* --- Inputs --- */
+  .input-group {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  .radio-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .radio-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .radio-btn input[type="radio"] { display: none; }
+
+  .radio-btn.selected {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  .slider-wrap {
+    position: relative;
+  }
+
+  .slider-value {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .slider-val-display {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 3px 10px;
+    min-width: 110px;
+    text-align: right;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #e2e8f0;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2563eb;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(37,99,235,0.4);
+    cursor: pointer;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2563eb;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(37,99,235,0.4);
+    cursor: pointer;
+  }
+
+  .number-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .number-input:focus { border-color: #2563eb; }
+
+  .slider-range-hint {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 3px;
+  }
+
+  /* --- Right Panel --- */
+  .narrative-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid #86efac;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #15803d;
+    font-weight: 500;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 160px;
+    margin-bottom: 20px;
+  }
+
+  .niit-notice {
+    display: none;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: #b91c1c;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  .niit-notice.show { display: block; }
+
+  /* --- Tax Table --- */
+  .tax-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+
+  .tax-table thead tr {
+    background: #f8fafc;
+  }
+
+  .tax-table th {
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .tax-table th:last-child { text-align: right; }
+
+  .tax-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #374151;
+  }
+
+  .tax-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tax-table tr.total-row {
+    background: #1e293b;
+  }
+
+  .tax-table tr.total-row td {
+    color: #fff;
+    font-weight: 700;
+    border-bottom: none;
+  }
+
+  .tax-table tr.total-row td:first-child { border-radius: 0 0 0 8px; }
+  .tax-table tr.total-row td:last-child { border-radius: 0 0 8px 0; }
+
+  .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .rate-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .rate-good { background: #dcfce7; color: #15803d; }
+  .rate-mid  { background: #fef9c3; color: #854d0e; }
+  .rate-high { background: #fee2e2; color: #b91c1c; }
+
+  /* --- Legend --- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 16px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Capital Gains Rate Optimizer</h1>
+  <p>2025 Tax Year &mdash; Visualize how your investment income is taxed across LTCG brackets</p>
+</header>
+
+<div class="layout">
+  <!-- LEFT PANEL: Inputs -->
+  <div class="panel">
+    <div class="panel-title">Inputs</div>
+
+    <!-- Filing Status -->
+    <div class="input-group">
+      <label>Filing Status</label>
+      <div class="radio-row">
+        <label class="radio-btn selected" id="lbl-single">
+          <input type="radio" name="filing" value="single" checked onchange="onFilingChange()">
+          Single
+        </label>
+        <label class="radio-btn" id="lbl-mfj">
+          <input type="radio" name="filing" value="mfj" onchange="onFilingChange()">
+          Married Filing Jointly
+        </label>
+      </div>
+    </div>
+
+    <!-- Ordinary Income Slider -->
+    <div class="input-group">
+      <label>Ordinary Taxable Income</label>
+      <div class="slider-value">
+        <span style="font-size:0.75rem;color:#94a3b8;">Wages, self-employment, etc.</span>
+        <span class="slider-val-display" id="ord-display">$80,000</span>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="ord-slider" min="0" max="600000" step="1000" value="80000"
+               oninput="onOrdinaryChange(this.value)">
+      </div>
+      <div class="slider-range-hint"><span>$0</span><span>$600,000</span></div>
+    </div>
+
+    <!-- LTCG -->
+    <div class="input-group">
+      <label>Long-Term Capital Gain</label>
+      <input type="number" class="number-input" id="ltcg-input"
+             min="0" max="500000" step="1000" value="20000"
+             oninput="recalculate()">
+    </div>
+
+    <!-- Short-term gain -->
+    <div class="input-group">
+      <label>Short-Term Capital Gain</label>
+      <input type="number" class="number-input" id="stcg-input"
+             min="0" max="200000" step="1000" value="0"
+             oninput="recalculate()">
+    </div>
+
+    <!-- Qualified Dividends -->
+    <div class="input-group">
+      <label>Qualified Dividends</label>
+      <input type="number" class="number-input" id="qd-input"
+             min="0" max="100000" step="1000" value="0"
+             oninput="recalculate()">
+    </div>
+
+    <hr class="divider">
+
+    <!-- 2025 LTCG brackets reference -->
+    <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:0.75rem;color:#64748b;line-height:1.7;">
+      <strong style="color:#374151;display:block;margin-bottom:4px;">2025 LTCG Brackets</strong>
+      <span id="bracket-ref-text">Single: 0% ≤$48,350 &bull; 15% ≤$533,400 &bull; 20% above</span>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Results -->
+  <div class="panel">
+    <div class="panel-title">Tax Analysis</div>
+
+    <div class="narrative-box" id="narrative">
+      Your $20,000 long-term gain: $20,000 at 0%, $0 at 15%, $0 at 20%
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#64748b"></div>Ordinary Income</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#86efac"></div>LTCG/QD at 0%</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#22c55e"></div>LTCG/QD at 15%</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#15803d"></div>LTCG/QD at 20%</div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="incomeChart"></canvas>
+    </div>
+
+    <div class="niit-notice" id="niit-notice">
+      Net Investment Income Tax (NIIT): 3.8% applies — your MAGI exceeds the threshold
+    </div>
+
+    <table class="tax-table">
+      <thead>
+        <tr>
+          <th>Tax Component</th>
+          <th>Amount</th>
+          <th>Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="dot" style="background:#94a3b8"></span>Short-Term Gain Tax</td>
+          <td id="t-stcg">$0</td>
+          <td><span class="rate-badge rate-high" id="r-stcg">Ord. Rate</span></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#86efac"></span>LTCG + QD at 0%</td>
+          <td id="t-ltcg0">$0</td>
+          <td><span class="rate-badge rate-good">0%</span></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#22c55e"></span>LTCG + QD at 15%</td>
+          <td id="t-ltcg15">$0</td>
+          <td><span class="rate-badge rate-mid">15%</span></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#15803d"></span>LTCG + QD at 20%</td>
+          <td id="t-ltcg20">$0</td>
+          <td><span class="rate-badge rate-high">20%</span></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#fca5a5"></span>NIIT (3.8%)</td>
+          <td id="t-niit">$0</td>
+          <td><span class="rate-badge rate-high">3.8%</span></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="total-row">
+          <td>Total Additional Tax</td>
+          <td id="t-total">$0</td>
+          <td id="t-eff-rate"><span class="rate-badge" style="background:#334155;color:#fff">0.0%</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<script>
+// =========================================================
+// 2025 Ordinary Income Tax Brackets
+// =========================================================
+const ORDINARY_BRACKETS = {
+  single: [
+    { rate: 0.10, max: 11925 },
+    { rate: 0.12, max: 48475 },
+    { rate: 0.22, max: 103350 },
+    { rate: 0.24, max: 197300 },
+    { rate: 0.32, max: 250525 },
+    { rate: 0.35, max: 626350 },
+    { rate: 0.37, max: Infinity }
+  ],
+  mfj: [
+    { rate: 0.10, max: 23850 },
+    { rate: 0.12, max: 96950 },
+    { rate: 0.22, max: 206700 },
+    { rate: 0.24, max: 394600 },
+    { rate: 0.32, max: 501050 },
+    { rate: 0.35, max: 751600 },
+    { rate: 0.37, max: Infinity }
+  ]
+};
+
+// 2025 LTCG Brackets
+const LTCG_BRACKETS = {
+  single: { t0: 48350, t15: 533400 },
+  mfj:    { t0: 96700, t15: 600050 }
+};
+
+// NIIT thresholds
+const NIIT_THRESHOLDS = { single: 200000, mfj: 250000 };
+
+// =========================================================
+// Utility
+// =========================================================
+function fmt(n) {
+  if (n === 0) return '$0';
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+
+function calcOrdinaryTax(income, filing) {
+  const brackets = ORDINARY_BRACKETS[filing];
+  let tax = 0;
+  let prev = 0;
+  for (const b of brackets) {
+    if (income <= prev) break;
+    const taxable = Math.min(income, b.max) - prev;
+    tax += taxable * b.rate;
+    prev = b.max;
+  }
+  return tax;
+}
+
+// =========================================================
+// State
+// =========================================================
+let filing = 'single';
+let ordIncome = 80000;
+let ltcg = 20000;
+let stcg = 0;
+let qd = 0;
+
+// =========================================================
+// Chart setup
+// =========================================================
+const ctx = document.getElementById('incomeChart').getContext('2d');
+const incomeChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Income Composition'],
+    datasets: [
+      { label: 'Ordinary Income',   data: [80000], backgroundColor: '#64748b' },
+      { label: 'LTCG+QD at 0%',    data: [0],     backgroundColor: '#86efac' },
+      { label: 'LTCG+QD at 15%',   data: [0],     backgroundColor: '#22c55e' },
+      { label: 'LTCG+QD at 20%',   data: [0],     backgroundColor: '#15803d' },
+      { label: 'Short-Term Gain',   data: [0],     backgroundColor: '#94a3b8' }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            return ' ' + ctx.dataset.label + ': ' + fmt(ctx.raw);
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        ticks: {
+          callback: v => '$' + (v >= 1000 ? (v/1000)+'k' : v),
+          font: { size: 11 }
+        },
+        grid: { color: '#f1f5f9' }
+      },
+      y: {
+        stacked: true,
+        display: false
+      }
+    }
+  }
+});
+
+// =========================================================
+// Core calculation
+// =========================================================
+function recalculate() {
+  // Read fresh values from inputs
+  ltcg = Math.max(0, parseFloat(document.getElementById('ltcg-input').value) || 0);
+  stcg = Math.max(0, parseFloat(document.getElementById('stcg-input').value) || 0);
+  qd   = Math.max(0, parseFloat(document.getElementById('qd-input').value)   || 0);
+
+  const brk = LTCG_BRACKETS[filing];
+  const niitThreshold = NIIT_THRESHOLDS[filing];
+
+  // ---- Short-term gain tax ----
+  // STCG added on top of ordinary income, taxed at ordinary rates
+  const totalOrd = ordIncome + stcg;
+  const stcgTax = calcOrdinaryTax(totalOrd, filing) - calcOrdinaryTax(ordIncome, filing);
+
+  // ---- LTCG + QD stacking ----
+  // Base is ordinary income (+ stcg already in ordinary)
+  const base = ordIncome + stcg;  // bottom of LTCG stack
+  const ltcgQD = ltcg + qd;
+
+  // How much of the 0% bucket remains after ordinary income fills it
+  const remainIn0  = Math.max(0, brk.t0 - base);
+  const at0        = Math.min(ltcgQD, remainIn0);
+  const remaining1 = ltcgQD - at0;
+
+  // 15% bucket: from t0 to t15
+  const remainIn15 = Math.max(0, brk.t15 - Math.max(base, brk.t0));
+  const at15       = Math.min(remaining1, remainIn15);
+  const remaining2 = remaining1 - at15;
+
+  // 20% bucket: everything else
+  const at20 = remaining2;
+
+  const ltcgTax0  = 0;
+  const ltcgTax15 = at15 * 0.15;
+  const ltcgTax20 = at20 * 0.20;
+
+  // ---- NIIT ----
+  // Approximate MAGI = ordinary_income + ltcg + qd  (STCG already treated as ordinary)
+  const magi = ordIncome + stcg + ltcg + qd;
+  const investmentIncome = ltcg + qd + stcg;
+  let niit = 0;
+  if (magi > niitThreshold) {
+    // NIIT applies to lesser of (investment income) or (MAGI - threshold)
+    const niitBase = Math.min(investmentIncome, magi - niitThreshold);
+    niit = niitBase * 0.038;
+  }
+
+  const totalAdditional = stcgTax + ltcgTax15 + ltcgTax20 + niit;
+  const totalInvestmentIncome = ltcgQD + stcg;
+  const effectiveRate = totalInvestmentIncome > 0 ? totalAdditional / totalInvestmentIncome : 0;
+
+  // ---- Update DOM ----
+  document.getElementById('t-stcg').textContent   = fmt(stcgTax);
+  document.getElementById('t-ltcg0').textContent  = fmt(at0) + ' (tax: $0)';
+  document.getElementById('t-ltcg15').textContent = fmt(ltcgTax15);
+  document.getElementById('t-ltcg20').textContent = fmt(ltcgTax20);
+  document.getElementById('t-niit').textContent   = fmt(niit);
+  document.getElementById('t-total').textContent  = fmt(totalAdditional);
+
+  const effEl = document.getElementById('t-eff-rate');
+  effEl.innerHTML = `<span class="rate-badge" style="background:#334155;color:#fff">${(effectiveRate*100).toFixed(1)}%</span>`;
+
+  // NIIT notice
+  const niitNotice = document.getElementById('niit-notice');
+  if (niit > 0) {
+    niitNotice.classList.add('show');
+    niitNotice.textContent = `NIIT (3.8%): Your estimated MAGI is ${fmt(magi)}, which exceeds the $${(niitThreshold/1000).toFixed(0)}k threshold. NIIT applies to ${fmt(Math.min(investmentIncome, magi - niitThreshold))} of investment income = ${fmt(niit)}.`;
+  } else {
+    niitNotice.classList.remove('show');
+  }
+
+  // Narrative
+  const narr = document.getElementById('narrative');
+  narr.textContent = `Your ${fmt(ltcg)} long-term gain: ${fmt(at0)} at 0%, ${fmt(at15)} at 15%, ${fmt(at20)} at 20%` +
+    (qd > 0 ? `. Plus ${fmt(qd)} in qualified dividends: distributed similarly.` : '.') +
+    (niit > 0 ? ` NIIT of ${fmt(niit)} also applies.` : '');
+
+  // Chart update
+  incomeChart.data.datasets[0].data = [ordIncome];
+  incomeChart.data.datasets[1].data = [at0];
+  incomeChart.data.datasets[2].data = [at15];
+  incomeChart.data.datasets[3].data = [at20];
+  incomeChart.data.datasets[4].data = [stcg];
+  incomeChart.update('none');
+}
+
+// =========================================================
+// Event handlers
+// =========================================================
+function onFilingChange() {
+  const radios = document.querySelectorAll('input[name="filing"]');
+  radios.forEach(r => {
+    const lbl = r.parentElement;
+    lbl.classList.toggle('selected', r.checked);
+    if (r.checked) filing = r.value;
+  });
+
+  // Update bracket reference text
+  const brk = LTCG_BRACKETS[filing];
+  document.getElementById('bracket-ref-text').textContent =
+    (filing === 'single' ? 'Single' : 'MFJ') +
+    `: 0% ≤${fmt(brk.t0)} · 15% ≤${fmt(brk.t15)} · 20% above`;
+
+  recalculate();
+}
+
+function onOrdinaryChange(val) {
+  ordIncome = parseFloat(val) || 0;
+  document.getElementById('ord-display').textContent = fmt(ordIncome);
+  recalculate();
+}
+
+// =========================================================
+// Init
+// =========================================================
+recalculate();
+</script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remote Worker State Tax Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    color: #1a1a2e;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #00695c 0%, #00897b 100%);
+    color: white;
+    padding: 20px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; }
+  header p { font-size: 0.82rem; opacity: 0.85; margin-top: 4px; }
+  .layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .panel {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .panel-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #00796b;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0f2f1;
+  }
+  .input-group { margin-bottom: 20px; }
+  .input-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 7px;
+  }
+  .input-label span { font-size: 0.875rem; font-weight: 600; color: #37474f; }
+  .input-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #00695c;
+    background: #e0f2f1;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e0f2f1;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #00796b;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    transition: transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #00796b;
+    cursor: pointer; border: none;
+  }
+  select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #b2dfdb;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #37474f;
+    background: white;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  select:focus { border-color: #00796b; }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+  }
+  .toggle-label { font-size: 0.875rem; font-weight: 600; color: #37474f; flex: 1; }
+  .toggle-group { display: flex; gap: 0; border: 1.5px solid #b2dfdb; border-radius: 8px; overflow: hidden; }
+  .toggle-btn {
+    padding: 7px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    background: white;
+    color: #78909c;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .toggle-btn.active { background: #00796b; color: white; }
+  .cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .state-card {
+    border-radius: 10px;
+    padding: 16px;
+    border: 2px solid;
+  }
+  .state-card.home { background: #e3f2fd; border-color: #90caf9; }
+  .state-card.employer { background: #e8f5e9; border-color: #a5d6a7; }
+  .state-card-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .state-card.home .state-card-title { color: #1565c0; }
+  .state-card.employer .state-card-title { color: #2e7d32; }
+  .state-card-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    margin-bottom: 5px;
+    color: #455a64;
+  }
+  .state-card-row strong { color: #263238; }
+  .state-card-tax {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 10px;
+  }
+  .state-card.home .state-card-tax { color: #1565c0; }
+  .state-card.employer .state-card-tax { color: #2e7d32; }
+  .total-box {
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .total-label { font-size: 0.9rem; font-weight: 600; color: #546e7a; }
+  .total-value { font-size: 1.5rem; font-weight: 700; color: #263238; }
+  .warning-box {
+    background: #ffebee;
+    border: 2px solid #ef5350;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .warning-box.show { display: block; }
+  .warning-box h4 { font-size: 0.85rem; font-weight: 700; color: #b71c1c; margin-bottom: 6px; }
+  .warning-box p { font-size: 0.82rem; color: #c62828; line-height: 1.5; }
+  .explanation {
+    background: #fffde7;
+    border-left: 4px solid #f9a825;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .explanation p { font-size: 0.85rem; color: #5d4037; line-height: 1.6; }
+  .note-box {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    color: #9e9e9e;
+    font-style: italic;
+    line-height: 1.5;
+  }
+  @media (max-width: 780px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .cards-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Remote Worker State Tax Explainer</h1>
+  <p>Understand how multiple states may tax your remote work income</p>
+</header>
+<div class="layout">
+  <div class="panel">
+    <div class="panel-title">Your Situation</div>
+
+    <div class="input-group">
+      <div class="input-label"><span>Home State (where you live)</span></div>
+      <select id="homeState"></select>
+    </div>
+
+    <div class="input-group">
+      <div class="input-label"><span>Employer State (where job is based)</span></div>
+      <select id="employerState"></select>
+    </div>
+
+    <div class="input-group">
+      <div class="input-label">
+        <span>Annual Salary</span>
+        <span class="input-value" id="salaryDisplay">$85,000</span>
+      </div>
+      <input type="range" id="salarySlider" min="30000" max="300000" step="5000" value="85000">
+    </div>
+
+    <div class="input-group">
+      <div class="input-label">
+        <span>Work-from-Home %</span>
+        <span class="input-value" id="wfhDisplay">80%</span>
+      </div>
+      <input type="range" id="wfhSlider" min="0" max="100" step="5" value="80">
+    </div>
+
+    <div class="input-group">
+      <div class="toggle-row">
+        <span class="toggle-label">Employer requires remote work (necessity)</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="btnYes" onclick="setNecessity(true)">Yes</button>
+          <button class="toggle-btn active" id="btnNo" onclick="setNecessity(false)">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Tax Analysis</div>
+
+    <div id="warningBox" class="warning-box">
+      <h4>Convenience Doctrine May Apply</h4>
+      <p id="warningText"></p>
+    </div>
+
+    <div class="cards-row">
+      <div class="state-card home">
+        <div class="state-card-title">Home State</div>
+        <div class="state-card-row"><span>State</span><strong id="homeStateName">—</strong></div>
+        <div class="state-card-row"><span>Taxable Income</span><strong id="homeTaxableIncome">—</strong></div>
+        <div class="state-card-row"><span>Tax Rate</span><strong id="homeRate">—</strong></div>
+        <div class="state-card-tax" id="homeTax">—</div>
+      </div>
+      <div class="state-card employer">
+        <div class="state-card-title">Employer State</div>
+        <div class="state-card-row"><span>State</span><strong id="empStateName">—</strong></div>
+        <div class="state-card-row"><span>Taxable Income</span><strong id="empTaxableIncome">—</strong></div>
+        <div class="state-card-row"><span>Tax Rate</span><strong id="empRate">—</strong></div>
+        <div class="state-card-tax" id="empTax">—</div>
+      </div>
+    </div>
+
+    <div class="total-box">
+      <span class="total-label">Estimated Total State Tax</span>
+      <span class="total-value" id="totalTax">—</span>
+    </div>
+
+    <div class="explanation">
+      <p id="explanationText">Select your states to see a detailed explanation.</p>
+    </div>
+
+    <div class="note-box">
+      This is an educational estimate using simplified flat rates. Actual taxes use graduated brackets and may allow deductions. The credit calculation is simplified — total reflects the larger of the two taxes, not necessarily the exact combined liability. See a tax professional for actual multi-state filing.
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const STATES = [
+    ['AL','Alabama',5],['AK','Alaska',0],['AZ','Arizona',2.5],['AR','Arkansas',4.7],
+    ['CA','California',9.3],['CO','Colorado',4.4],['CT','Connecticut',5],['DE','Delaware',5.5],
+    ['FL','Florida',0],['GA','Georgia',5.75],['HI','Hawaii',7.9],['ID','Idaho',5.8],
+    ['IL','Illinois',4.95],['IN','Indiana',3.23],['IA','Iowa',4.4],['KS','Kansas',5.7],
+    ['KY','Kentucky',4],['LA','Louisiana',4.25],['ME','Maine',7.15],['MD','Maryland',5.75],
+    ['MA','Massachusetts',5],['MI','Michigan',4.25],['MN','Minnesota',7.85],['MS','Mississippi',5],
+    ['MO','Missouri',4.95],['MT','Montana',6.75],['NE','Nebraska',5.84],['NV','Nevada',0],
+    ['NH','New Hampshire',0],['NJ','New Jersey',6.37],['NM','New Mexico',4.9],['NY','New York',6.85],
+    ['NC','North Carolina',4.75],['ND','North Dakota',2.5],['OH','Ohio',3.99],['OK','Oklahoma',4.75],
+    ['OR','Oregon',9.9],['PA','Pennsylvania',3.07],['RI','Rhode Island',5.99],['SC','South Carolina',7],
+    ['SD','South Dakota',0],['TN','Tennessee',0],['TX','Texas',0],['UT','Utah',4.85],
+    ['VT','Vermont',6.6],['VA','Virginia',5.75],['WA','Washington',0],['WV','West Virginia',6.5],
+    ['WI','Wisconsin',5.3],['WY','Wyoming',0],['DC','Wash. D.C.',8.5]
+  ];
+
+  const CONVENIENCE_STATES = new Set(['NY','NJ','PA','CT','DE','AR']);
+  const RATE_MAP = {};
+  STATES.forEach(([code,,rate]) => { RATE_MAP[code] = rate; });
+  const NAME_MAP = {};
+  STATES.forEach(([code,name]) => { NAME_MAP[code] = name; });
+
+  let necessityRequired = false;
+
+  function populateSelect(id, defaultVal) {
+    const sel = document.getElementById(id);
+    STATES.forEach(([code, name]) => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = name + (RATE_MAP[code] === 0 ? ' (no income tax)' : ' (' + RATE_MAP[code] + '%)');
+      if (code === defaultVal) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+  populateSelect('homeState', 'CO');
+  populateSelect('employerState', 'NY');
+
+  window.setNecessity = function(val) {
+    necessityRequired = val;
+    document.getElementById('btnYes').classList.toggle('active', val);
+    document.getElementById('btnNo').classList.toggle('active', !val);
+    calc();
+  };
+
+  function fmt(v) { return '$' + Math.round(v).toLocaleString(); }
+  function fmtPct(v) { return v.toFixed(2) + '%'; }
+
+  function calc() {
+    const homeCode = document.getElementById('homeState').value;
+    const empCode = document.getElementById('employerState').value;
+    const salary = parseFloat(document.getElementById('salarySlider').value);
+    const wfhPct = parseFloat(document.getElementById('wfhSlider').value) / 100;
+
+    const homeRate = RATE_MAP[homeCode] / 100;
+    const empRate = RATE_MAP[empCode] / 100;
+    const homeName = NAME_MAP[homeCode];
+    const empName = NAME_MAP[empCode];
+
+    const isConvenience = CONVENIENCE_STATES.has(empCode) && !necessityRequired && homeCode !== empCode;
+
+    let homeIncome, empIncome;
+    if (isConvenience) {
+      empIncome = salary;
+      homeIncome = 0;
+    } else {
+      homeIncome = salary * wfhPct;
+      empIncome = salary * (1 - wfhPct);
+    }
+
+    const homeTaxRaw = homeIncome * homeRate;
+    const empTaxRaw = empIncome * empRate;
+
+    // Simplified credit: total = max of the two if both states have income and same income is taxed twice
+    // When convenience applies, no overlap; just sum
+    let totalTax;
+    if (isConvenience) {
+      // Employer state taxes full salary; home state may still tax home-sourced income
+      // In this simplified model homeIncome = 0 when convenience applies
+      totalTax = empTaxRaw;
+    } else {
+      // Home state gives credit for taxes paid to employer state on that income
+      totalTax = Math.max(homeTaxRaw, empTaxRaw) + Math.min(homeTaxRaw, empTaxRaw) * Math.max(0, 1 - empRate / Math.max(homeRate, 0.001));
+      // Simplified: just take the larger of the two when rates differ
+      totalTax = Math.max(homeTaxRaw, empTaxRaw);
+    }
+
+    document.getElementById('homeStateName').textContent = homeName;
+    document.getElementById('homeTaxableIncome').textContent = fmt(homeIncome);
+    document.getElementById('homeRate').textContent = fmtPct(RATE_MAP[homeCode]);
+    document.getElementById('homeTax').textContent = homeRate > 0 ? fmt(homeTaxRaw) : '$0 (no income tax)';
+
+    document.getElementById('empStateName').textContent = empName;
+    document.getElementById('empTaxableIncome').textContent = fmt(empIncome);
+    document.getElementById('empRate').textContent = fmtPct(RATE_MAP[empCode]);
+    document.getElementById('empTax').textContent = empRate > 0 ? fmt(empTaxRaw) : '$0 (no income tax)';
+
+    document.getElementById('totalTax').textContent = fmt(totalTax);
+
+    // Warning box
+    const warn = document.getElementById('warningBox');
+    if (isConvenience) {
+      warn.classList.add('show');
+      document.getElementById('warningText').textContent =
+        empName + ' applies the "Convenience of the Employer" doctrine. Because you are working remotely by your own choice (not required by your employer), ' + empName + ' may tax your entire salary of ' + fmt(salary) + ' — including the days you work from home in ' + homeName + '. This can result in double taxation unless ' + homeName + ' provides a full credit.';
+    } else {
+      warn.classList.remove('show');
+    }
+
+    // Explanation
+    let exp = '';
+    if (homeCode === empCode) {
+      exp = 'You live and work in the same state (' + homeName + '). Only one state tax return is required. Your estimated state tax is ' + fmt(homeTaxRaw) + ' at a ' + RATE_MAP[homeCode] + '% effective rate.';
+    } else if (RATE_MAP[empCode] === 0 && RATE_MAP[homeCode] === 0) {
+      exp = 'Great news — neither ' + homeName + ' nor ' + empName + ' has a state income tax. Your estimated state tax liability is $0.';
+    } else if (RATE_MAP[empCode] === 0) {
+      exp = empName + ' has no state income tax, so your remote work days there generate no state tax. You owe state income tax only to ' + homeName + ' on your home-based income of ' + fmt(homeIncome) + ', estimated at ' + fmt(homeTaxRaw) + '.';
+    } else if (isConvenience) {
+      exp = 'Since your employer is based in ' + empName + ' and you work remotely by choice (not necessity), ' + empName + ' may claim the right to tax your full salary under the "Convenience Doctrine." You may also owe ' + homeName + ' tax on income earned there. Check whether ' + homeName + ' offers a credit for taxes paid to ' + empName + ' to avoid double taxation.';
+    } else {
+      exp = 'You work ' + Math.round(wfhPct * 100) + '% from home in ' + homeName + ' and ' + Math.round((1 - wfhPct) * 100) + '% from ' + empName + '. ' +
+        homeName + ' taxes ' + fmt(homeIncome) + ' at ' + RATE_MAP[homeCode] + '% (~' + fmt(homeTaxRaw) + '). ' +
+        empName + ' taxes ' + fmt(empIncome) + ' at ' + RATE_MAP[empCode] + '% (~' + fmt(empTaxRaw) + '). ' +
+        'Most states allow a credit for taxes paid to another state on the same income, so your net total is estimated at ' + fmt(totalTax) + '. You will likely need to file returns in both states.';
+    }
+    document.getElementById('explanationText').textContent = exp;
+  }
+
+  document.getElementById('homeState').addEventListener('change', calc);
+  document.getElementById('employerState').addEventListener('change', calc);
+  document.getElementById('salarySlider').addEventListener('input', () => {
+    const v = parseFloat(document.getElementById('salarySlider').value);
+    document.getElementById('salaryDisplay').textContent = '$' + v.toLocaleString();
+    calc();
+  });
+  document.getElementById('wfhSlider').addEventListener('input', () => {
+    document.getElementById('wfhDisplay').textContent = document.getElementById('wfhSlider').value + '%';
+    calc();
+  });
+
+  calc();
+})();
+</script>
+</body>
+</html>

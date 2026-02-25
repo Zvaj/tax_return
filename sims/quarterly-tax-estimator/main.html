@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quarterly Estimated Tax Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --border: #E2E8F0;
+    --text-primary: #1A202C;
+    --text-secondary: #4A5568;
+    --text-muted: #718096;
+    --accent: #2B6CB0;
+    --accent-light: #EBF4FF;
+    --red: #C0392B;
+    --orange: #E67E22;
+    --green: #27AE60;
+    --blue: #2980B9;
+    --gray: #95A5A6;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+    --radius: 8px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1A365D 0%, #2B6CB0 100%);
+    color: #fff;
+    padding: 18px 24px;
+    box-shadow: var(--shadow-md);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
+  header p  { font-size: 0.82rem; opacity: 0.82; margin-top: 2px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .panel-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    background: #FAFBFC;
+  }
+
+  /* ---- Inputs ---- */
+  .input-group {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .input-group:last-child { border-bottom: none; }
+
+  label.field-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .slider-wrap input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  .slider-wrap input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .slider-val {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 76px;
+    text-align: right;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43,108,176,0.12);
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    user-select: none;
+  }
+  .checkbox-row input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  /* ---- Output ---- */
+  .output-section { padding: 0; }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .result-item {
+    padding: 12px 16px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .result-item:nth-child(even) { border-right: none; }
+  .result-item:nth-last-child(-n+2) { border-bottom: none; }
+
+  .result-item .r-label {
+    font-size: 0.73rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+  .result-item .r-val {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .highlight-box {
+    margin: 16px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, #1A365D, #2B6CB0);
+    color: #fff;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .hb-item .hb-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.75;
+  }
+  .hb-item .hb-val {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-top: 2px;
+  }
+
+  .chart-wrap {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .chart-wrap h3 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .chart-container {
+    position: relative;
+    height: 240px;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .due-dates {
+    margin: 0 16px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .due-dates h3 {
+    font-size: 0.73rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    padding: 10px 14px;
+    background: #FAFBFC;
+    border-bottom: 1px solid var(--border);
+  }
+  table.dd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+  }
+  .dd-table th {
+    text-align: left;
+    padding: 7px 14px;
+    background: #F7F8FA;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+  .dd-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .dd-table tr:last-child td { border-bottom: none; }
+  .dd-table td.amt {
+    font-weight: 700;
+    color: var(--accent);
+    text-align: right;
+  }
+
+  .note {
+    margin: 0 16px 16px;
+    padding: 10px 14px;
+    background: #FFFBEB;
+    border: 1px solid #F6E05E;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: #744210;
+    line-height: 1.45;
+  }
+
+  .zero-profit {
+    margin: 16px;
+    padding: 14px;
+    background: #F0FFF4;
+    border: 1px solid #9AE6B4;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: #22543D;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* mobile */
+  @media (max-width: 768px) {
+    .layout {
+      grid-template-columns: 1fr;
+      padding: 12px;
+    }
+    .highlight-box { grid-template-columns: 1fr 1fr; }
+    .result-grid { grid-template-columns: 1fr; }
+    .result-item { border-right: none !important; }
+    .result-item:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Quarterly Estimated Tax Calculator</h1>
+  <p>2025 Tax Year &mdash; Self-Employed / Schedule C</p>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: Inputs -->
+  <div class="panel">
+    <div class="panel-title">Your Information</div>
+
+    <div class="input-group">
+      <label class="field-label" for="grossIncome">Annual Gross Business Income</label>
+      <div class="slider-wrap">
+        <input type="range" id="grossIncome" min="0" max="300000" step="5000" value="60000">
+        <span class="slider-val" id="grossIncomeVal">$60,000</span>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="expenses">Annual Business Expenses</label>
+      <div class="slider-wrap">
+        <input type="range" id="expenses" min="0" max="150000" step="5000" value="10000">
+        <span class="slider-val" id="expensesVal">$10,000</span>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="filingStatus">Filing Status</label>
+      <select id="filingStatus">
+        <option value="single">Single</option>
+        <option value="mfj">Married Filing Jointly (MFJ)</option>
+        <option value="hoh">Head of Household (HoH)</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label class="checkbox-row">
+        <input type="checkbox" id="age50">
+        Age 50 or older (for future catch-up reference)
+      </label>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="priorYearTax">Prior Year Total Tax Paid ($)</label>
+      <input type="number" id="priorYearTax" value="0" min="0" step="100" placeholder="0">
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="healthIns">Self-Employed Health Insurance Premiums ($)</label>
+      <input type="number" id="healthIns" value="0" min="0" step="100" placeholder="0">
+    </div>
+  </div>
+
+  <!-- RIGHT: Output -->
+  <div class="panel output-section">
+    <div class="panel-title">Tax Estimate &amp; Breakdown</div>
+
+    <div id="zeroProfitMsg" class="zero-profit" style="display:none;">
+      Net business profit is $0 or negative &mdash; No SE tax owed. Consider reviewing your income and expenses.
+    </div>
+
+    <div id="mainOutput">
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="r-label">Net Schedule C Profit</div>
+          <div class="r-val" id="rNetProfit">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">SE Tax (15.3%)</div>
+          <div class="r-val" id="rSETax" style="color:var(--red)">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">SE Tax Deduction (½ SE)</div>
+          <div class="r-val" id="rSEDeduction">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">Adjusted Gross Income</div>
+          <div class="r-val" id="rAGI">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">QBI Deduction (20%)</div>
+          <div class="r-val" id="rQBI" style="color:var(--green)">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">Taxable Income</div>
+          <div class="r-val" id="rTaxableIncome">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">Federal Income Tax</div>
+          <div class="r-val" id="rIncomeTax" style="color:var(--orange)">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">Effective Tax Rate</div>
+          <div class="r-val" id="rEffRate">0.0%</div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <div class="hb-item">
+          <div class="hb-label">Total Annual Tax</div>
+          <div class="hb-val" id="hTotalTax">$0</div>
+        </div>
+        <div class="hb-item">
+          <div class="hb-label">Recommended Quarterly</div>
+          <div class="hb-val" id="hQuarterly">$0</div>
+        </div>
+        <div class="hb-item">
+          <div class="hb-label">Safe Harbor Quarterly</div>
+          <div class="hb-val" id="hSafeHarbor">$0</div>
+        </div>
+        <div class="hb-item">
+          <div class="hb-label">Take-Home (Annual)</div>
+          <div class="hb-val" id="hTakeHome">$0</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <h3>Income Breakdown</h3>
+        <div class="chart-container">
+          <canvas id="donutChart"></canvas>
+        </div>
+      </div>
+
+      <div class="due-dates">
+        <h3>2025 Estimated Tax Due Dates</h3>
+        <table class="dd-table">
+          <thead>
+            <tr>
+              <th>Quarter</th>
+              <th>Period</th>
+              <th>Due Date</th>
+              <th style="text-align:right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Q1</td>
+              <td>Jan 1 – Mar 31</td>
+              <td>Apr 15, 2025</td>
+              <td class="amt" id="ddQ1">$0</td>
+            </tr>
+            <tr>
+              <td>Q2</td>
+              <td>Apr 1 – May 31</td>
+              <td>Jun 16, 2025</td>
+              <td class="amt" id="ddQ2">$0</td>
+            </tr>
+            <tr>
+              <td>Q3</td>
+              <td>Jun 1 – Aug 31</td>
+              <td>Sep 15, 2025</td>
+              <td class="amt" id="ddQ3">$0</td>
+            </tr>
+            <tr>
+              <td>Q4</td>
+              <td>Sep 1 – Dec 31</td>
+              <td>Jan 15, 2026</td>
+              <td class="amt" id="ddQ4">$0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <strong>Note:</strong> Safe harbor = prior year tax &divide; 4. If prior year AGI exceeded $150,000, multiply by 1.10. QBI deduction uses simplified 20% of net profit (no wage limit applied). Consult a tax professional for advice specific to your situation.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---- Chart setup ----
+const ctx = document.getElementById('donutChart').getContext('2d');
+const donut = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Business Expenses', 'SE Tax', 'Income Tax', 'QBI Savings', 'Take-Home'],
+    datasets: [{
+      data: [0, 0, 0, 0, 0],
+      backgroundColor: ['#95A5A6', '#C0392B', '#E67E22', '#27AE60', '#2980B9'],
+      borderWidth: 2,
+      borderColor: '#fff',
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    cutout: '62%',
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: { size: 11 },
+          padding: 10,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyleWidth: 10
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            const val = ctx.raw;
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+            return ` ${fmt(val)} (${pct}%)`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// ---- Brackets 2025 ----
+const BRACKETS = {
+  single: [
+    { rate: 0.10, max: 11925 },
+    { rate: 0.12, max: 48475 },
+    { rate: 0.22, max: 103350 },
+    { rate: 0.24, max: 197300 },
+    { rate: 0.32, max: 250525 },
+    { rate: 0.35, max: 626350 },
+    { rate: 0.37, max: Infinity }
+  ],
+  mfj: [
+    { rate: 0.10, max: 23850 },
+    { rate: 0.12, max: 96950 },
+    { rate: 0.22, max: 206700 },
+    { rate: 0.24, max: 394600 },
+    { rate: 0.32, max: 501050 },
+    { rate: 0.35, max: 751600 },
+    { rate: 0.37, max: Infinity }
+  ],
+  hoh: [
+    { rate: 0.10, max: 17000 },
+    { rate: 0.12, max: 64850 },
+    { rate: 0.22, max: 103350 },
+    { rate: 0.24, max: 197300 },
+    { rate: 0.32, max: 250500 },
+    { rate: 0.35, max: 626350 },
+    { rate: 0.37, max: Infinity }
+  ]
+};
+
+const STD_DED = { single: 15000, mfj: 30000, hoh: 22500 };
+const SS_WAGE_BASE = 176100;
+
+function calcIncomeTax(taxable, status) {
+  if (taxable <= 0) return 0;
+  const brackets = BRACKETS[status];
+  let tax = 0, prev = 0;
+  for (const b of brackets) {
+    if (taxable <= prev) break;
+    const chunk = Math.min(taxable, b.max) - prev;
+    tax += chunk * b.rate;
+    prev = b.max;
+    if (b.max === Infinity) break;
+  }
+  return Math.max(0, tax);
+}
+
+function fmt(n) {
+  if (n < 0) return '-$' + Math.abs(Math.round(n)).toLocaleString();
+  return '$' + Math.round(n).toLocaleString();
+}
+
+// ---- Inputs ----
+const ids = {
+  gross:    document.getElementById('grossIncome'),
+  grossVal: document.getElementById('grossIncomeVal'),
+  exp:      document.getElementById('expenses'),
+  expVal:   document.getElementById('expensesVal'),
+  status:   document.getElementById('filingStatus'),
+  age50:    document.getElementById('age50'),
+  priorTax: document.getElementById('priorYearTax'),
+  health:   document.getElementById('healthIns'),
+};
+
+ids.gross.addEventListener('input', () => { ids.grossVal.textContent = fmt(+ids.gross.value); recalc(); });
+ids.exp.addEventListener('input',   () => { ids.expVal.textContent   = fmt(+ids.exp.value);   recalc(); });
+ids.status.addEventListener('change', recalc);
+ids.age50.addEventListener('change', recalc);
+ids.priorTax.addEventListener('input', recalc);
+ids.health.addEventListener('input', recalc);
+
+function recalc() {
+  const gross      = +ids.gross.value   || 0;
+  const expenses   = +ids.exp.value     || 0;
+  const status     = ids.status.value;
+  const priorTax   = +ids.priorTax.value || 0;
+  const healthPrem = +ids.health.value  || 0;
+
+  const netProfit  = gross - expenses;
+  const zeroProfit = netProfit <= 0;
+
+  document.getElementById('zeroProfitMsg').style.display = zeroProfit ? 'block' : 'none';
+
+  // SE Tax
+  const seBase  = netProfit * 0.9235;
+  const ssWages = Math.min(seBase, SS_WAGE_BASE);
+  const seTax   = zeroProfit ? 0 : ssWages * 0.124 + seBase * 0.029; // SS (capped) + Medicare
+  // Note: above implements SS cap correctly: 12.4% on capped, 2.9% on full SE base
+  const seDeduction = seTax / 2;
+
+  // AGI
+  const healthDed = Math.min(healthPrem, Math.max(0, netProfit - seTax)); // can't exceed net profit
+  const agi = Math.max(0, netProfit - seDeduction - healthDed);
+
+  // QBI (20% of net profit, but limited to taxable income after std ded)
+  const stdDed  = STD_DED[status];
+  const qbi     = zeroProfit ? 0 : Math.max(0, netProfit * 0.20);
+  const taxableIncome = Math.max(0, agi - stdDed - qbi);
+
+  const incomeTax  = calcIncomeTax(taxableIncome, status);
+  const totalTax   = incomeTax + seTax;
+  const quarterly  = totalTax / 4;
+
+  // Safe harbor
+  const safeHarbor = priorTax > 0 ? priorTax / 4 : quarterly;
+
+  const takeHome   = gross - expenses - totalTax;
+  const effRate    = gross > 0 ? (totalTax / gross * 100).toFixed(1) : '0.0';
+
+  // Update DOM
+  document.getElementById('rNetProfit').textContent    = fmt(netProfit);
+  document.getElementById('rSETax').textContent        = fmt(seTax);
+  document.getElementById('rSEDeduction').textContent  = fmt(seDeduction);
+  document.getElementById('rAGI').textContent          = fmt(agi);
+  document.getElementById('rQBI').textContent          = fmt(qbi);
+  document.getElementById('rTaxableIncome').textContent = fmt(taxableIncome);
+  document.getElementById('rIncomeTax').textContent    = fmt(incomeTax);
+  document.getElementById('rEffRate').textContent      = effRate + '%';
+  document.getElementById('hTotalTax').textContent     = fmt(totalTax);
+  document.getElementById('hQuarterly').textContent    = fmt(quarterly);
+  document.getElementById('hSafeHarbor').textContent   = fmt(safeHarbor);
+  document.getElementById('hTakeHome').textContent     = fmt(Math.max(0, takeHome));
+
+  ['ddQ1','ddQ2','ddQ3','ddQ4'].forEach(id => {
+    document.getElementById(id).textContent = fmt(quarterly);
+  });
+
+  // Chart
+  const qbiSavings = qbi * 0.22; // approx tax saved by QBI at marginal rate
+  const chartExpenses  = Math.max(0, expenses);
+  const chartSETax     = Math.max(0, seTax);
+  const chartIncTax    = Math.max(0, incomeTax);
+  const chartQBISave   = Math.max(0, qbiSavings);
+  const chartTakeHome  = Math.max(0, takeHome);
+
+  donut.data.datasets[0].data = [
+    chartExpenses, chartSETax, chartIncTax, chartQBISave, chartTakeHome
+  ];
+  donut.update('none');
+}
+
+// Init
+ids.grossVal.textContent = fmt(+ids.gross.value);
+ids.expVal.textContent   = fmt(+ids.exp.value);
+recalc();
+</script>
+</body>
+</html>

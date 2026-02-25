@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tax Liability Calculator — 2025</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1a3a5c;
+    --teal: #2a9d8f;
+    --teal-light: #e8f7f5;
+    --light-gray: #f5f5f5;
+    --mid-gray: #e0e0e0;
+    --dark-gray: #555;
+    --text: #222;
+    --red: #c0392b;
+    --green: #27ae60;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.10);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em; }
+  header span { font-size: 0.85rem; opacity: 0.75; }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 800px) {
+    .main-layout { grid-template-columns: 1fr; padding: 12px; }
+  }
+
+  .panel {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 12px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .panel-body { padding: 18px; }
+
+  /* --- Inputs --- */
+  .form-group {
+    margin-bottom: 14px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .form-group select,
+  .form-group input[type="number"] {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid var(--mid-gray);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--light-gray);
+    transition: border-color 0.2s;
+    appearance: auto;
+  }
+  .form-group select:focus,
+  .form-group input[type="number"]:focus {
+    outline: none;
+    border-color: var(--teal);
+    background: var(--white);
+  }
+
+  .section-divider {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin: 18px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--teal-light);
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.88rem;
+    font-weight: 400;
+    color: var(--text);
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: pointer;
+  }
+  .radio-group input[type="radio"] { accent-color: var(--teal); width: 15px; height: 15px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .toggle-row label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+  .toggle-switch {
+    position: relative;
+    width: 46px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--mid-gray);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--teal); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(22px); }
+
+  #itemized-input-group { display: none; }
+
+  .hint {
+    font-size: 0.74rem;
+    color: var(--dark-gray);
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  .btn-reset {
+    width: 100%;
+    padding: 11px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .btn-reset:hover { background: #0f2640; }
+
+  /* --- Output Waterfall --- */
+  .waterfall { font-size: 0.9rem; }
+
+  .wf-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--light-gray);
+    gap: 8px;
+  }
+  .wf-row:last-child { border-bottom: none; }
+
+  .wf-label { color: var(--dark-gray); flex: 1; }
+  .wf-value { font-weight: 600; white-space: nowrap; }
+  .wf-deduct .wf-value { color: var(--red); }
+  .wf-sub { font-size: 0.8rem; color: #888; padding: 2px 0 6px 14px; }
+
+  .wf-highlight {
+    background: var(--teal-light);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 6px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wf-highlight .wf-label { font-weight: 700; color: var(--navy); }
+  .wf-highlight .wf-value { font-size: 1.05rem; color: var(--navy); font-weight: 700; }
+
+  .wf-total {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 7px;
+    padding: 10px 12px;
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wf-total .wf-label { color: rgba(255,255,255,0.85); font-weight: 600; }
+  .wf-total .wf-value { font-size: 1.15rem; font-weight: 700; }
+
+  .wf-grand-total {
+    background: linear-gradient(135deg, var(--navy) 0%, #0f2640 100%);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid var(--teal);
+  }
+  .wf-grand-total .wf-label { color: rgba(255,255,255,0.9); font-weight: 700; font-size: 1rem; }
+  .wf-grand-total .wf-value { font-size: 1.25rem; font-weight: 700; }
+
+  /* Bracket table */
+  .bracket-table-wrap { margin: 10px 0; overflow-x: auto; }
+  .bracket-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  .bracket-table th {
+    background: var(--navy);
+    color: white;
+    padding: 7px 9px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+  }
+  .bracket-table td {
+    padding: 6px 9px;
+    border-bottom: 1px solid var(--mid-gray);
+  }
+  .bracket-table tr.bracket-inactive td { color: #bbb; background: var(--light-gray); }
+  .bracket-table tr.bracket-active td { color: var(--text); background: white; }
+  .bracket-table tr.bracket-current td { background: #fff8e1; font-weight: 600; }
+  .bracket-table td.tax-amt { text-align: right; font-weight: 600; }
+  .bracket-table td.rate { font-weight: 700; color: var(--navy); }
+  .bracket-table tr.bracket-inactive td.rate { color: #ccc; }
+
+  /* Badges */
+  .badges {
+    display: flex;
+    gap: 12px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+  }
+  .badge {
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 110px;
+  }
+  .badge-label { font-size: 0.7rem; font-weight: 500; margin-bottom: 2px; opacity: 0.8; text-transform: uppercase; }
+  .badge-marginal { background: var(--navy); color: white; }
+  .badge-effective { background: var(--teal); color: white; }
+
+  /* SE section */
+  .se-block {
+    background: #fff3e0;
+    border-left: 4px solid #f57c00;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-size: 0.88rem;
+  }
+  .se-block strong { color: #e65100; }
+
+  .section-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin: 14px 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-tag::after {
+    content: '';
+    flex: 1;
+    height: 1.5px;
+    background: var(--teal-light);
+  }
+
+  .zero-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #aaa;
+    font-size: 0.9rem;
+  }
+  .zero-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Tax Liability Calculator</h1>
+  <span>Tax Year 2025 — Federal Income Tax</span>
+</header>
+
+<div class="main-layout">
+
+  <!-- LEFT: Inputs -->
+  <div class="panel">
+    <div class="panel-header">Your Information</div>
+    <div class="panel-body">
+
+      <div class="form-group">
+        <label for="filingStatus">Filing Status</label>
+        <select id="filingStatus">
+          <option value="single">Single</option>
+          <option value="mfj">Married Filing Jointly (MFJ)</option>
+          <option value="mfs">Married Filing Separately (MFS)</option>
+          <option value="hoh">Head of Household (HoH)</option>
+          <option value="qss">Qualifying Surviving Spouse (QSS)</option>
+        </select>
+      </div>
+
+      <div class="section-divider">Income</div>
+
+      <div class="form-group">
+        <label for="w2Wages">W-2 Wages</label>
+        <input type="number" id="w2Wages" min="0" step="100" value="0" placeholder="0">
+      </div>
+
+      <div class="form-group">
+        <label for="seIncome">Freelance / Self-Employment Net Income</label>
+        <input type="number" id="seIncome" min="0" step="100" value="0" placeholder="0">
+        <div class="hint">Enter net profit (after business expenses)</div>
+      </div>
+
+      <div class="form-group">
+        <label for="otherIncome">Other Income (interest, dividends, etc.)</label>
+        <input type="number" id="otherIncome" min="0" step="100" value="0" placeholder="0">
+      </div>
+
+      <div class="section-divider">Above-the-Line Deductions</div>
+
+      <div class="form-group">
+        <label>HSA Coverage Type</label>
+        <div class="radio-group">
+          <label><input type="radio" name="hsaType" value="self" checked> Self-Only (max $4,300)</label>
+          <label><input type="radio" name="hsaType" value="family"> Family (max $8,550)</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="hsaContrib">HSA Contributions</label>
+        <input type="number" id="hsaContrib" min="0" step="50" value="0" placeholder="0">
+        <div class="hint" id="hsaHint">Max: $4,300 (self-only)</div>
+      </div>
+
+      <div class="form-group">
+        <label for="iraContrib">Traditional IRA Contributions</label>
+        <input type="number" id="iraContrib" min="0" step="100" value="0" placeholder="0">
+        <div class="hint">Max: $7,000</div>
+      </div>
+
+      <div class="form-group">
+        <label for="sliDeduction">Student Loan Interest</label>
+        <input type="number" id="sliDeduction" min="0" step="50" value="0" placeholder="0">
+        <div class="hint">Max: $2,500</div>
+      </div>
+
+      <div class="section-divider">Standard vs. Itemized</div>
+
+      <div class="toggle-row">
+        <span class="toggle-switch">
+          <input type="checkbox" id="itemizedToggle">
+          <span class="toggle-slider"></span>
+        </span>
+        <label for="itemizedToggle" id="deductionToggleLabel">Standard Deduction</label>
+      </div>
+
+      <div id="itemized-input-group" class="form-group">
+        <label for="itemizedAmt">Total Itemized Deductions</label>
+        <input type="number" id="itemizedAmt" min="0" step="100" value="0" placeholder="0">
+      </div>
+
+      <button class="btn-reset" onclick="resetForm()">Reset All Fields</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: Output Waterfall -->
+  <div class="panel">
+    <div class="panel-header">Tax Calculation Breakdown</div>
+    <div class="panel-body">
+      <div id="output-waterfall">
+        <div class="zero-state">
+          <div class="icon">🧮</div>
+          Enter income above to see your tax breakdown
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// 2025 TAX DATA
+// ============================================================
+const STANDARD_DEDUCTIONS = {
+  single: 15000,
+  mfj:    30000,
+  mfs:    15000,
+  hoh:    22500,
+  qss:    30000,
+};
+
+// Brackets: [rate, min, max] — max null = no upper limit
+const BRACKETS = {
+  single: [
+    [0.10,      0,       11925],
+    [0.12,  11926,       48475],
+    [0.22,  48476,      103350],
+    [0.24, 103351,      197300],
+    [0.32, 197301,      250525],
+    [0.35, 250526,      626350],
+    [0.37, 626351,        null],
+  ],
+  mfj: [
+    [0.10,      0,       23850],
+    [0.12,  23851,       96950],
+    [0.22,  96951,      206700],
+    [0.24, 206701,      394600],
+    [0.32, 394601,      501050],
+    [0.35, 501051,     1252700],
+    [0.37, 1252701,       null],
+  ],
+  mfs: [
+    [0.10,      0,       11925],
+    [0.12,  11926,       48475],
+    [0.22,  48476,      103350],
+    [0.24, 103351,      197300],
+    [0.32, 197301,      250525],
+    [0.35, 250526,      626350],
+    [0.37, 626351,        null],
+  ],
+  hoh: [
+    [0.10,      0,       17000],
+    [0.12,  17001,       64850],
+    [0.22,  64851,      103350],
+    [0.24, 103351,      197300],
+    [0.32, 197301,      250500],
+    [0.35, 250501,      626350],
+    [0.37, 626351,        null],
+  ],
+  qss: [
+    [0.10,      0,       23850],
+    [0.12,  23851,       96950],
+    [0.22,  96951,      206700],
+    [0.24, 206701,      394600],
+    [0.32, 394601,      501050],
+    [0.35, 501051,     1252700],
+    [0.37, 1252701,       null],
+  ],
+};
+
+const HSA_LIMITS = { self: 4300, family: 8550 };
+const IRA_LIMIT = 7000;
+const SLI_LIMIT = 2500;
+const SE_RATE = 0.153;
+const SE_FACTOR = 0.9235;
+
+// ============================================================
+// UTILS
+// ============================================================
+function fmt(n) {
+  if (n === 0) return '$0';
+  const neg = n < 0;
+  const abs = Math.abs(Math.round(n));
+  const s = '$' + abs.toLocaleString('en-US');
+  return neg ? '−' + s : s;
+}
+function fmtPct(r) { return (r * 100).toFixed(1) + '%'; }
+function val(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
+
+// ============================================================
+// CORE CALCULATION
+// ============================================================
+function calculate() {
+  const status     = document.getElementById('filingStatus').value;
+  const w2         = Math.max(0, val('w2Wages'));
+  const se         = Math.max(0, val('seIncome'));
+  const other      = Math.max(0, val('otherIncome'));
+  const hsaType    = document.querySelector('input[name="hsaType"]:checked').value;
+  const hsaRaw     = Math.max(0, val('hsaContrib'));
+  const hsaCapped  = clamp(hsaRaw, 0, HSA_LIMITS[hsaType]);
+  const iraRaw     = Math.max(0, val('iraContrib'));
+  const iraCapped  = clamp(iraRaw, 0, IRA_LIMIT);
+  const sliRaw     = Math.max(0, val('sliDeduction'));
+  const sliCapped  = clamp(sliRaw, 0, SLI_LIMIT);
+  const useItemized = document.getElementById('itemizedToggle').checked;
+  const itemizedAmt = Math.max(0, val('itemizedAmt'));
+  const stdDed     = STANDARD_DEDUCTIONS[status];
+
+  // SE deduction (half of SE tax)
+  const seTax       = se > 0 ? se * SE_FACTOR * SE_RATE : 0;
+  const seHalfDed   = seTax / 2;
+
+  // Gross Income
+  const grossIncome = w2 + se + other;
+
+  // Above-the-line deductions
+  const aboveLineDeds = [
+    { label: 'SE Tax Deduction (½ SE tax)', amount: seHalfDed, show: se > 0 },
+    { label: 'HSA Contributions',           amount: hsaCapped, show: hsaCapped > 0 },
+    { label: 'Traditional IRA',             amount: iraCapped, show: iraCapped > 0 },
+    { label: 'Student Loan Interest',       amount: sliCapped, show: sliCapped > 0 },
+  ];
+  const totalAboveLine = aboveLineDeds.reduce((s, d) => s + d.amount, 0);
+
+  // AGI
+  const agi = Math.max(0, grossIncome - totalAboveLine);
+
+  // Deduction
+  const deductionUsed = useItemized ? itemizedAmt : stdDed;
+
+  // Taxable Income
+  const taxableIncome = Math.max(0, agi - deductionUsed);
+
+  // Tax from brackets
+  const brackets = BRACKETS[status];
+  let totalTax = 0;
+  let marginalRate = 0;
+  const bracketRows = [];
+
+  for (let i = 0; i < brackets.length; i++) {
+    const [rate, lo, hi] = brackets[i];
+    if (taxableIncome <= 0 || taxableIncome < lo) {
+      bracketRows.push({ rate, lo, hi, taxable: 0, tax: 0, active: false });
+      continue;
+    }
+    const upper = hi === null ? Infinity : hi;
+    const taxable = Math.min(taxableIncome, upper) - lo + 1;
+    const clampedTaxable = Math.max(0, Math.min(taxableIncome, upper) - lo + (lo === 0 ? 0 : 0));
+    // correct calc: amount in bracket = min(taxableIncome, upper) - lo + 1 if lo>0 else min(taxableIncome, upper)
+    const inBracket = lo === 0
+      ? Math.min(taxableIncome, upper)
+      : Math.max(0, Math.min(taxableIncome, upper) - lo + 1);
+    const bracketTax = inBracket * rate;
+    totalTax += bracketTax;
+    if (inBracket > 0) marginalRate = rate;
+    bracketRows.push({ rate, lo, hi, taxable: inBracket, tax: bracketTax, active: inBracket > 0 });
+  }
+
+  const effectiveRate = grossIncome > 0 ? totalTax / grossIncome : 0;
+  const grandTotal = totalTax + seTax;
+
+  return {
+    w2, se, other, grossIncome,
+    aboveLineDeds, totalAboveLine,
+    agi, deductionUsed, useItemized, stdDed, itemizedAmt,
+    taxableIncome, bracketRows, totalTax,
+    seTax, grandTotal,
+    marginalRate, effectiveRate, status,
+    hsaCapped, iraCapped, sliCapped, seHalfDed,
+  };
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const c = calculate();
+  const container = document.getElementById('output-waterfall');
+
+  if (c.grossIncome === 0) {
+    container.innerHTML = `<div class="zero-state"><div class="icon">&#x1F9EE;</div>Enter income above to see your tax breakdown</div>`;
+    return;
+  }
+
+  let html = '';
+
+  // --- Gross Income ---
+  html += `<div class="section-tag">Income</div>`;
+  html += wfRow('W-2 Wages', c.w2);
+  if (c.se > 0) html += wfRow('Freelance / SE Net Income', c.se);
+  if (c.other > 0) html += wfRow('Other Income', c.other);
+  html += wfHighlight('Gross Income', c.grossIncome);
+
+  // --- Above-the-line deductions ---
+  const visibleDeds = c.aboveLineDeds.filter(d => d.show);
+  if (visibleDeds.length > 0) {
+    html += `<div class="section-tag">Above-the-Line Deductions</div>`;
+    visibleDeds.forEach(d => { html += wfDeductRow(d.label, d.amount); });
+    if (visibleDeds.length > 1) html += wfDeductRow('Total Above-the-Line Deductions', c.totalAboveLine, true);
+  }
+
+  // --- AGI ---
+  html += wfHighlight('Adjusted Gross Income (AGI)', c.agi);
+
+  // --- Standard/Itemized Deduction ---
+  html += `<div class="section-tag">Deduction</div>`;
+  if (c.useItemized) {
+    html += wfDeductRow('Itemized Deduction', c.deductionUsed);
+  } else {
+    html += wfDeductRow(`Standard Deduction (${statusLabel(c.status)})`, c.deductionUsed);
+  }
+
+  // --- Taxable Income ---
+  html += wfHighlight('Taxable Income', c.taxableIncome);
+
+  // --- Bracket Table ---
+  html += `<div class="section-tag">Federal Tax Brackets</div>`;
+  html += buildBracketTable(c.bracketRows);
+
+  // --- Total Tax ---
+  html += `<div class="wf-total"><span class="wf-label">Federal Income Tax</span><span class="wf-value">${fmt(c.totalTax)}</span></div>`;
+
+  // --- Badges ---
+  html += `<div class="badges">
+    <div class="badge badge-marginal"><span class="badge-label">Marginal Rate</span>${fmtPct(c.marginalRate)}</div>
+    <div class="badge badge-effective"><span class="badge-label">Effective Rate</span>${fmtPct(c.effectiveRate)}</div>
+  </div>`;
+
+  // --- SE Tax ---
+  if (c.se > 0) {
+    html += `<div class="section-tag">Self-Employment Tax</div>`;
+    html += `<div class="se-block">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span>SE Net Income</span><strong>${fmt(c.se)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span>× 92.35% (SE factor)</span><strong>${fmt(c.se * SE_FACTOR)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span>× 15.3% (SE tax rate)</span><strong>${fmt(c.seTax)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8em;color:#777;">
+        <span>½ deducted above-the-line</span><span>${fmt(c.seHalfDed)}</span>
+      </div>
+    </div>`;
+    html += `<div class="wf-grand-total"><span class="wf-label">Grand Total Tax (Income + SE)</span><span class="wf-value">${fmt(c.grandTotal)}</span></div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function wfRow(label, amount) {
+  return `<div class="wf-row"><span class="wf-label">${label}</span><span class="wf-value">${fmt(amount)}</span></div>`;
+}
+function wfDeductRow(label, amount, bold = false) {
+  return `<div class="wf-row wf-deduct"><span class="wf-label"${bold?' style="font-weight:700"':''}>${label}</span><span class="wf-value">−${fmt(amount)}</span></div>`;
+}
+function wfHighlight(label, amount) {
+  return `<div class="wf-highlight"><span class="wf-label">${label}</span><span class="wf-value">${fmt(amount)}</span></div>`;
+}
+
+function buildBracketTable(rows) {
+  let t = `<div class="bracket-table-wrap"><table class="bracket-table">
+    <thead><tr>
+      <th>Rate</th><th>Bracket Range</th><th>Income in Bracket</th><th>Tax</th>
+    </tr></thead><tbody>`;
+  rows.forEach((r, i) => {
+    const cls = !r.active ? 'bracket-inactive' : (i === rows.length - 1 || !rows[i+1]?.active ? 'bracket-current' : 'bracket-active');
+    // find last active
+    t += `<tr class="${cls}">
+      <td class="rate">${(r.rate*100).toFixed(0)}%</td>
+      <td>${fmt(r.lo)} – ${r.hi === null ? 'Above' : fmt(r.hi)}</td>
+      <td>${r.active ? fmt(r.taxable) : '—'}</td>
+      <td class="tax-amt">${r.active ? fmt(r.tax) : '—'}</td>
+    </tr>`;
+  });
+  // find actual marginal row
+  t += `</tbody></table></div>`;
+  return t;
+}
+
+function statusLabel(s) {
+  const map = { single: 'Single', mfj: 'MFJ', mfs: 'MFS', hoh: 'HoH', qss: 'QSS' };
+  return map[s] || s;
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+function resetForm() {
+  document.getElementById('filingStatus').value = 'single';
+  ['w2Wages','seIncome','otherIncome','hsaContrib','iraContrib','sliDeduction','itemizedAmt'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  document.querySelector('input[name="hsaType"][value="self"]').checked = true;
+  document.getElementById('itemizedToggle').checked = false;
+  document.getElementById('itemized-input-group').style.display = 'none';
+  document.getElementById('deductionToggleLabel').textContent = 'Standard Deduction';
+  updateHsaHint();
+  render();
+}
+
+document.getElementById('itemizedToggle').addEventListener('change', function() {
+  document.getElementById('itemized-input-group').style.display = this.checked ? 'block' : 'none';
+  document.getElementById('deductionToggleLabel').textContent = this.checked ? 'Itemizing Deductions' : 'Standard Deduction';
+  render();
+});
+
+document.querySelectorAll('input[name="hsaType"]').forEach(r => {
+  r.addEventListener('change', () => { updateHsaHint(); render(); });
+});
+
+function updateHsaHint() {
+  const type = document.querySelector('input[name="hsaType"]:checked').value;
+  document.getElementById('hsaHint').textContent = `Max: $${HSA_LIMITS[type].toLocaleString()} (${type === 'self' ? 'self-only' : 'family'})`;
+}
+
+// Attach change listeners to all inputs
+document.querySelectorAll('input[type="number"], select').forEach(el => {
+  el.addEventListener('input', render);
+  el.addEventListener('change', render);
+});
+
+// Initial render
+updateHsaHint();
+render();
+</script>
+</body>
+</html>
