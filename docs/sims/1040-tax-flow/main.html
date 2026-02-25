@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1040 Tax Flow Simulator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --border: #E2E8F0;
+    --text-primary: #1A202C;
+    --text-secondary: #4A5568;
+    --text-muted: #718096;
+    --accent: #2B6CB0;
+    --c-income: #2E7D6C;
+    --c-income-bg: #E6F7F4;
+    --c-deduct: #4A5568;
+    --c-deduct-bg: #EDF2F7;
+    --c-tax: #C05621;
+    --c-tax-bg: #FEEBC8;
+    --c-credit: #276749;
+    --c-credit-bg: #C6F6D5;
+    --c-refund: #22543D;
+    --c-refund-bg: #C6F6D5;
+    --c-owe: #9B2335;
+    --c-owe-bg: #FED7D7;
+    --c-subtotal: #1A5276;
+    --c-subtotal-bg: #D6EAF8;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+    --radius: 8px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1A3A2A 0%, #2E7D6C 100%);
+    color: #fff;
+    padding: 18px 24px;
+    box-shadow: var(--shadow-md);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
+  header p  { font-size: 0.82rem; opacity: 0.82; margin-top: 2px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .panel-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    background: #FAFBFC;
+  }
+
+  .input-group {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .input-group:last-child { border-bottom: none; }
+
+  label.field-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .slider-wrap input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  .slider-wrap input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .slider-val {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 72px;
+    text-align: right;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43,108,176,0.12);
+  }
+
+  /* ---- Waterfall ---- */
+  .waterfall {
+    padding: 16px;
+  }
+
+  .wf-row {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 0;
+  }
+
+  /* Connector line */
+  .wf-row::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .wf-row:first-child::before { top: 50%; }
+  .wf-row:last-child::before  { bottom: 50%; }
+  .wf-row.no-connector::before { display: none; }
+
+  .wf-icon {
+    width: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: 8px 0;
+  }
+
+  .wf-bullet {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .wf-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    margin: 4px 0;
+    border-radius: 6px;
+    cursor: default;
+    transition: filter 0.15s;
+    position: relative;
+  }
+  .wf-content:hover { filter: brightness(0.97); }
+
+  .wf-left { flex: 1; }
+  .wf-lineno {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.65;
+    margin-bottom: 1px;
+  }
+  .wf-label {
+    font-size: 0.87rem;
+    font-weight: 600;
+  }
+  .wf-operator {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 0 8px;
+    opacity: 0.6;
+    min-width: 14px;
+    text-align: center;
+  }
+  .wf-amount {
+    font-size: 1rem;
+    font-weight: 700;
+    min-width: 90px;
+    text-align: right;
+  }
+
+  /* Row type styles */
+  .row-income .wf-content {
+    background: var(--c-income-bg);
+    color: var(--c-income);
+    border: 1px solid #A7D9CF;
+  }
+  .row-deduct .wf-content {
+    background: var(--c-deduct-bg);
+    color: var(--c-deduct);
+    border: 1px solid #CBD5E0;
+  }
+  .row-tax .wf-content {
+    background: var(--c-tax-bg);
+    color: var(--c-tax);
+    border: 1px solid #FBD38D;
+  }
+  .row-credit .wf-content {
+    background: var(--c-credit-bg);
+    color: var(--c-credit);
+    border: 1px solid #9AE6B4;
+  }
+  .row-subtotal .wf-content {
+    background: var(--c-subtotal-bg);
+    color: var(--c-subtotal);
+    border: 1px solid #7FB3D3;
+    font-weight: 700;
+  }
+  .row-result .wf-content {
+    border: 2px solid;
+    font-weight: 800;
+  }
+  .row-result.refund .wf-content {
+    background: var(--c-refund-bg);
+    color: var(--c-refund);
+    border-color: var(--c-refund);
+  }
+  .row-result.owe .wf-content {
+    background: var(--c-owe-bg);
+    color: var(--c-owe);
+    border-color: var(--c-owe);
+  }
+
+  /* Tooltip */
+  .wf-content[data-tip] { cursor: help; }
+  .tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1A202C;
+    color: #fff;
+    padding: 7px 10px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.45;
+    width: 220px;
+    text-align: left;
+    z-index: 100;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+  .tooltip-text::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1A202C;
+  }
+  .wf-content:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+  /* Divider spacer */
+  .wf-spacer {
+    height: 8px;
+    position: relative;
+  }
+  .wf-spacer::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+
+  /* Summary bar */
+  .summary-bar {
+    margin: 16px 16px 0;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: #1A365D;
+    color: #fff;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .sb-item .sb-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    opacity: 0.7;
+    margin-bottom: 2px;
+  }
+  .sb-item .sb-val {
+    font-size: 1.0rem;
+    font-weight: 800;
+  }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; padding: 12px; }
+    .summary-bar { grid-template-columns: 1fr 1fr; }
+    .wf-amount { min-width: 70px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>1040 Tax Flow Simulator</h1>
+  <p>2025 Tax Year &mdash; Trace your money through every key line of Form 1040</p>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: Inputs -->
+  <div class="panel">
+    <div class="panel-title">Your Tax Information</div>
+
+    <div class="input-group">
+      <label class="field-label" for="wages">Wages (W-2 Box 1)</label>
+      <div class="slider-wrap">
+        <input type="range" id="wages" min="20000" max="200000" step="1000" value="65000">
+        <span class="slider-val" id="wagesVal">$65,000</span>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="filingStatus">Filing Status</label>
+      <select id="filingStatus">
+        <option value="single">Single</option>
+        <option value="mfj">Married Filing Jointly (MFJ)</option>
+        <option value="hoh">Head of Household (HoH)</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="withheld">Federal Tax Withheld</label>
+      <div class="slider-wrap">
+        <input type="range" id="withheld" min="0" max="40000" step="500" value="8000">
+        <span class="slider-val" id="withheldVal">$8,000</span>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="otherIncome">Other Income (1099s, etc.) ($)</label>
+      <input type="number" id="otherIncome" value="0" min="0" step="100" placeholder="0">
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="children">Child Tax Credit Eligible Children</label>
+      <select id="children">
+        <option value="0">0 children</option>
+        <option value="1">1 child</option>
+        <option value="2">2 children</option>
+        <option value="3">3 children</option>
+        <option value="4">4 children</option>
+      </select>
+    </div>
+
+    <!-- Legend -->
+    <div style="padding:14px 18px; border-top:1px solid var(--border); background:#FAFBFC;">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:8px;">Row Color Guide</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;align-items:center;gap:7px;font-size:0.75rem;color:var(--c-income)"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--c-income-bg);border:1px solid #A7D9CF"></span>Income rows</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:0.75rem;color:var(--c-deduct)"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--c-deduct-bg);border:1px solid #CBD5E0"></span>Deduction rows</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:0.75rem;color:var(--c-tax)"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--c-tax-bg);border:1px solid #FBD38D"></span>Tax rows</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:0.75rem;color:var(--c-credit)"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--c-credit-bg);border:1px solid #9AE6B4"></span>Credit rows</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:0.75rem;color:var(--c-subtotal)"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--c-subtotal-bg);border:1px solid #7FB3D3"></span>Subtotals / running totals</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Waterfall -->
+  <div class="panel">
+    <div class="panel-title">Form 1040 Flow</div>
+    <div class="waterfall" id="waterfall"></div>
+    <div class="summary-bar">
+      <div class="sb-item">
+        <div class="sb-label">Effective Tax Rate</div>
+        <div class="sb-val" id="sbEffRate">0.0%</div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-label">Marginal Rate</div>
+        <div class="sb-val" id="sbMargRate">0.0%</div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-label">Net Take-Home</div>
+        <div class="sb-val" id="sbTakeHome">$0</div>
+      </div>
+    </div>
+    <div id="resultBanner" style="margin:0 16px 16px;padding:14px 16px;border-radius:0 0 8px 8px;font-weight:800;font-size:1.05rem;text-align:center;"></div>
+  </div>
+
+</div>
+
+<script>
+// ---- 2025 Tax Data ----
+const STD_DED = { single: 15000, mfj: 30000, hoh: 22500 };
+
+const BRACKETS = {
+  single: [
+    [11925,  0.10],
+    [48475,  0.12],
+    [103350, 0.22],
+    [197300, 0.24],
+    [250525, 0.32],
+    [626350, 0.35],
+    [Infinity, 0.37]
+  ],
+  mfj: [
+    [23850,  0.10],
+    [96950,  0.12],
+    [206700, 0.22],
+    [394600, 0.24],
+    [501050, 0.32],
+    [751600, 0.35],
+    [Infinity, 0.37]
+  ],
+  hoh: [
+    [16550,  0.10],
+    [63100,  0.12],
+    [100500, 0.22],
+    [197300, 0.24],
+    [250500, 0.32],
+    [626350, 0.35],
+    [Infinity, 0.37]
+  ]
+};
+
+function calcTax(taxable, status) {
+  if (taxable <= 0) return 0;
+  const brackets = BRACKETS[status];
+  let tax = 0, prev = 0;
+  for (const [max, rate] of brackets) {
+    if (taxable <= prev) break;
+    const chunk = Math.min(taxable, max) - prev;
+    tax += chunk * rate;
+    prev = max;
+    if (!isFinite(max)) break;
+  }
+  return Math.max(0, tax);
+}
+
+function marginalRate(taxable, status) {
+  if (taxable <= 0) return 0.10;
+  for (const [max, rate] of BRACKETS[status]) {
+    if (taxable <= max) return rate;
+  }
+  return 0.37;
+}
+
+function fmt(n, forceSign = false) {
+  const abs = '$' + Math.abs(Math.round(n)).toLocaleString();
+  if (forceSign && n < 0) return '-' + abs;
+  return abs;
+}
+
+// ---- Inputs ----
+const elWages    = document.getElementById('wages');
+const elWagesVal = document.getElementById('wagesVal');
+const elStatus   = document.getElementById('filingStatus');
+const elWith     = document.getElementById('withheld');
+const elWithVal  = document.getElementById('withheldVal');
+const elOther    = document.getElementById('otherIncome');
+const elChildren = document.getElementById('children');
+
+elWages.addEventListener('input', () => { elWagesVal.textContent = fmt(+elWages.value); recalc(); });
+elWith.addEventListener('input', () => { elWithVal.textContent = fmt(+elWith.value); recalc(); });
+[elStatus, elOther, elChildren].forEach(el => el.addEventListener('change', recalc));
+elOther.addEventListener('input', recalc);
+
+function buildRow({ rowClass, bulletColor, lineNo, label, operator, amountId, tip, spacerAfter }) {
+  const wf = document.getElementById('waterfall');
+
+  const rowDiv = document.createElement('div');
+  rowDiv.className = `wf-row ${rowClass}`;
+
+  const iconDiv = document.createElement('div');
+  iconDiv.className = 'wf-icon';
+  const bullet = document.createElement('div');
+  bullet.className = 'wf-bullet';
+  bullet.style.background = bulletColor;
+  bullet.textContent = lineNo.replace('Line ', '');
+  iconDiv.appendChild(bullet);
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'wf-content';
+  if (tip) contentDiv.setAttribute('data-tip', '1');
+
+  const leftDiv = document.createElement('div');
+  leftDiv.className = 'wf-left';
+  const linenoDiv = document.createElement('div');
+  linenoDiv.className = 'wf-lineno';
+  linenoDiv.textContent = lineNo;
+  const labelDiv = document.createElement('div');
+  labelDiv.className = 'wf-label';
+  labelDiv.textContent = label;
+  leftDiv.appendChild(linenoDiv);
+  leftDiv.appendChild(labelDiv);
+
+  const opDiv = document.createElement('div');
+  opDiv.className = 'wf-operator';
+  opDiv.textContent = operator || '';
+
+  const amtDiv = document.createElement('div');
+  amtDiv.className = 'wf-amount';
+  amtDiv.id = amountId;
+  amtDiv.textContent = '$0';
+
+  if (tip) {
+    const tipEl = document.createElement('div');
+    tipEl.className = 'tooltip-text';
+    tipEl.textContent = tip;
+    contentDiv.appendChild(tipEl);
+  }
+
+  contentDiv.appendChild(leftDiv);
+  contentDiv.appendChild(opDiv);
+  contentDiv.appendChild(amtDiv);
+
+  rowDiv.appendChild(iconDiv);
+  rowDiv.appendChild(contentDiv);
+  wf.appendChild(rowDiv);
+
+  if (spacerAfter) {
+    const sp = document.createElement('div');
+    sp.className = 'wf-spacer';
+    wf.appendChild(sp);
+  }
+}
+
+// Build the waterfall rows once
+(function buildWaterfall() {
+  const rows = [
+    {
+      rowClass: 'row-income',
+      bulletColor: '#2E7D6C',
+      lineNo: 'Line 1a',
+      label: 'Gross Wages (W-2)',
+      operator: '',
+      amountId: 'wfWages',
+      tip: 'Form W-2 Box 1 — Your total wages, salaries, and tips from your employer(s).',
+      spacerAfter: false
+    },
+    {
+      rowClass: 'row-income',
+      bulletColor: '#2E7D6C',
+      lineNo: 'Line 8',
+      label: 'Other Income (1099s, etc.)',
+      operator: '+',
+      amountId: 'wfOther',
+      tip: 'Schedule 1, Line 8 — Additional income including freelance, rental, interest, dividends, and other sources.',
+      spacerAfter: false
+    },
+    {
+      rowClass: 'row-subtotal',
+      bulletColor: '#1A5276',
+      lineNo: 'Line 9',
+      label: 'Total Gross Income',
+      operator: '=',
+      amountId: 'wfTotalIncome',
+      tip: 'Form 1040 Line 9 — Sum of all income sources before any adjustments.',
+      spacerAfter: true
+    },
+    {
+      rowClass: 'row-deduct',
+      bulletColor: '#4A5568',
+      lineNo: 'Line 10',
+      label: 'Adjustments to Income',
+      operator: '−',
+      amountId: 'wfAdjust',
+      tip: 'Schedule 1, Part II — Above-the-line deductions such as student loan interest, IRA contributions, HSA deductions (set to $0 in this simulation).',
+      spacerAfter: false
+    },
+    {
+      rowClass: 'row-subtotal',
+      bulletColor: '#1A5276',
+      lineNo: 'Line 11',
+      label: 'Adjusted Gross Income (AGI)',
+      operator: '=',
+      amountId: 'wfAGI',
+      tip: 'Form 1040 Line 11 — Your total income minus above-the-line deductions. AGI is used to calculate many other deductions and credits.',
+      spacerAfter: true
+    },
+    {
+      rowClass: 'row-deduct',
+      bulletColor: '#4A5568',
+      lineNo: 'Line 12',
+      label: 'Standard Deduction',
+      operator: '−',
+      amountId: 'wfStdDed',
+      tip: '2025 Standard Deduction: Single $15,000 | MFJ $30,000 | HoH $22,500. This reduces your income subject to tax.',
+      spacerAfter: false
+    },
+    {
+      rowClass: 'row-subtotal',
+      bulletColor: '#1A5276',
+      lineNo: 'Line 15',
+      label: 'Taxable Income',
+      operator: '=',
+      amountId: 'wfTaxable',
+      tip: 'Form 1040 Line 15 — The income amount on which your federal income tax is calculated using the tax brackets.',
+      spacerAfter: true
+    },
+    {
+      rowClass: 'row-tax',
+      bulletColor: '#C05621',
+      lineNo: 'Line 16',
+      label: 'Income Tax (from brackets)',
+      operator: '',
+      amountId: 'wfIncomeTax',
+      tip: '2025 federal income tax brackets applied to your taxable income. Calculated using progressive marginal rates.',
+      spacerAfter: false
+    },
+    {
+      rowClass: 'row-credit',
+      bulletColor: '#276749',
+      lineNo: 'Lines 19–24',
+      label: 'Child Tax Credit',
+      operator: '−',
+      amountId: 'wfCTC',
+      tip: '$2,000 per qualifying child under age 17. Nonrefundable — cannot reduce tax below $0 (ACTC handles refundable portion separately).',
+      spacerAfter: false
+    },
+    {
+      rowClass: 'row-subtotal',
+      bulletColor: '#1A5276',
+      lineNo: 'Line 24',
+      label: 'Tax After Credits',
+      operator: '=',
+      amountId: 'wfTaxAfterCredits',
+      tip: 'Total tax liability after applying nonrefundable credits.',
+      spacerAfter: true
+    },
+    {
+      rowClass: 'row-deduct',
+      bulletColor: '#4A5568',
+      lineNo: 'Line 25',
+      label: 'Federal Tax Withheld (W-2)',
+      operator: '−',
+      amountId: 'wfWithheld',
+      tip: 'W-2 Box 2 — Federal income tax your employer withheld from your paychecks throughout the year.',
+      spacerAfter: false
+    },
+    {
+      rowClass: 'row-result',
+      bulletColor: '#1A202C',
+      lineNo: 'Line 37/38',
+      label: 'Amount Owed or Refund',
+      operator: '=',
+      amountId: 'wfResult',
+      tip: 'Positive = refund (Line 35a). Negative = amount you owe (Line 37). File by April 15, 2026 to avoid penalties.',
+      spacerAfter: false
+    }
+  ];
+
+  rows.forEach(r => buildRow(r));
+})();
+
+function recalc() {
+  const wages    = +elWages.value    || 0;
+  const status   = elStatus.value;
+  const withheld = +elWith.value     || 0;
+  const other    = +elOther.value    || 0;
+  const children = +elChildren.value || 0;
+
+  const totalIncome = wages + other;
+  const adjustments = 0; // simplified
+  const agi         = Math.max(0, totalIncome - adjustments);
+  const stdDed      = STD_DED[status];
+  const taxable     = Math.max(0, agi - stdDed);
+  const incomeTax   = calcTax(taxable, status);
+  const ctc         = Math.min(incomeTax, children * 2000); // nonrefundable
+  const taxAfterCTC = Math.max(0, incomeTax - ctc);
+  const balance     = taxAfterCTC - withheld;
+  const isRefund    = balance <= 0;
+
+  // Update row values
+  document.getElementById('wfWages').textContent       = fmt(wages);
+  document.getElementById('wfOther').textContent       = fmt(other);
+  document.getElementById('wfTotalIncome').textContent = fmt(totalIncome);
+  document.getElementById('wfAdjust').textContent      = fmt(adjustments);
+  document.getElementById('wfAGI').textContent         = fmt(agi);
+  document.getElementById('wfStdDed').textContent      = fmt(stdDed);
+  document.getElementById('wfTaxable').textContent     = fmt(taxable);
+  document.getElementById('wfIncomeTax').textContent   = fmt(incomeTax);
+  document.getElementById('wfCTC').textContent         = fmt(ctc);
+  document.getElementById('wfTaxAfterCredits').textContent = fmt(taxAfterCTC);
+  document.getElementById('wfWithheld').textContent    = fmt(withheld);
+  document.getElementById('wfResult').textContent      = fmt(Math.abs(balance));
+
+  // Result row class
+  const resultRow = document.getElementById('wfResult').closest('.wf-row');
+  resultRow.classList.remove('refund', 'owe');
+  resultRow.classList.add(isRefund ? 'refund' : 'owe');
+
+  // Result banner
+  const banner = document.getElementById('resultBanner');
+  if (isRefund) {
+    const amt = Math.abs(balance);
+    banner.style.background = '#C6F6D5';
+    banner.style.color = '#22543D';
+    banner.style.border = '1px solid #9AE6B4';
+    banner.textContent = amt === 0 ? 'Break Even — No refund or amount owed' : `REFUND: ${fmt(amt)}`;
+  } else {
+    banner.style.background = '#FED7D7';
+    banner.style.color = '#9B2335';
+    banner.style.border = '1px solid #FC8181';
+    banner.textContent = `AMOUNT OWED: ${fmt(balance)} (due April 15, 2026)`;
+  }
+
+  // Summary bar
+  const effRate  = totalIncome > 0 ? (taxAfterCTC / totalIncome * 100).toFixed(1) : '0.0';
+  const margRate = (marginalRate(taxable, status) * 100).toFixed(0);
+  const takeHome = wages - withheld + (isRefund ? Math.abs(balance) : -balance) + other;
+  // simpler: take-home = wages + other - taxAfterCTC
+  const netTakeHome = totalIncome - taxAfterCTC;
+
+  document.getElementById('sbEffRate').textContent  = effRate + '%';
+  document.getElementById('sbMargRate').textContent = margRate + '%';
+  document.getElementById('sbTakeHome').textContent = fmt(Math.max(0, netTakeHome));
+}
+
+// Init
+elWagesVal.textContent  = fmt(+elWages.value);
+elWithVal.textContent   = fmt(+elWith.value);
+recalc();
+</script>
+</body>
+</html>

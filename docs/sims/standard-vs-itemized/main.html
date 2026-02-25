@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Standard vs. Itemized Deduction Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1a3a5c;
+    --teal: #2a9d8f;
+    --teal-light: #e8f7f5;
+    --light-gray: #f5f5f5;
+    --mid-gray: #e0e0e0;
+    --dark-gray: #555;
+    --text: #222;
+    --blue: #2196F3;
+    --blue-light: #e3f2fd;
+    --green: #4CAF50;
+    --green-light: #e8f5e9;
+    --orange: #FF9800;
+    --orange-light: #fff3e0;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.10);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em; }
+  header span { font-size: 0.85rem; opacity: 0.75; }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 760px) {
+    .main-layout { grid-template-columns: 1fr; padding: 12px; gap: 14px; }
+  }
+
+  .panel {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 12px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .panel-body { padding: 20px; }
+
+  /* Form elements */
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .form-group label .value-display {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--teal);
+    text-transform: none;
+    letter-spacing: 0;
+    background: var(--teal-light);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .form-group select,
+  .form-group input[type="number"] {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid var(--mid-gray);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--light-gray);
+    transition: border-color 0.2s;
+  }
+  .form-group select:focus,
+  .form-group input[type="number"]:focus {
+    outline: none;
+    border-color: var(--teal);
+    background: var(--white);
+  }
+
+  /* Range slider */
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    appearance: none;
+    background: var(--mid-gray);
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--teal);
+    cursor: pointer;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { background: var(--navy); }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--teal);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  }
+
+  .section-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin: 18px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-tag::after {
+    content: '';
+    flex: 1;
+    height: 1.5px;
+    background: var(--teal-light);
+  }
+
+  /* Right panel */
+  .result-area { display: flex; flex-direction: column; gap: 16px; }
+
+  .recommendation-banner {
+    border-radius: 9px;
+    padding: 14px 18px;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rec-standard { background: var(--blue-light); color: #1565C0; border: 2px solid var(--blue); }
+  .rec-itemize  { background: var(--green-light); color: #2E7D32; border: 2px solid var(--green); }
+  .rec-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .rec-text { display: flex; flex-direction: column; gap: 2px; }
+  .rec-text .rec-main { font-size: 1rem; }
+  .rec-text .rec-sub  { font-size: 0.8rem; font-weight: 400; opacity: 0.85; }
+
+  .chart-container {
+    position: relative;
+    height: 220px;
+  }
+
+  .notes-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .note-chip {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    color: #6d4c00;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  .breakdown-table th {
+    background: var(--light-gray);
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid var(--mid-gray);
+  }
+  .breakdown-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--mid-gray);
+  }
+  .breakdown-table .amt { text-align: right; font-weight: 600; }
+  .breakdown-table tr:last-child td { border-bottom: none; font-weight: 700; background: var(--light-gray); }
+  .breakdown-table .salt-capped { color: var(--orange); }
+  .breakdown-table .zero-row td { color: #bbb; }
+
+  .winner-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  .winner-blue  { background: var(--blue);  color: white; }
+  .winner-green { background: var(--green); color: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Standard vs. Itemized Deduction Calculator</h1>
+  <span>Tax Year 2025 — Federal Income Tax</span>
+</header>
+
+<div class="main-layout">
+
+  <!-- LEFT: Inputs -->
+  <div class="panel">
+    <div class="panel-header">Your Deduction Inputs</div>
+    <div class="panel-body">
+
+      <div class="form-group">
+        <label for="filingStatus">Filing Status</label>
+        <select id="filingStatus">
+          <option value="single">Single — Standard: $15,000</option>
+          <option value="mfj">Married Filing Jointly — Standard: $30,000</option>
+          <option value="hoh">Head of Household — Standard: $22,500</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="agi">Adjusted Gross Income (AGI)
+          <span class="value-display" id="agiDisplay">$50,000</span>
+        </label>
+        <input type="number" id="agi" min="0" step="1000" value="50000">
+      </div>
+
+      <div class="section-tag">Itemizable Expenses</div>
+
+      <div class="form-group">
+        <label for="mortgage">Mortgage Interest
+          <span class="value-display" id="mortgageDisplay">$0</span>
+        </label>
+        <input type="range" id="mortgage" min="0" max="50000" step="500" value="0">
+      </div>
+
+      <div class="form-group">
+        <label for="propTax">Property Tax
+          <span class="value-display" id="propTaxDisplay">$0</span>
+        </label>
+        <input type="range" id="propTax" min="0" max="15000" step="250" value="0">
+      </div>
+
+      <div class="form-group">
+        <label for="stateTax">State Income Tax
+          <span class="value-display" id="stateTaxDisplay">$0</span>
+        </label>
+        <input type="range" id="stateTax" min="0" max="20000" step="250" value="0">
+      </div>
+
+      <div class="form-group">
+        <label for="charitable">Charitable Contributions
+          <span class="value-display" id="charitableDisplay">$0</span>
+        </label>
+        <input type="range" id="charitable" min="0" max="20000" step="250" value="0">
+      </div>
+
+      <div class="form-group">
+        <label for="medical">Medical Expenses
+          <span class="value-display" id="medicalDisplay">$0</span>
+        </label>
+        <input type="number" id="medical" min="0" step="100" value="0" placeholder="0">
+        <div style="font-size:0.74rem;color:var(--dark-gray);margin-top:4px;font-style:italic;">
+          Only amount exceeding 7.5% of AGI is deductible
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div class="panel">
+    <div class="panel-header">Deduction Comparison</div>
+    <div class="panel-body">
+      <div class="result-area">
+
+        <div id="recommendationBanner" class="recommendation-banner rec-standard">
+          <div class="rec-icon">&#x1F4CB;</div>
+          <div class="rec-text">
+            <div class="rec-main" id="recMain">Take the Standard Deduction</div>
+            <div class="rec-sub" id="recSub">Loading...</div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="deductionChart"></canvas>
+        </div>
+
+        <div id="saltNote" class="notes-row" style="display:none;">
+          <div class="note-chip">
+            &#9888; SALT cap applied: state + property taxes reduced to $10,000 limit
+          </div>
+        </div>
+        <div id="medNote" class="notes-row" style="display:none;">
+          <div class="note-chip" id="medNoteText">&#128138; Medical deduction after 7.5% AGI floor: $0</div>
+        </div>
+
+        <table class="breakdown-table" id="breakdownTable">
+          <thead>
+            <tr>
+              <th>Itemized Component</th>
+              <th class="amt">Amount</th>
+              <th class="amt">Deductible</th>
+            </tr>
+          </thead>
+          <tbody id="breakdownBody"></tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const STD_DEDUCTIONS = { single: 15000, mfj: 30000, hoh: 22500 };
+const SALT_CAP = 10000;
+const MEDICAL_PCT = 0.075;
+
+let chart = null;
+
+// ============================================================
+// UTILS
+// ============================================================
+function fmt(n) {
+  if (n === 0) return '$0';
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+function val(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function setDisplay(id, v) { document.getElementById(id).textContent = fmt(v); }
+
+// ============================================================
+// CALCULATE
+// ============================================================
+function calculate() {
+  const status     = document.getElementById('filingStatus').value;
+  const agi        = Math.max(0, val('agi'));
+  const mortgage   = Math.max(0, val('mortgage'));
+  const propTax    = Math.max(0, val('propTax'));
+  const stateTax   = Math.max(0, val('stateTax'));
+  const charitable = Math.max(0, val('charitable'));
+  const medical    = Math.max(0, val('medical'));
+
+  const rawSALT     = propTax + stateTax;
+  const saltCapped  = Math.min(rawSALT, SALT_CAP);
+  const saltApplied = rawSALT > SALT_CAP;
+
+  const deductibleMedical = Math.max(0, medical - MEDICAL_PCT * agi);
+  const medFloor          = MEDICAL_PCT * agi;
+
+  const itemizedTotal = saltCapped + mortgage + charitable + deductibleMedical;
+  const stdDeduction  = STD_DEDUCTIONS[status];
+
+  const itemizeWins = itemizedTotal > stdDeduction;
+  const savings     = itemizedTotal - stdDeduction;
+
+  return {
+    status, agi, mortgage, propTax, stateTax, charitable, medical,
+    rawSALT, saltCapped, saltApplied,
+    deductibleMedical, medFloor,
+    itemizedTotal, stdDeduction, itemizeWins, savings,
+  };
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const c = calculate();
+
+  // Update recommendation banner
+  const banner = document.getElementById('recommendationBanner');
+  const recMain = document.getElementById('recMain');
+  const recSub  = document.getElementById('recSub');
+
+  if (c.itemizeWins) {
+    banner.className = 'recommendation-banner rec-itemize';
+    recMain.textContent = 'Itemize Your Deductions';
+    recSub.textContent  = `Itemizing saves you ${fmt(c.savings)} compared to the standard deduction`;
+  } else if (c.itemizedTotal === c.stdDeduction) {
+    banner.className = 'recommendation-banner rec-standard';
+    recMain.textContent = 'Either Method — Same Result';
+    recSub.textContent  = 'Your itemized deductions equal the standard deduction';
+  } else {
+    banner.className = 'recommendation-banner rec-standard';
+    recMain.textContent = 'Take the Standard Deduction';
+    recSub.textContent  = `Standard deduction is ${fmt(Math.abs(c.savings))} more than your itemized total`;
+  }
+
+  // SALT note
+  const saltNote = document.getElementById('saltNote');
+  saltNote.style.display = c.saltApplied ? 'flex' : 'none';
+
+  // Medical note
+  const medNote     = document.getElementById('medNote');
+  const medNoteText = document.getElementById('medNoteText');
+  if (c.medical > 0) {
+    medNote.style.display = 'flex';
+    medNoteText.textContent = `Medical deduction after ${fmt(c.medFloor)} (7.5% of AGI) floor: ${fmt(c.deductibleMedical)}`;
+  } else {
+    medNote.style.display = 'none';
+  }
+
+  // Breakdown table
+  const tbody = document.getElementById('breakdownBody');
+  const rows = [
+    { label: 'Mortgage Interest',         raw: c.mortgage,   ded: c.mortgage,          zero: c.mortgage === 0 },
+    { label: 'Property Tax',              raw: c.propTax,    ded: null,                 zero: c.propTax === 0, salt: true },
+    { label: 'State Income Tax',          raw: c.stateTax,   ded: null,                 zero: c.stateTax === 0, salt: true },
+    { label: 'SALT (capped at $10,000)',  raw: c.rawSALT,    ded: c.saltCapped,         zero: c.rawSALT === 0, saltTotal: true },
+    { label: 'Charitable Contributions', raw: c.charitable, ded: c.charitable,          zero: c.charitable === 0 },
+    { label: 'Medical Expenses',          raw: c.medical,    ded: c.deductibleMedical,  zero: c.medical === 0, medRow: true },
+  ];
+
+  tbody.innerHTML = rows.map(r => {
+    if (r.salt) return ''; // skip individual SALT rows; show combined
+    const zeroClass = r.zero ? 'zero-row' : '';
+    const saltClass = r.saltTotal && c.saltApplied ? 'salt-capped' : '';
+    const dedStr    = r.ded !== null ? fmt(r.ded) : fmt(r.raw);
+    return `<tr class="${zeroClass}">
+      <td class="${saltClass}">${r.label}${r.saltTotal && c.saltApplied ? ' <em style="font-size:0.75rem;">(cap applied)</em>' : ''}</td>
+      <td class="amt">${fmt(r.raw)}</td>
+      <td class="amt ${saltClass}">${dedStr}</td>
+    </tr>`;
+  }).join('') + `<tr>
+    <td>Total Itemized Deductions</td>
+    <td class="amt"></td>
+    <td class="amt">${fmt(c.itemizedTotal)}</td>
+  </tr>`;
+
+  // Chart
+  updateChart(c);
+}
+
+function updateChart(c) {
+  const stdColor     = '#2196F3';
+  const stdColorAlpha = 'rgba(33,150,243,0.15)';
+  const itemColor    = c.itemizeWins ? '#4CAF50' : '#FF9800';
+  const itemAlpha    = c.itemizeWins ? 'rgba(76,175,80,0.15)' : 'rgba(255,152,0,0.15)';
+
+  const stdLabel  = `Standard (${fmt(c.stdDeduction)})${!c.itemizeWins ? ' ✓' : ''}`;
+  const itemLabel = `Itemized (${fmt(c.itemizedTotal)})${c.itemizeWins ? ' ✓' : ''}`;
+
+  if (!chart) {
+    const ctx = document.getElementById('deductionChart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [stdLabel, itemLabel],
+        datasets: [{
+          label: 'Deduction Amount',
+          data: [c.stdDeduction, c.itemizedTotal],
+          backgroundColor: [stdColor, itemColor],
+          borderColor:     [stdColor, itemColor],
+          borderWidth: 2,
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ' ' + fmt(ctx.raw),
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              callback: v => '$' + (v/1000).toFixed(0) + 'k',
+              font: { size: 11 },
+            },
+            grid: { color: 'rgba(0,0,0,0.06)' },
+          },
+          y: {
+            ticks: { font: { size: 12, weight: '600' } },
+            grid: { display: false },
+          }
+        }
+      }
+    });
+  } else {
+    chart.data.labels                            = [stdLabel, itemLabel];
+    chart.data.datasets[0].data                  = [c.stdDeduction, c.itemizedTotal];
+    chart.data.datasets[0].backgroundColor       = [stdColor, itemColor];
+    chart.data.datasets[0].borderColor           = [stdColor, itemColor];
+    chart.update('none');
+  }
+}
+
+// ============================================================
+// SLIDER SYNC
+// ============================================================
+const sliders = [
+  { input: 'mortgage',   display: 'mortgageDisplay'   },
+  { input: 'propTax',    display: 'propTaxDisplay'    },
+  { input: 'stateTax',   display: 'stateTaxDisplay'   },
+  { input: 'charitable', display: 'charitableDisplay' },
+];
+
+sliders.forEach(({ input, display }) => {
+  const el = document.getElementById(input);
+  el.addEventListener('input', () => {
+    setDisplay(display, parseFloat(el.value));
+    render();
+  });
+});
+
+document.getElementById('agi').addEventListener('input', () => {
+  setDisplay('agiDisplay', val('agi'));
+  render();
+});
+
+document.getElementById('medical').addEventListener('input', () => {
+  setDisplay('medicalDisplay', val('medical'));
+  render();
+});
+
+document.getElementById('filingStatus').addEventListener('change', render);
+
+// Initial render
+render();
+</script>
+</body>
+</html>

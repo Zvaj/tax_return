@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rental Property Annual Tax Summary</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0f2744 0%, #1565C0 100%);
+    color: #fff;
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(21,101,192,0.3);
+  }
+
+  header h1 {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px;
+  }
+
+  .panel-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  /* Input styles */
+  .input-group { margin-bottom: 16px; }
+
+  .field-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 5px;
+  }
+
+  .field-hint {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  .number-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .number-input:focus { border-color: #1565C0; }
+  .number-input.error { border-color: #ef4444; background: #fef2f2; }
+
+  .error-msg {
+    font-size: 0.75rem;
+    color: #ef4444;
+    font-weight: 600;
+    margin-top: 4px;
+    display: none;
+  }
+
+  .error-msg.show { display: block; }
+
+  /* Radio buttons */
+  .radio-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .radio-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .radio-btn input[type="radio"] { display: none; }
+
+  .radio-btn.selected {
+    border-color: #1565C0;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  /* Dropdown */
+  .select-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .select-input:focus { border-color: #1565C0; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 14px 0;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    margin-bottom: 10px;
+  }
+
+  /* Result Cards */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-wide {
+    grid-column: 1 / -1;
+  }
+
+  .card-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 6px;
+  }
+
+  .card-formula {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-bottom: 4px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .card-amount {
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-sub {
+    font-size: 0.72rem;
+    margin-top: 4px;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  /* Card color themes */
+  .card-depr {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e40af;
+  }
+
+  .card-income-pos {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #2E7D32;
+  }
+
+  .card-income-neg {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #B71C1C;
+  }
+
+  .card-deductible {
+    background: #f0fdf4;
+    border-color: #4ade80;
+    color: #166534;
+  }
+
+  .card-deductible-zero {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+  }
+
+  .card-suspended {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    color: #92400e;
+  }
+
+  .card-suspended .card-amount { color: #B71C1C; }
+
+  .card-savings {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1565C0;
+  }
+
+  .card-owed {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #9a3412;
+  }
+
+  /* Collapsible calculation section */
+  .calc-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0;
+    user-select: none;
+    transition: all 0.15s;
+  }
+
+  .calc-toggle:hover { border-color: #94a3b8; }
+  .calc-toggle.open { border-radius: 10px 10px 0 0; border-bottom-color: transparent; }
+
+  .calc-toggle .arrow {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    transition: transform 0.2s;
+  }
+
+  .calc-toggle.open .arrow { transform: rotate(180deg); }
+
+  .calc-content {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 16px;
+    display: none;
+    margin-bottom: 16px;
+  }
+
+  .calc-content.open { display: block; }
+
+  .calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px dashed #e2e8f0;
+    font-size: 0.8rem;
+  }
+
+  .calc-row:last-child { border-bottom: none; }
+
+  .calc-row-label { color: #64748b; font-weight: 500; }
+  .calc-row-val { font-weight: 700; color: #1e293b; font-variant-numeric: tabular-nums; }
+  .calc-row-val.neg { color: #B71C1C; }
+  .calc-row-val.pos { color: #2E7D32; }
+  .calc-row-val.hl  { color: #1565C0; }
+
+  .calc-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: #1e293b;
+    border-radius: 6px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 8px;
+  }
+
+  /* Bar chart */
+  .bar-section { margin-top: 0; }
+
+  .bar-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .bar-row-label {
+    width: 110px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 26px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.35s ease;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .bar-amount {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #374151;
+    min-width: 75px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Rental Property Annual Tax Summary</h1>
+  <p>2025 Tax Year &mdash; Calculate depreciation, net income, passive loss deductibility, and estimated tax impact</p>
+</header>
+
+<div class="layout">
+  <!-- LEFT PANEL: Inputs -->
+  <div class="panel">
+    <div class="panel-title">Property Inputs</div>
+
+    <div class="section-label">Property Basis</div>
+
+    <div class="input-group">
+      <label class="field-label">Purchase Price</label>
+      <input type="number" class="number-input" id="purchase-price" min="0" value="350000" oninput="recalculate()">
+    </div>
+
+    <div class="input-group">
+      <label class="field-label">Land Value <span class="field-hint">(non-depreciable)</span></label>
+      <input type="number" class="number-input" id="land-value" min="0" value="60000" oninput="recalculate()">
+      <div class="error-msg" id="land-error">Land value must be less than purchase price</div>
+    </div>
+
+    <hr class="divider">
+    <div class="section-label">Annual Income &amp; Expenses</div>
+
+    <div class="input-group">
+      <label class="field-label">Gross Annual Rent</label>
+      <input type="number" class="number-input" id="gross-rent" min="0" value="24000" oninput="recalculate()">
+    </div>
+
+    <div class="input-group">
+      <label class="field-label">Operating Expenses <span class="field-hint">(excl. mortgage interest)</span></label>
+      <input type="number" class="number-input" id="op-expenses" min="0" value="5000" oninput="recalculate()">
+    </div>
+
+    <div class="input-group">
+      <label class="field-label">Annual Mortgage Interest</label>
+      <input type="number" class="number-input" id="mortgage-interest" min="0" value="14000" oninput="recalculate()">
+    </div>
+
+    <hr class="divider">
+    <div class="section-label">Your Tax Situation</div>
+
+    <div class="input-group">
+      <label class="field-label">Your AGI (Before Rental)</label>
+      <input type="number" class="number-input" id="agi-input" min="0" value="90000" oninput="recalculate()">
+    </div>
+
+    <div class="input-group">
+      <label class="field-label">Active Participation in Property Management?</label>
+      <div class="radio-row">
+        <label class="radio-btn selected" id="lbl-active-yes">
+          <input type="radio" name="active" value="yes" checked onchange="onRadioChange('active','yes')">
+          Yes
+        </label>
+        <label class="radio-btn" id="lbl-active-no">
+          <input type="radio" name="active" value="no" onchange="onRadioChange('active','no')">
+          No
+        </label>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label">Real Estate Professional Status?</label>
+      <div class="radio-row">
+        <label class="radio-btn" id="lbl-rep-yes">
+          <input type="radio" name="rep" value="yes" onchange="onRadioChange('rep','yes')">
+          Yes
+        </label>
+        <label class="radio-btn selected" id="lbl-rep-no">
+          <input type="radio" name="rep" value="no" checked onchange="onRadioChange('rep','no')">
+          No
+        </label>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label">Your Marginal Tax Rate</label>
+      <select class="select-input" id="marginal-rate" onchange="recalculate()">
+        <option value="0.10">10%</option>
+        <option value="0.12">12%</option>
+        <option value="0.22" selected>22%</option>
+        <option value="0.24">24%</option>
+        <option value="0.32">32%</option>
+        <option value="0.35">35%</option>
+        <option value="0.37">37%</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Results -->
+  <div class="panel">
+    <div class="panel-title">Calculated Results</div>
+
+    <div class="cards-grid" id="cards-grid">
+      <!-- Card 1: Depreciation -->
+      <div class="card card-depr">
+        <div class="card-label">Annual Depreciation</div>
+        <div class="card-formula" id="depr-formula">($350,000 − $60,000) ÷ 27.5</div>
+        <div class="card-amount" id="depr-amount">$10,545</div>
+        <div class="card-sub">Straight-line over 27.5 years</div>
+      </div>
+
+      <!-- Card 2: Net Rental Income/Loss -->
+      <div class="card card-income-neg" id="card-net">
+        <div class="card-label">Net Rental Income / (Loss)</div>
+        <div class="card-formula" id="net-formula">Rent − Expenses − Interest − Depr.</div>
+        <div class="card-amount" id="net-amount">($5,545)</div>
+        <div class="card-sub" id="net-sub">Net rental loss</div>
+      </div>
+
+      <!-- Card 3: Deductible This Year -->
+      <div class="card card-deductible" id="card-deductible">
+        <div class="card-label">Deductible This Year</div>
+        <div class="card-amount" id="ded-amount">$5,545</div>
+        <div class="card-sub" id="ded-sub">Active participation allowance</div>
+      </div>
+
+      <!-- Card 4: Suspended -->
+      <div class="card card-suspended">
+        <div class="card-label">Suspended Loss Carryforward</div>
+        <div class="card-amount" id="sus-amount">$0</div>
+        <div class="card-sub">Released upon sale of property</div>
+      </div>
+
+      <!-- Card 5: Tax Impact (wide) -->
+      <div class="card card-savings card-wide" id="card-impact">
+        <div class="card-label">Estimated Tax Impact</div>
+        <div class="card-amount" id="impact-amount">$1,220</div>
+        <div class="card-sub" id="impact-sub">Tax savings from deductible loss × 22% marginal rate</div>
+      </div>
+    </div>
+
+    <!-- Collapsible full calculation -->
+    <div class="calc-toggle" id="calc-toggle" onclick="toggleCalc()">
+      <span>Show Full Calculation</span>
+      <span class="arrow">&#9660;</span>
+    </div>
+    <div class="calc-content" id="calc-content">
+      <div class="calc-row">
+        <span class="calc-row-label">Gross Annual Rent</span>
+        <span class="calc-row-val pos" id="c-rent">+$24,000</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Operating Expenses</span>
+        <span class="calc-row-val neg" id="c-opex">−$5,000</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Mortgage Interest</span>
+        <span class="calc-row-val neg" id="c-interest">−$14,000</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Depreciation (basis ÷ 27.5)</span>
+        <span class="calc-row-val neg" id="c-depr">−$10,545</span>
+      </div>
+      <div class="calc-total-row">
+        <span>Net Rental Income / (Loss)</span>
+        <span id="c-net">($5,545)</span>
+      </div>
+      <div style="margin-top:14px;margin-bottom:6px;" class="calc-row" style="border:none;">
+        <span class="calc-row-label" style="font-weight:700;color:#374151;">Passive Loss Analysis</span>
+        <span></span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Your AGI</span>
+        <span class="calc-row-val" id="c-agi">$90,000</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Participation Rule Applied</span>
+        <span class="calc-row-val hl" id="c-rule">Active ($25k allowance)</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Allowance Available</span>
+        <span class="calc-row-val" id="c-allowance">$25,000</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Deductible (min of loss &amp; allowance)</span>
+        <span class="calc-row-val pos" id="c-ded">$5,545</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Suspended (carried forward)</span>
+        <span class="calc-row-val neg" id="c-sus">$0</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-row-label">Marginal Rate</span>
+        <span class="calc-row-val" id="c-rate">22%</span>
+      </div>
+      <div class="calc-total-row" id="c-impact-row">
+        <span>Estimated Tax Savings</span>
+        <span id="c-impact">$1,220</span>
+      </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="bar-section" style="margin-top:16px;">
+      <div class="bar-section-title">Financial Breakdown</div>
+      <div class="bar-row">
+        <div class="bar-row-label">Gross Rent</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-rent" style="width:100%;background:#1565C0;"></div>
+        </div>
+        <div class="bar-amount" id="bamt-rent">$24,000</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">Total Deductions</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-ded" style="width:100%;background:#B71C1C;"></div>
+        </div>
+        <div class="bar-amount" id="bamt-ded">$29,545</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">Net Position</div>
+        <div class="bar-track" style="background:#fef2f2;">
+          <div class="bar-fill" id="bar-net" style="width:19%;background:#B71C1C;"></div>
+        </div>
+        <div class="bar-amount" id="bamt-net" style="color:#B71C1C;">($5,545)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========================================================
+// State
+// =========================================================
+let activeParticipation = true;
+let isREP = false;
+
+function fmt(n) {
+  const abs = Math.abs(Math.round(n));
+  const str = '$' + abs.toLocaleString('en-US');
+  return n < 0 ? '(' + str + ')' : str;
+}
+
+function fmtPos(n) {
+  return '$' + Math.abs(Math.round(n)).toLocaleString('en-US');
+}
+
+// =========================================================
+// Radio handlers
+// =========================================================
+function onRadioChange(name, val) {
+  if (name === 'active') {
+    activeParticipation = val === 'yes';
+    document.getElementById('lbl-active-yes').classList.toggle('selected', val === 'yes');
+    document.getElementById('lbl-active-no').classList.toggle('selected', val === 'no');
+  } else {
+    isREP = val === 'yes';
+    document.getElementById('lbl-rep-yes').classList.toggle('selected', val === 'yes');
+    document.getElementById('lbl-rep-no').classList.toggle('selected', val === 'no');
+  }
+  recalculate();
+}
+
+function toggleCalc() {
+  const btn = document.getElementById('calc-toggle');
+  const content = document.getElementById('calc-content');
+  btn.classList.toggle('open');
+  content.classList.toggle('open');
+  const arrow = btn.querySelector('.arrow');
+  btn.querySelector('span:first-child').textContent =
+    btn.classList.contains('open') ? 'Hide Full Calculation' : 'Show Full Calculation';
+}
+
+// =========================================================
+// Passive loss logic (mirrors sim 8a)
+// =========================================================
+function calcPassiveLoss(agi, netLoss, activeParticipation, isREP) {
+  // netLoss is a positive number representing the loss
+  if (netLoss <= 0) {
+    // It's net income, fully taxable
+    return { deductible: 0, suspended: 0, rule: 'Net rental income — fully taxable', allowance: 0 };
+  }
+
+  // REP: full deduction (simplified — assumes material participation criteria met)
+  if (isREP) {
+    return { deductible: netLoss, suspended: 0, rule: 'Real Estate Professional: full loss deductible', allowance: netLoss };
+  }
+
+  // Active participation + AGI <= $100k
+  if (activeParticipation && agi <= 100000) {
+    const deductible = Math.min(netLoss, 25000);
+    return { deductible, suspended: netLoss - deductible, rule: 'Active participation: $25,000 allowance', allowance: 25000 };
+  }
+
+  // Active participation + AGI $100k–$150k (phase-out)
+  if (activeParticipation && agi > 100000 && agi < 150000) {
+    const phaseOut = (agi - 100000) / 50000;
+    const allowance = 25000 * (1 - phaseOut);
+    const deductible = Math.min(netLoss, allowance);
+    return {
+      deductible, suspended: netLoss - deductible,
+      rule: `Phase-out allowance (${(phaseOut*100).toFixed(0)}% phased out)`,
+      allowance
+    };
+  }
+
+  // Fully passive / AGI too high
+  const noActiveReason = !activeParticipation
+    ? 'No active participation — loss fully suspended'
+    : 'AGI ≥ $150,000 — allowance fully phased out';
+  return { deductible: 0, suspended: netLoss, rule: noActiveReason, allowance: 0 };
+}
+
+// =========================================================
+// Core calculation
+// =========================================================
+function recalculate() {
+  const purchasePrice = parseFloat(document.getElementById('purchase-price').value) || 0;
+  const landValue     = parseFloat(document.getElementById('land-value').value)     || 0;
+  const grossRent     = parseFloat(document.getElementById('gross-rent').value)      || 0;
+  const opExpenses    = parseFloat(document.getElementById('op-expenses').value)     || 0;
+  const mortgageInt   = parseFloat(document.getElementById('mortgage-interest').value) || 0;
+  const agi           = parseFloat(document.getElementById('agi-input').value)        || 0;
+  const marginalRate  = parseFloat(document.getElementById('marginal-rate').value)    || 0.22;
+
+  // Validation
+  const landInput = document.getElementById('land-value');
+  const landError = document.getElementById('land-error');
+  if (landValue >= purchasePrice && purchasePrice > 0) {
+    landInput.classList.add('error');
+    landError.classList.add('show');
+    return; // Stop calculation
+  } else {
+    landInput.classList.remove('error');
+    landError.classList.remove('show');
+  }
+
+  // Calculations
+  const depreciableBasis = Math.max(0, purchasePrice - landValue);
+  const annualDepr       = depreciableBasis / 27.5;
+  const totalDeductions  = opExpenses + mortgageInt + annualDepr;
+  const netRentalIncome  = grossRent - totalDeductions;  // negative = loss
+
+  // Passive loss
+  const netLoss = -Math.min(netRentalIncome, 0); // positive if there's a loss
+  const passiveResult = calcPassiveLoss(agi, netLoss, activeParticipation, isREP);
+
+  // Tax impact
+  let taxImpact = 0;
+  let impactLabel = '';
+  let isIncome = false;
+
+  if (netRentalIncome >= 0) {
+    // Income — estimate tax owed
+    taxImpact = netRentalIncome * marginalRate;
+    impactLabel = `Tax owed on net rental income × ${(marginalRate*100).toFixed(0)}% marginal rate`;
+    isIncome = true;
+  } else if (passiveResult.deductible > 0) {
+    taxImpact = passiveResult.deductible * marginalRate;
+    impactLabel = `Tax savings: deductible loss × ${(marginalRate*100).toFixed(0)}% marginal rate`;
+    isIncome = false;
+  } else {
+    taxImpact = 0;
+    impactLabel = 'No immediate tax impact — loss suspended';
+    isIncome = false;
+  }
+
+  // ---- Update Cards ----
+  // Card 1: Depreciation
+  document.getElementById('depr-formula').textContent =
+    `(${fmtPos(purchasePrice)} − ${fmtPos(landValue)}) ÷ 27.5`;
+  document.getElementById('depr-amount').textContent = fmtPos(annualDepr);
+
+  // Card 2: Net Income/Loss
+  const netCard = document.getElementById('card-net');
+  const netAmtEl = document.getElementById('net-amount');
+  const netSubEl = document.getElementById('net-sub');
+  netCard.className = 'card ' + (netRentalIncome >= 0 ? 'card-income-pos' : 'card-income-neg');
+  netAmtEl.textContent = fmt(netRentalIncome);
+  netSubEl.textContent = netRentalIncome >= 0 ? 'Net rental income' : 'Net rental loss';
+
+  // Card 3: Deductible
+  const dedCard = document.getElementById('card-deductible');
+  const dedAmtEl = document.getElementById('ded-amount');
+  const dedSubEl = document.getElementById('ded-sub');
+  dedCard.className = 'card ' + (passiveResult.deductible > 0 ? 'card-deductible' : 'card-deductible-zero');
+  dedAmtEl.textContent = fmtPos(passiveResult.deductible);
+  dedSubEl.textContent = passiveResult.rule;
+
+  // Card 4: Suspended
+  document.getElementById('sus-amount').textContent = fmtPos(passiveResult.suspended);
+
+  // Card 5: Tax impact
+  const impactCard = document.getElementById('card-impact');
+  const impactAmtEl = document.getElementById('impact-amount');
+  const impactSubEl = document.getElementById('impact-sub');
+  impactCard.className = 'card card-wide ' + (isIncome ? 'card-owed' : (taxImpact > 0 ? 'card-savings' : 'card-deductible-zero'));
+  impactAmtEl.textContent = fmtPos(taxImpact);
+  impactSubEl.textContent = impactLabel;
+
+  // ---- Full Calculation Section ----
+  document.getElementById('c-rent').textContent     = '+' + fmtPos(grossRent);
+  document.getElementById('c-opex').textContent     = '−' + fmtPos(opExpenses);
+  document.getElementById('c-interest').textContent = '−' + fmtPos(mortgageInt);
+  document.getElementById('c-depr').textContent     = '−' + fmtPos(annualDepr);
+  document.getElementById('c-net').textContent      = fmt(netRentalIncome);
+  document.getElementById('c-agi').textContent      = fmtPos(agi);
+  document.getElementById('c-rule').textContent     = passiveResult.rule;
+  document.getElementById('c-allowance').textContent= fmtPos(passiveResult.allowance);
+  document.getElementById('c-ded').textContent      = fmtPos(passiveResult.deductible);
+  document.getElementById('c-sus').textContent      = fmtPos(passiveResult.suspended);
+  document.getElementById('c-rate').textContent     = (marginalRate * 100).toFixed(0) + '%';
+
+  const impactRowEl = document.getElementById('c-impact-row');
+  const impactValEl = document.getElementById('c-impact');
+  impactRowEl.querySelector('span:first-child').textContent = isIncome ? 'Estimated Tax Owed' : 'Estimated Tax Savings';
+  impactValEl.textContent = fmtPos(taxImpact);
+
+  // ---- Bar Chart ----
+  const maxBar = Math.max(grossRent, totalDeductions, 1);
+  const rentPct  = Math.min(100, (grossRent / maxBar * 100));
+  const dedPct   = Math.min(100, (totalDeductions / maxBar * 100));
+  const netPct   = netRentalIncome < 0
+    ? Math.min(100, (netLoss / maxBar * 100))
+    : Math.min(100, (netRentalIncome / maxBar * 100));
+
+  document.getElementById('bar-rent').style.width = rentPct + '%';
+  document.getElementById('bar-ded').style.width  = dedPct  + '%';
+  document.getElementById('bar-net').style.width  = netPct  + '%';
+  document.getElementById('bar-net').style.background = netRentalIncome >= 0 ? '#2E7D32' : '#B71C1C';
+
+  document.getElementById('bamt-rent').textContent = fmtPos(grossRent);
+  document.getElementById('bamt-ded').textContent  = fmtPos(totalDeductions);
+  document.getElementById('bamt-net').textContent  = fmt(netRentalIncome);
+  document.getElementById('bamt-net').style.color  = netRentalIncome >= 0 ? '#2E7D32' : '#B71C1C';
+  document.getElementById('bar-net').parentElement.style.background = netRentalIncome >= 0 ? '#f0fdf4' : '#fef2f2';
+}
+
+// =========================================================
+// Init
+// =========================================================
+recalculate();
+</script>
+</body>
+</html>

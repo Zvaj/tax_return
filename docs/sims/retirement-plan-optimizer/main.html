@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retirement Plan Optimizer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --border: #E2E8F0;
+    --text-primary: #1A202C;
+    --text-secondary: #4A5568;
+    --text-muted: #718096;
+    --accent: #1565C0;
+    --accent-light: #E3F2FD;
+    --match: #2E7D32;
+    --hsa: #00838F;
+    --roth: #1565C0;
+    --extra401k: #558B2F;
+    --remaining: #E0E0E0;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+    --radius: 8px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0D3349 0%, #1565C0 100%);
+    color: #fff;
+    padding: 18px 24px;
+    box-shadow: var(--shadow-md);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
+  header p  { font-size: 0.82rem; opacity: 0.82; margin-top: 2px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .panel-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    background: #FAFBFC;
+  }
+
+  .input-group {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .input-group:last-child { border-bottom: none; }
+
+  label.field-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .slider-wrap input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  .slider-wrap input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .slider-val {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 72px;
+    text-align: right;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.12);
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    user-select: none;
+  }
+  .checkbox-row input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  /* ---- Output ---- */
+  .out-body { padding: 16px; }
+
+  /* Alert banners */
+  .alert {
+    display: none;
+    padding: 11px 14px;
+    border-radius: 6px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+  .alert.red  { background: #FFF5F5; border: 1px solid #FC8181; color: #742A2A; display: block; }
+  .alert.teal { background: #E6FFFA; border: 1px solid #81E6D9; color: #1D4044; display: block; }
+  .alert.hide { display: none !important; }
+
+  /* Waterfall bar */
+  .waterfall-label {
+    font-size: 0.73rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .bar-stack {
+    display: flex;
+    height: 38px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 8px;
+  }
+  .bar-seg {
+    height: 100%;
+    transition: width 0.3s ease;
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .bar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-bottom: 16px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Priority steps */
+  .steps-title {
+    font-size: 0.73rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .step-list { margin-bottom: 16px; }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    border: 1px solid transparent;
+  }
+  .step-item.active { border-color: rgba(0,0,0,0.08); }
+  .step-item.done { opacity: 0.55; }
+  .step-num {
+    font-size: 0.7rem;
+    font-weight: 800;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #fff;
+  }
+  .step-body { flex: 1; }
+  .step-body .s-title { font-size: 0.85rem; font-weight: 700; }
+  .step-body .s-desc  { font-size: 0.77rem; color: var(--text-muted); margin-top: 1px; }
+  .step-body .s-amt   { font-size: 0.82rem; font-weight: 700; margin-top: 3px; }
+
+  /* Summary table */
+  .sum-title {
+    font-size: 0.73rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  table.sum-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .sum-table th {
+    background: #F7F8FA;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .sum-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text-secondary);
+  }
+  .sum-table tr:last-child td { border-bottom: none; }
+  .sum-table td.num { text-align: right; font-weight: 700; color: var(--text-primary); }
+  .sum-table td.green { color: var(--match); font-weight: 700; text-align: right; }
+
+  .total-row {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #0D3349, #1565C0);
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+  }
+  .total-row .t-label { font-size: 0.82rem; font-weight: 600; opacity: 0.85; }
+  .total-row .t-val   { font-size: 1.15rem; font-weight: 800; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Retirement Plan Optimizer</h1>
+  <p>2025 Contribution Limits &mdash; Maximize Your Tax-Advantaged Accounts</p>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: Inputs -->
+  <div class="panel">
+    <div class="panel-title">Your Situation</div>
+
+    <div class="input-group">
+      <label class="field-label" for="filingStatus">Filing Status</label>
+      <select id="filingStatus">
+        <option value="single">Single</option>
+        <option value="mfj">Married Filing Jointly (MFJ)</option>
+        <option value="hoh">Head of Household (HoH)</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="income">Gross Annual Income</label>
+      <div class="slider-wrap">
+        <input type="range" id="income" min="30000" max="500000" step="5000" value="75000">
+        <span class="slider-val" id="incomeVal">$75,000</span>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="matchType">Employer 401(k) Match</label>
+      <select id="matchType">
+        <option value="none">No Match</option>
+        <option value="50pct3">50% up to 3% of salary</option>
+        <option value="100pct3">100% up to 3% of salary</option>
+        <option value="100pct6" selected>100% up to 6% of salary</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label class="checkbox-row">
+        <input type="checkbox" id="hasHSA">
+        Has HSA Access (enrolled in HDHP)
+      </label>
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="age">Your Age</label>
+      <input type="number" id="age" value="35" min="18" max="75" step="1">
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="ytd401k">Current 401(k) YTD Contribution ($)</label>
+      <input type="number" id="ytd401k" value="0" min="0" step="500" placeholder="0">
+    </div>
+
+    <div class="input-group">
+      <label class="field-label" for="ytdIRA">Current IRA YTD Contribution ($)</label>
+      <input type="number" id="ytdIRA" value="0" min="0" step="100" placeholder="0">
+    </div>
+  </div>
+
+  <!-- RIGHT: Output -->
+  <div class="panel">
+    <div class="panel-title">Contribution Strategy</div>
+    <div class="out-body">
+
+      <div id="alertMatch" class="alert hide"></div>
+      <div id="alertHSA" class="alert hide"></div>
+
+      <div class="waterfall-label">Annual Contribution Waterfall (% of Income)</div>
+      <div class="bar-stack" id="barStack">
+        <div class="bar-seg" id="segMatch"   style="background:#2E7D32; width:0%"></div>
+        <div class="bar-seg" id="segHSA"     style="background:#00838F; width:0%"></div>
+        <div class="bar-seg" id="segRoth"    style="background:#1565C0; width:0%"></div>
+        <div class="bar-seg" id="seg401k"    style="background:#558B2F; width:0%"></div>
+        <div class="bar-seg" id="segRemain"  style="background:#E0E0E0; width:100%"></div>
+      </div>
+      <div class="bar-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#2E7D32"></div>Match Capture</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#00838F"></div>HSA</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1565C0"></div>Roth IRA</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#558B2F"></div>Additional 401(k)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#E0E0E0; border:1px solid #ccc"></div>Remaining Income</div>
+      </div>
+
+      <div class="steps-title">Recommended Contribution Order</div>
+      <div class="step-list" id="stepList"></div>
+
+      <div class="sum-title">Account Summary</div>
+      <table class="sum-table">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th style="text-align:right">Recommended</th>
+            <th style="text-align:right">2025 Limit</th>
+            <th style="text-align:right">Room Left</th>
+            <th style="text-align:right">Est. Tax Savings</th>
+          </tr>
+        </thead>
+        <tbody id="sumTableBody"></tbody>
+      </table>
+
+      <div class="total-row">
+        <span class="t-label">Total Tax-Advantaged Contributions</span>
+        <span class="t-val" id="totalContrib">$0</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- 2025 Limits ----
+const LIMITS = {
+  k401_base:    23500,
+  k401_50plus:  31000,
+  k401_60to63:  34750,
+  ira_base:      7000,
+  ira_50plus:    8000,
+  hsa:           4300,
+};
+
+const STD_DED = { single: 15000, mfj: 30000, hoh: 22500 };
+
+const BRACKETS = {
+  single: [
+    [11925, 0.10], [48475, 0.12], [103350, 0.22],
+    [197300, 0.24], [250525, 0.32], [626350, 0.35], [Infinity, 0.37]
+  ],
+  mfj: [
+    [23850, 0.10], [96950, 0.12], [206700, 0.22],
+    [394600, 0.24], [501050, 0.32], [751600, 0.35], [Infinity, 0.37]
+  ],
+  hoh: [
+    [17000, 0.10], [64850, 0.12], [103350, 0.22],
+    [197300, 0.24], [250500, 0.32], [626350, 0.35], [Infinity, 0.37]
+  ]
+};
+
+function marginalRate(taxableIncome, status) {
+  if (taxableIncome <= 0) return 0.10;
+  const brackets = BRACKETS[status];
+  let prev = 0;
+  for (const [max, rate] of brackets) {
+    if (taxableIncome <= max) return rate;
+    prev = max;
+  }
+  return 0.37;
+}
+
+function fmt(n) {
+  return '$' + Math.round(Math.max(0, n)).toLocaleString();
+}
+
+// Inputs
+const elStatus  = document.getElementById('filingStatus');
+const elIncome  = document.getElementById('income');
+const elIncVal  = document.getElementById('incomeVal');
+const elMatch   = document.getElementById('matchType');
+const elHSA     = document.getElementById('hasHSA');
+const elAge     = document.getElementById('age');
+const elYTD401k = document.getElementById('ytd401k');
+const elYTDIRA  = document.getElementById('ytdIRA');
+
+[elStatus, elIncome, elMatch, elHSA, elAge, elYTD401k, elYTDIRA].forEach(el => {
+  el.addEventListener('input', recalc);
+  el.addEventListener('change', recalc);
+});
+elIncome.addEventListener('input', () => {
+  elIncVal.textContent = '$' + (+elIncome.value).toLocaleString();
+});
+
+function get401kLimit(age) {
+  if (age >= 60 && age <= 63) return LIMITS.k401_60to63;
+  if (age >= 50) return LIMITS.k401_50plus;
+  return LIMITS.k401_base;
+}
+
+function getIRALimit(age) {
+  return age >= 50 ? LIMITS.ira_50plus : LIMITS.ira_base;
+}
+
+function getMatchAmount(income, matchType) {
+  if (matchType === 'none') return 0;
+  if (matchType === '50pct3') return income * 0.03 * 0.50;
+  if (matchType === '100pct3') return income * 0.03;
+  if (matchType === '100pct6') return income * 0.06;
+  return 0;
+}
+
+function getMatchContrib(income, matchType) {
+  // How much employee must contribute to capture full match
+  if (matchType === 'none') return 0;
+  if (matchType === '50pct3') return income * 0.03;
+  if (matchType === '100pct3') return income * 0.03;
+  if (matchType === '100pct6') return income * 0.06;
+  return 0;
+}
+
+function recalc() {
+  const status    = elStatus.value;
+  const income    = +elIncome.value || 0;
+  const matchType = elMatch.value;
+  const hasHSA    = elHSA.checked;
+  const age       = +elAge.value || 35;
+  const ytd401k   = Math.max(0, +elYTD401k.value || 0);
+  const ytdIRA    = Math.max(0, +elYTDIRA.value || 0);
+
+  const limit401k = get401kLimit(age);
+  const limitIRA  = getIRALimit(age);
+  const limitHSA  = hasHSA ? LIMITS.hsa : 0;
+
+  const matchContrib = getMatchContrib(income, matchType); // employee must put in X to get full match
+  const matchAmt     = getMatchAmount(income, matchType);  // employer gives Y
+
+  // Room remaining after YTD
+  const room401k = Math.max(0, limit401k - ytd401k);
+  const roomIRA  = Math.max(0, limitIRA  - ytdIRA);
+
+  // ---- Determine marginal rate ----
+  const stdDed    = STD_DED[status];
+  const taxable   = Math.max(0, income - stdDed);
+  const margRate  = marginalRate(taxable, status);
+
+  // ---- Step 1: Capture match ----
+  const need401kForMatch  = Math.max(0, matchContrib - ytd401k);
+  const step1Contrib      = Math.min(need401kForMatch, room401k);
+  let remaining401k_room  = Math.max(0, room401k - step1Contrib);
+  let matchCaptured       = matchType === 'none' ? 0 : matchAmt;
+  let alreadyGotMatch     = ytd401k >= matchContrib;
+
+  // ---- Step 2: HSA ----
+  const step2Contrib = hasHSA ? limitHSA : 0; // recommend full HSA regardless of YTD (simplified)
+
+  // ---- Step 3: Roth IRA ----
+  const step3Contrib = Math.min(roomIRA, limitIRA);
+
+  // ---- Step 4: Additional 401k ----
+  const step4Contrib = remaining401k_room;
+
+  // ---- Totals ----
+  const totalRecommended = step1Contrib + step2Contrib + step3Contrib + step4Contrib;
+
+  // ---- Alert: leaving match on table ----
+  const alertMatchEl = document.getElementById('alertMatch');
+  const alertHSAEl   = document.getElementById('alertHSA');
+
+  if (matchType !== 'none' && !alreadyGotMatch && step1Contrib === 0 && ytd401k < matchContrib) {
+    // already handled by step1, but show if they're not going to contribute enough
+  }
+  const leavingOnTable = matchType !== 'none' && ytd401k < matchContrib;
+  if (leavingOnTable) {
+    const free = fmt(matchAmt);
+    alertMatchEl.className = 'alert red';
+    alertMatchEl.textContent = `You're leaving ${free} in free employer money on the table. Contribute at least ${fmt(matchContrib)} to your 401(k) to capture the full match.`;
+  } else {
+    alertMatchEl.className = 'alert hide';
+  }
+
+  if (hasHSA) {
+    alertHSAEl.className = 'alert teal';
+    alertHSAEl.textContent = `HSA available — consider maximizing your $${limitHSA.toLocaleString()} contribution for the triple tax benefit (pre-tax, tax-free growth, tax-free withdrawals for medical expenses).`;
+  } else {
+    alertHSAEl.className = 'alert hide';
+  }
+
+  // ---- Bar ----
+  const matchBarContrib = alreadyGotMatch ? ytd401k : step1Contrib + ytd401k;
+  const totalBar = income;
+  const pMatch  = Math.min(100, (step1Contrib / totalBar) * 100);
+  const pHSA    = Math.min(100, (step2Contrib / totalBar) * 100);
+  const pRoth   = Math.min(100, (step3Contrib / totalBar) * 100);
+  const p401k   = Math.min(100, (step4Contrib / totalBar) * 100);
+  const pRem    = Math.max(0, 100 - pMatch - pHSA - pRoth - p401k);
+
+  document.getElementById('segMatch').style.width  = pMatch  + '%';
+  document.getElementById('segHSA').style.width    = pHSA    + '%';
+  document.getElementById('segRoth').style.width   = pRoth   + '%';
+  document.getElementById('seg401k').style.width   = p401k   + '%';
+  document.getElementById('segRemain').style.width = pRem    + '%';
+
+  // ---- Steps ----
+  const steps = [
+    {
+      color: '#2E7D32',
+      title: '401(k) to Capture Employer Match',
+      desc: matchType === 'none'
+        ? 'No employer match available'
+        : `Contribute ${fmt(matchContrib)} to capture ${fmt(matchAmt)} employer match`,
+      contrib: step1Contrib,
+      done: alreadyGotMatch,
+      skip: matchType === 'none'
+    },
+    {
+      color: '#00838F',
+      title: 'Health Savings Account (HSA)',
+      desc: hasHSA
+        ? `Triple tax benefit — contribute up to ${fmt(limitHSA)}`
+        : 'Not available (no HDHP enrolled)',
+      contrib: step2Contrib,
+      done: false,
+      skip: !hasHSA
+    },
+    {
+      color: '#1565C0',
+      title: 'Roth IRA',
+      desc: `Contribute up to ${fmt(limitIRA)} (age-based limit)`,
+      contrib: step3Contrib,
+      done: ytdIRA >= limitIRA,
+      skip: false
+    },
+    {
+      color: '#558B2F',
+      title: 'Additional 401(k) Contributions',
+      desc: `Max out 401(k) up to ${fmt(limit401k)} annual limit`,
+      contrib: step4Contrib,
+      done: ytd401k >= limit401k,
+      skip: false
+    }
+  ];
+
+  const stepList = document.getElementById('stepList');
+  stepList.innerHTML = '';
+  steps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'step-item' + (s.skip ? ' done' : (s.done ? ' done' : ' active'));
+    div.style.background = s.skip ? '#F7F8FA' : (s.done ? '#F0FFF4' : s.color + '11');
+    div.style.borderColor = s.skip ? 'transparent' : s.color + '33';
+
+    div.innerHTML = `
+      <div class="step-num" style="background:${s.skip || s.done ? '#A0AEC0' : s.color}">${i+1}</div>
+      <div class="step-body">
+        <div class="s-title">${s.title}</div>
+        <div class="s-desc">${s.desc}</div>
+        <div class="s-amt" style="color:${s.skip ? '#A0AEC0' : s.color}">
+          ${s.skip ? 'N/A' : (s.done ? 'Maxed / Captured' : 'Recommend: ' + fmt(s.contrib))}
+        </div>
+      </div>
+    `;
+    stepList.appendChild(div);
+  });
+
+  // ---- Summary Table ----
+  const rows = [
+    {
+      acct: '401(k) — Match Capture',
+      rec: step1Contrib,
+      limit: limit401k,
+      room: room401k,
+      taxSave: step1Contrib * margRate,
+      color: '#2E7D32'
+    },
+    {
+      acct: 'HSA (if applicable)',
+      rec: step2Contrib,
+      limit: limitHSA || 4300,
+      room: limitHSA,
+      taxSave: step2Contrib * margRate,
+      color: '#00838F'
+    },
+    {
+      acct: 'Roth IRA',
+      rec: step3Contrib,
+      limit: limitIRA,
+      room: roomIRA,
+      taxSave: 0, // Roth = post-tax, no current deduction
+      color: '#1565C0'
+    },
+    {
+      acct: 'Additional 401(k)',
+      rec: step4Contrib,
+      limit: limit401k,
+      room: remaining401k_room,
+      taxSave: step4Contrib * margRate,
+      color: '#558B2F'
+    }
+  ];
+
+  const tbody = document.getElementById('sumTableBody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${r.color};margin-right:6px;"></span>${r.acct}</td>
+      <td class="num">${fmt(r.rec)}</td>
+      <td class="num" style="color:var(--text-muted)">${fmt(r.limit)}</td>
+      <td class="num" style="color:${r.room > 0 ? '#744210' : '#22543D'}">${fmt(r.room)}</td>
+      <td class="green">${r.taxSave > 0 ? fmt(r.taxSave) : (r.acct.includes('Roth') ? 'Post-tax' : '$0')}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Match row bonus
+  if (matchType !== 'none') {
+    const tr = document.createElement('tr');
+    tr.style.background = '#F0FFF4';
+    tr.innerHTML = `
+      <td style="color:#22543D;font-weight:700">+ Employer Match (Free!)</td>
+      <td class="num" style="color:#22543D">${fmt(matchAmt)}</td>
+      <td class="num" style="color:var(--text-muted)">—</td>
+      <td class="num" style="color:#22543D">N/A</td>
+      <td class="green">${fmt(matchAmt)} Free</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  document.getElementById('totalContrib').textContent = fmt(totalRecommended);
+}
+
+// Init
+elIncVal.textContent = '$' + (+elIncome.value).toLocaleString();
+recalc();
+</script>
+</body>
+</html>

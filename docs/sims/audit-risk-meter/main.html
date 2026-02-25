@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Risk Assessment Tool</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
+    color: #212121;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 100%);
+    color: white;
+    padding: 20px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; }
+  header p { font-size: 0.82rem; opacity: 0.85; margin-top: 4px; }
+  .layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .panel {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .panel-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #7b1fa2;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f3e5f5;
+  }
+  .input-group { margin-bottom: 20px; }
+  .input-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 7px;
+  }
+  .input-label span { font-size: 0.875rem; font-weight: 600; color: #37474f; }
+  .input-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #6a1b9a;
+    background: #f3e5f5;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #f3e5f5;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #7b1fa2;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    transition: transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #7b1fa2;
+    cursor: pointer; border: none;
+  }
+  .checkbox-group { display: flex; flex-direction: column; gap: 10px; }
+  .checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #ede7f6;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .checkbox-item:hover { background: #faf7ff; border-color: #ce93d8; }
+  .checkbox-item input[type="checkbox"] {
+    width: 17px; height: 17px;
+    margin-top: 1px;
+    accent-color: #7b1fa2;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .checkbox-text {
+    font-size: 0.85rem;
+    color: #455a64;
+    line-height: 1.4;
+    flex: 1;
+  }
+  .checkbox-pts {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #e53935;
+    background: #ffebee;
+    padding: 1px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  /* Gauge area */
+  .gauge-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .gauge-svg-container {
+    width: 100%;
+    max-width: 340px;
+  }
+  .risk-label {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 6px;
+    text-align: center;
+  }
+  .score-display {
+    font-size: 2.2rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 4px 0 2px;
+  }
+  .score-sub {
+    font-size: 0.78rem;
+    color: #9e9e9e;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  /* Factor list */
+  .factor-section { margin-bottom: 16px; }
+  .factor-section h3 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #7b1fa2;
+    margin-bottom: 10px;
+  }
+  .factor-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .factor-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #455a64;
+    padding: 6px 10px;
+    background: #fafafa;
+    border-radius: 6px;
+    border-left: 3px solid #ef5350;
+  }
+  .factor-item::before { content: '▲'; color: #ef5350; font-size: 0.7rem; margin-top: 2px; flex-shrink: 0; }
+  .no-factors {
+    font-size: 0.85rem;
+    color: #4caf50;
+    font-weight: 600;
+    padding: 10px;
+    background: #e8f5e9;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .footer-note {
+    font-size: 0.75rem;
+    color: #9e9e9e;
+    font-style: italic;
+    line-height: 1.55;
+    padding: 12px;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 10px;
+  }
+  @media (max-width: 780px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Audit Risk Assessment Tool</h1>
+  <p>Estimate your relative IRS audit risk based on key return characteristics</p>
+</header>
+<div class="layout">
+  <div class="panel">
+    <div class="panel-title">Your Return Profile</div>
+
+    <div class="input-group">
+      <div class="input-label">
+        <span>Gross Income</span>
+        <span class="input-value" id="incomeDisplay">$75,000</span>
+      </div>
+      <input type="range" id="incomeSlider" min="0" max="2000000" step="5000" value="75000">
+    </div>
+
+    <div class="input-group">
+      <div class="input-label">
+        <span>Charitable Deductions as % of Income</span>
+        <span class="input-value" id="charDisplay">3%</span>
+      </div>
+      <input type="range" id="charSlider" min="0" max="60" step="1" value="3">
+    </div>
+
+    <div class="input-group">
+      <div class="checkbox-group" id="checkboxGroup">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Your Audit Risk Score</div>
+    <div class="gauge-wrapper">
+      <div class="gauge-svg-container">
+        <svg id="gaugeSvg" viewBox="0 0 340 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background track -->
+          <path id="trackGreen" d="" fill="none" stroke="#4CAF50" stroke-width="28" stroke-linecap="butt"/>
+          <path id="trackYellow" d="" fill="none" stroke="#FFC107" stroke-width="28" stroke-linecap="butt"/>
+          <path id="trackOrange" d="" fill="none" stroke="#FF9800" stroke-width="28" stroke-linecap="butt"/>
+          <path id="trackRed" d="" fill="none" stroke="#F44336" stroke-width="28" stroke-linecap="butt"/>
+          <!-- Zone separators -->
+          <line id="sep1" x1="0" y1="0" x2="0" y2="0" stroke="white" stroke-width="2"/>
+          <line id="sep2" x1="0" y1="0" x2="0" y2="0" stroke="white" stroke-width="2"/>
+          <line id="sep3" x1="0" y1="0" x2="0" y2="0" stroke="white" stroke-width="2"/>
+          <!-- Needle -->
+          <line id="needle" x1="170" y1="175" x2="170" y2="100" stroke="#212121" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="170" cy="175" r="8" fill="#212121"/>
+          <circle cx="170" cy="175" r="4" fill="white"/>
+          <!-- Zone labels -->
+          <text x="52" y="185" font-size="10" fill="#4CAF50" font-weight="700" text-anchor="middle">Low</text>
+          <text x="121" y="168" font-size="10" fill="#FFC107" font-weight="700" text-anchor="middle">Mod</text>
+          <text x="219" y="168" font-size="10" fill="#FF9800" font-weight="700" text-anchor="middle">Elev</text>
+          <text x="288" y="185" font-size="10" fill="#F44336" font-weight="700" text-anchor="middle">High</text>
+        </svg>
+      </div>
+      <div class="score-display" id="scoreDisplay">10</div>
+      <div class="score-sub">out of 95 maximum</div>
+      <div class="risk-label" id="riskLabel">Low Risk</div>
+    </div>
+
+    <div class="factor-section">
+      <h3>Factors Elevating Your Risk</h3>
+      <div id="factorList"></div>
+    </div>
+
+    <div class="footer-note">
+      This tool estimates relative audit risk for educational purposes only. Actual IRS audit selection uses proprietary models. A high score does not mean you will be audited.
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const CHECKBOXES = [
+    { id: 'schedC',     label: 'Self-employed / Schedule C filer',                    pts: 8,  group: 'schedC' },
+    { id: 'homeOffice', label: 'Claimed home office deduction',                        pts: 8,  group: null },
+    { id: 'lossYear',   label: 'Business showed a loss this year',                     pts: 8,  group: 'loss' },
+    { id: 'loss3years', label: 'Business has shown losses 3+ consecutive years',       pts: 15, group: 'loss3', note: '(overrides single-year loss)' },
+    { id: 'cash',       label: 'Cash-intensive business (restaurant, contractor, etc.)', pts: 8, group: null },
+    { id: 'crypto',     label: 'Reported cryptocurrency transactions',                 pts: 8,  group: null },
+    { id: 'eitc',       label: 'Claimed Earned Income Tax Credit (EITC)',              pts: 8,  group: null },
+    { id: 'missing1099',label: 'Had unreported or missing 1099 income',               pts: 8,  group: null }
+  ];
+
+  // Build checkboxes
+  const container = document.getElementById('checkboxGroup');
+  CHECKBOXES.forEach(cb => {
+    const div = document.createElement('label');
+    div.className = 'checkbox-item';
+    div.innerHTML = `
+      <input type="checkbox" id="${cb.id}">
+      <span class="checkbox-text">${cb.label}${cb.note ? ' <em style="color:#9e9e9e;font-size:0.78em">' + cb.note + '</em>' : ''}</span>
+      <span class="checkbox-pts">+${cb.pts}</span>
+    `;
+    container.appendChild(div);
+    document.getElementById(cb.id).addEventListener('change', updateGauge);
+  });
+
+  // Gauge geometry
+  const CX = 170, CY = 175, R = 130;
+  // Arc from 180deg to 0deg (left to right, semi-circle top)
+  // 0 score = leftmost (180deg), 100 = rightmost (0deg)
+  // We need paths for each colored zone
+
+  function polarToXY(angleDeg) {
+    const rad = (angleDeg * Math.PI) / 180;
+    return {
+      x: CX + R * Math.cos(rad),
+      y: CY + R * Math.sin(rad)
+    };
+  }
+
+  function arcPath(startDeg, endDeg) {
+    // Angles: 180 = leftmost, 0 = rightmost (going counterclockwise visually, but mathematically)
+    // We'll go from startDeg to endDeg clockwise in SVG coords
+    const s = polarToXY(startDeg);
+    const e = polarToXY(endDeg);
+    const largeArc = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+    // sweep-flag: 0 = counterclockwise in SVG (which is clockwise visually)
+    // Going from 180 to 0 means decreasing angle, so sweep = 0
+    return `M ${s.x} ${s.y} A ${R} ${R} 0 ${largeArc} 0 ${e.x} ${e.y}`;
+  }
+
+  function scoreToDeg(score) {
+    // score 0 → 180deg, score 100 → 0deg
+    return 180 - (score / 100) * 180;
+  }
+
+  // Set static zone arcs
+  // Green: 0-25 → 180 to 135
+  // Yellow: 25-50 → 135 to 90
+  // Orange: 50-75 → 90 to 45
+  // Red: 75-100 → 45 to 0
+  document.getElementById('trackGreen').setAttribute('d', arcPath(180, 135));
+  document.getElementById('trackYellow').setAttribute('d', arcPath(135, 90));
+  document.getElementById('trackOrange').setAttribute('d', arcPath(90, 45));
+  document.getElementById('trackRed').setAttribute('d', arcPath(45, 0));
+
+  // Separator lines
+  function setSep(id, angleDeg, innerR, outerR) {
+    const inner = { x: CX + innerR * Math.cos(angleDeg * Math.PI/180), y: CY + innerR * Math.sin(angleDeg * Math.PI/180) };
+    const outer = { x: CX + outerR * Math.cos(angleDeg * Math.PI/180), y: CY + outerR * Math.sin(angleDeg * Math.PI/180) };
+    const el = document.getElementById(id);
+    el.setAttribute('x1', inner.x); el.setAttribute('y1', inner.y);
+    el.setAttribute('x2', outer.x); el.setAttribute('y2', outer.y);
+  }
+  setSep('sep1', 135, R - 14, R + 14);
+  setSep('sep2', 90, R - 14, R + 14);
+  setSep('sep3', 45, R - 14, R + 14);
+
+  function calcScore() {
+    const income = parseFloat(document.getElementById('incomeSlider').value) || 0;
+    const charPct = parseFloat(document.getElementById('charSlider').value) || 0;
+    const loss3 = document.getElementById('loss3years').checked;
+    const lossYear = document.getElementById('lossYear').checked;
+
+    let score = 10;
+    const factors = [];
+
+    // Income
+    if (income > 1000000) {
+      score += 40;
+      factors.push({ text: 'Income over $1,000,000', pts: 40 });
+    } else if (income > 500000) {
+      score += 20;
+      factors.push({ text: 'Income over $500,000', pts: 20 });
+    }
+    if (income < 25000 && income > 0) {
+      score += 10;
+      factors.push({ text: 'Income under $25,000', pts: 10 });
+    }
+
+    // Charitable
+    if (charPct > 25) {
+      score += 30;
+      factors.push({ text: 'Charitable deductions exceed 25% of income', pts: 30 });
+    } else if (charPct > 10) {
+      score += 15;
+      factors.push({ text: 'Charitable deductions exceed 10% of income', pts: 15 });
+    }
+
+    // Checkboxes
+    CHECKBOXES.forEach(cb => {
+      if (cb.id === 'lossYear' || cb.id === 'loss3years') return; // handled separately
+      if (document.getElementById(cb.id).checked) {
+        score += cb.pts;
+        factors.push({ text: cb.label, pts: cb.pts });
+      }
+    });
+
+    // Loss logic
+    if (loss3) {
+      score += 15;
+      factors.push({ text: 'Business losses 3+ consecutive years', pts: 15 });
+    } else if (lossYear) {
+      score += 8;
+      factors.push({ text: 'Business showed a loss this year', pts: 8 });
+    }
+
+    return { score: Math.min(score, 95), factors };
+  }
+
+  function updateGauge() {
+    const income = parseFloat(document.getElementById('incomeSlider').value) || 0;
+    const charPct = parseFloat(document.getElementById('charSlider').value) || 0;
+    document.getElementById('incomeDisplay').textContent = '$' + income.toLocaleString();
+    document.getElementById('charDisplay').textContent = charPct + '%';
+
+    const { score, factors } = calcScore();
+
+    // Update needle
+    const deg = scoreToDeg(score);
+    const angle = deg * Math.PI / 180;
+    const needleLen = 70;
+    const nx = CX + needleLen * Math.cos(angle);
+    const ny = CY + needleLen * Math.sin(angle);
+    const needle = document.getElementById('needle');
+    needle.setAttribute('x1', CX); needle.setAttribute('y1', CY);
+    needle.setAttribute('x2', nx); needle.setAttribute('y2', ny);
+
+    // Score number & label
+    document.getElementById('scoreDisplay').textContent = score;
+    let label, color;
+    if (score <= 25) { label = 'Low Risk'; color = '#2e7d32'; }
+    else if (score <= 50) { label = 'Moderate Risk'; color = '#f57f17'; }
+    else if (score <= 75) { label = 'Elevated Risk'; color = '#e65100'; }
+    else { label = 'High Risk'; color = '#b71c1c'; }
+    document.getElementById('riskLabel').textContent = label;
+    document.getElementById('riskLabel').style.color = color;
+    document.getElementById('scoreDisplay').style.color = color;
+
+    // Factor list
+    const container = document.getElementById('factorList');
+    container.innerHTML = '';
+    if (factors.length === 0) {
+      container.innerHTML = '<div class="no-factors">No significant risk factors identified.</div>';
+    } else {
+      const ul = document.createElement('ul');
+      ul.className = 'factor-list';
+      factors.forEach(f => {
+        const li = document.createElement('li');
+        li.className = 'factor-item';
+        li.textContent = f.text + ' (+' + f.pts + ' pts)';
+        ul.appendChild(li);
+      });
+      container.appendChild(ul);
+    }
+  }
+
+  document.getElementById('incomeSlider').addEventListener('input', updateGauge);
+  document.getElementById('charSlider').addEventListener('input', updateGauge);
+
+  updateGauge();
+})();
+</script>
+</body>
+</html>

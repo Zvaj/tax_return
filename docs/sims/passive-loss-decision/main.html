@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passive Loss Decision Tree</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1a3a2a 0%, #2E7D32 100%);
+    color: #fff;
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+  }
+
+  header h1 {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px;
+  }
+
+  .panel-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  /* Inputs */
+  .input-group { margin-bottom: 20px; }
+
+  label.field-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .slider-val-display {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 3px 10px;
+    min-width: 90px;
+    text-align: right;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #e2e8f0;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #2E7D32;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(46,125,50,0.4);
+    cursor: pointer;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #2E7D32;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(46,125,50,0.4);
+    cursor: pointer;
+  }
+
+  .slider-range-hint {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 3px;
+  }
+
+  /* Toggle switch */
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    user-select: none;
+  }
+
+  .toggle-group:hover { border-color: #94a3b8; }
+
+  .toggle-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .toggle-switch {
+    width: 44px;
+    height: 24px;
+    background: #cbd5e1;
+    border-radius: 12px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: left 0.2s;
+  }
+
+  .toggle-switch.on {
+    background: #2E7D32;
+  }
+
+  .toggle-switch.on::after {
+    left: 23px;
+  }
+
+  .toggle-status {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    min-width: 26px;
+    text-align: center;
+  }
+
+  .toggle-status.on { color: #2E7D32; }
+
+  .number-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .number-input:focus { border-color: #2E7D32; }
+
+  .rep-fields {
+    margin-top: 14px;
+    padding: 14px;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 10px;
+    display: none;
+  }
+
+  .rep-fields.show { display: block; }
+
+  .rep-fields .input-group { margin-bottom: 14px; }
+  .rep-fields .input-group:last-child { margin-bottom: 0; }
+
+  /* Right panel */
+  .result-box {
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .result-box.deductible {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 2px solid #4ade80;
+  }
+
+  .result-box.zero {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 2px solid #cbd5e1;
+  }
+
+  .result-box-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 6px;
+  }
+
+  .result-amount {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .result-amount.green { color: #2E7D32; }
+  .result-amount.gray  { color: #64748b; }
+
+  .result-sub {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .suspended-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff7ed;
+    border: 2px solid #fdba74;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .suspended-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #92400e;
+  }
+
+  .suspended-amount {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #B71C1C;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Decision path */
+  .decision-path {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .decision-path-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+
+  .decision-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .decision-step:last-child { margin-bottom: 0; }
+
+  .step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-number.pass { background: #dcfce7; color: #15803d; }
+  .step-number.fail { background: #fee2e2; color: #b91c1c; }
+  .step-number.active { background: #2E7D32; color: #fff; }
+  .step-number.inactive { background: #e2e8f0; color: #94a3b8; }
+
+  .step-text {
+    font-size: 0.8rem;
+    color: #374151;
+    line-height: 1.4;
+  }
+
+  .step-text strong { color: #1e293b; }
+
+  .step-result {
+    display: inline-block;
+    margin-top: 3px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+  }
+
+  .step-result.applied { background: #2E7D32; color: #fff; }
+  .step-result.skipped { background: #e2e8f0; color: #94a3b8; }
+
+  /* Bar chart */
+  .bar-section {
+    margin-top: 0;
+  }
+
+  .bar-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .bar-row-label {
+    width: 90px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 24px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.35s ease;
+    min-width: 0;
+  }
+
+  .bar-amount {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #374151;
+    min-width: 70px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .phase-out-notice {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: #92400e;
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  .phase-out-notice.show { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Passive Loss Decision Tree</h1>
+  <p>2025 Tax Year &mdash; Determine how much of your rental loss you can deduct today</p>
+</header>
+
+<div class="layout">
+  <!-- LEFT PANEL -->
+  <div class="panel">
+    <div class="panel-title">Your Situation</div>
+
+    <!-- AGI Slider -->
+    <div class="input-group">
+      <label class="field-label">Adjusted Gross Income (AGI)</label>
+      <div class="slider-header">
+        <span style="font-size:0.72rem;color:#94a3b8;">Before rental loss</span>
+        <span class="slider-val-display" id="agi-display">$80,000</span>
+      </div>
+      <input type="range" id="agi-slider" min="0" max="300000" step="5000" value="80000"
+             oninput="onAGIChange(this.value)">
+      <div class="slider-range-hint"><span>$0</span><span>$300,000</span></div>
+    </div>
+
+    <!-- Rental Loss Slider -->
+    <div class="input-group">
+      <label class="field-label">Rental Loss This Year</label>
+      <div class="slider-header">
+        <span style="font-size:0.72rem;color:#94a3b8;">Total passive loss</span>
+        <span class="slider-val-display" id="loss-display">$15,000</span>
+      </div>
+      <input type="range" id="loss-slider" min="0" max="50000" step="1000" value="15000"
+             oninput="onLossChange(this.value)">
+      <div class="slider-range-hint"><span>$0</span><span>$50,000</span></div>
+    </div>
+
+    <!-- Active Participation Toggle -->
+    <div class="input-group">
+      <label class="field-label">Actively Participate in Management?</label>
+      <div class="toggle-group" id="active-toggle" onclick="toggleActive()">
+        <span class="toggle-label">Making management decisions (approve tenants, repairs, etc.)</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="toggle-status on" id="active-status">YES</span>
+          <div class="toggle-switch on" id="active-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REP Toggle -->
+    <div class="input-group">
+      <label class="field-label">Real Estate Professional (REP)?</label>
+      <div class="toggle-group" id="rep-toggle" onclick="toggleREP()">
+        <span class="toggle-label">Material participation &amp; 750+ hours in real estate</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="toggle-status" id="rep-status">NO</span>
+          <div class="toggle-switch" id="rep-switch"></div>
+        </div>
+      </div>
+
+      <!-- REP sub-fields -->
+      <div class="rep-fields" id="rep-fields">
+        <div class="input-group">
+          <label class="field-label">Hours in Real Estate This Year</label>
+          <input type="number" class="number-input" id="re-hours"
+                 min="0" max="2000" value="0" oninput="recalculate()">
+        </div>
+        <div class="input-group">
+          <label class="field-label">Total Hours Worked This Year</label>
+          <input type="number" class="number-input" id="total-hours"
+                 min="0" max="4000" value="2000" oninput="recalculate()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel">
+    <div class="panel-title">Deductibility Analysis</div>
+
+    <!-- Main result box -->
+    <div class="result-box deductible" id="result-box">
+      <div class="result-box-label">Deductible This Year</div>
+      <div class="result-amount green" id="deductible-amount">$15,000</div>
+      <div class="result-sub" id="result-sub-text">Active participation: $25k allowance applies</div>
+    </div>
+
+    <!-- Suspended box -->
+    <div class="suspended-box">
+      <div>
+        <div class="suspended-label">Suspended (Carried Forward)</div>
+        <div style="font-size:0.75rem;color:#92400e;margin-top:2px;">Released when property is sold</div>
+      </div>
+      <div class="suspended-amount" id="suspended-amount">$0</div>
+    </div>
+
+    <!-- Phase-out notice -->
+    <div class="phase-out-notice" id="phaseout-notice"></div>
+
+    <!-- Decision Path -->
+    <div class="decision-path">
+      <div class="decision-path-title">Decision Path</div>
+      <div id="steps-container"></div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="bar-section">
+      <div class="bar-section-title">Loss Breakdown</div>
+      <div class="bar-row">
+        <div class="bar-row-label">Total Loss</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-total" style="width:100%;background:#e2e8f0;"></div>
+        </div>
+        <div class="bar-amount" id="bar-total-amt">$15,000</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">Deductible</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-deductible" style="width:100%;background:#2E7D32;"></div>
+        </div>
+        <div class="bar-amount" id="bar-ded-amt">$15,000</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">Suspended</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-suspended" style="width:0%;background:#B71C1C;"></div>
+        </div>
+        <div class="bar-amount" id="bar-sus-amt">$0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========================================================
+// State
+// =========================================================
+let agi         = 80000;
+let rentalLoss  = 15000;
+let activeParticipate = true;
+let isREP       = false;
+let reHours     = 0;
+let totalHours  = 2000;
+
+function fmt(n) {
+  return '$' + Math.abs(Math.round(n)).toLocaleString('en-US');
+}
+
+// =========================================================
+// Toggle handlers
+// =========================================================
+function toggleActive() {
+  activeParticipate = !activeParticipate;
+  const sw  = document.getElementById('active-switch');
+  const st  = document.getElementById('active-status');
+  sw.classList.toggle('on', activeParticipate);
+  st.textContent = activeParticipate ? 'YES' : 'NO';
+  st.classList.toggle('on', activeParticipate);
+  recalculate();
+}
+
+function toggleREP() {
+  isREP = !isREP;
+  const sw  = document.getElementById('rep-switch');
+  const st  = document.getElementById('rep-status');
+  const flds = document.getElementById('rep-fields');
+  sw.classList.toggle('on', isREP);
+  st.textContent = isREP ? 'YES' : 'NO';
+  st.classList.toggle('on', isREP);
+  flds.classList.toggle('show', isREP);
+  recalculate();
+}
+
+function onAGIChange(val) {
+  agi = parseFloat(val) || 0;
+  document.getElementById('agi-display').textContent = fmt(agi);
+  recalculate();
+}
+
+function onLossChange(val) {
+  rentalLoss = parseFloat(val) || 0;
+  document.getElementById('loss-display').textContent = fmt(rentalLoss);
+  recalculate();
+}
+
+// =========================================================
+// Core logic
+// =========================================================
+function recalculate() {
+  reHours    = parseFloat(document.getElementById('re-hours').value)    || 0;
+  totalHours = parseFloat(document.getElementById('total-hours').value) || 0;
+
+  let deductible = 0;
+  let rule = '';
+  let phaseOutPct = 0;
+  const steps = [];
+
+  // Step 1: REP test
+  const repQualifies = isREP && reHours >= 750 && reHours > (totalHours * 0.5);
+
+  if (isREP) {
+    const passHours = reHours >= 750;
+    const passMajority = reHours > (totalHours * 0.5);
+    if (repQualifies) {
+      steps.push({
+        num: 1,
+        status: 'active',
+        text: `<strong>Real Estate Professional test:</strong> ${reHours} RE hours ≥ 750 ✓ and ${reHours} > ${Math.round(totalHours*0.5)} (50% of ${totalHours} total hours) ✓`,
+        result: 'APPLIED'
+      });
+      deductible = rentalLoss;
+      rule = 'Real Estate Professional status: full rental loss deductible';
+    } else {
+      let failReason = '';
+      if (!passHours) failReason += `${reHours} hours < 750 required. `;
+      if (!passMajority) failReason += `${reHours} ≤ ${Math.round(totalHours*0.5)} (need >50% of total hours). `;
+      steps.push({
+        num: 1,
+        status: 'fail',
+        text: `<strong>Real Estate Professional test FAILED:</strong> ${failReason.trim()}`,
+        result: 'SKIPPED'
+      });
+    }
+  } else {
+    steps.push({
+      num: 1,
+      status: 'fail',
+      text: `<strong>Real Estate Professional:</strong> Not elected — move to passive activity rules`,
+      result: 'SKIPPED'
+    });
+  }
+
+  if (!repQualifies) {
+    // Step 2: AGI <= $100k + active participation
+    if (activeParticipate && agi <= 100000) {
+      deductible = Math.min(rentalLoss, 25000);
+      rule = 'Active participation: $25,000 allowance applies';
+      steps.push({
+        num: 2,
+        status: 'active',
+        text: `<strong>Active participation allowance:</strong> AGI ${fmt(agi)} ≤ $100,000 and actively participates — $25,000 special allowance`,
+        result: 'APPLIED'
+      });
+      steps.push({
+        num: 3,
+        status: 'inactive',
+        text: `<strong>Phase-out check:</strong> N/A — AGI within full-allowance range`,
+        result: 'SKIPPED'
+      });
+    } else if (activeParticipate && agi > 100000 && agi < 150000) {
+      // Step 3: Phase-out
+      phaseOutPct = (agi - 100000) / 50000;
+      const allowance = 25000 * (1 - phaseOutPct);
+      deductible = Math.min(rentalLoss, allowance);
+      rule = 'Partial allowance (phase-out applies)';
+      steps.push({
+        num: 2,
+        status: 'fail',
+        text: `<strong>Full $25k allowance:</strong> AGI ${fmt(agi)} > $100,000 — full allowance not available`,
+        result: 'SKIPPED'
+      });
+      steps.push({
+        num: 3,
+        status: 'active',
+        text: `<strong>Phase-out allowance:</strong> (${fmt(agi)} − $100,000) ÷ $50,000 = ${(phaseOutPct*100).toFixed(0)}% phase-out → allowance = $25,000 × ${((1-phaseOutPct)*100).toFixed(0)}% = ${fmt(allowance)}`,
+        result: 'APPLIED'
+      });
+    } else {
+      // Step 4: Fully passive — suspended
+      deductible = 0;
+      if (!activeParticipate) {
+        rule = 'Loss suspended — no active participation';
+        steps.push({
+          num: 2,
+          status: 'fail',
+          text: `<strong>Active participation:</strong> Not elected — $25k allowance unavailable`,
+          result: 'SKIPPED'
+        });
+      } else {
+        rule = 'Loss suspended — AGI ≥ $150,000 eliminates allowance';
+        steps.push({
+          num: 2,
+          status: 'fail',
+          text: `<strong>Active participation allowance:</strong> AGI ${fmt(agi)} ≥ $150,000 — allowance fully phased out`,
+          result: 'SKIPPED'
+        });
+      }
+      steps.push({
+        num: 4,
+        status: 'fail',
+        text: `<strong>Result: Loss is fully suspended</strong> — carried forward to offset future passive income or gains on sale`,
+        result: 'SUSPENDED'
+      });
+    }
+  }
+
+  const suspended = rentalLoss - deductible;
+
+  // ---- Update UI ----
+  const deductibleEl = document.getElementById('deductible-amount');
+  const resultBox    = document.getElementById('result-box');
+  const subText      = document.getElementById('result-sub-text');
+  const suspendedEl  = document.getElementById('suspended-amount');
+  const phaseNotice  = document.getElementById('phaseout-notice');
+
+  deductibleEl.textContent = fmt(deductible);
+  deductibleEl.className   = 'result-amount ' + (deductible > 0 ? 'green' : 'gray');
+  resultBox.className      = 'result-box ' + (deductible > 0 ? 'deductible' : 'zero');
+  subText.textContent      = rule;
+  suspendedEl.textContent  = fmt(suspended);
+
+  if (phaseOutPct > 0) {
+    phaseNotice.classList.add('show');
+    phaseNotice.textContent = `Phase-out: ${(phaseOutPct*100).toFixed(1)}% of the $25,000 allowance is eliminated because your AGI of ${fmt(agi)} is $${((agi-100000)/1000).toFixed(0)}k above the $100k threshold.`;
+  } else {
+    phaseNotice.classList.remove('show');
+  }
+
+  // Steps
+  const container = document.getElementById('steps-container');
+  container.innerHTML = steps.map(s => `
+    <div class="decision-step">
+      <div class="step-number ${s.status}">${s.num}</div>
+      <div class="step-text">
+        ${s.text}
+        <br><span class="step-result ${s.result === 'APPLIED' ? 'applied' : 'skipped'}">${s.result}</span>
+      </div>
+    </div>
+  `).join('');
+
+  // Bar chart
+  document.getElementById('bar-total-amt').textContent    = fmt(rentalLoss);
+  document.getElementById('bar-ded-amt').textContent      = fmt(deductible);
+  document.getElementById('bar-sus-amt').textContent      = fmt(suspended);
+  document.getElementById('bar-deductible').style.width   = rentalLoss > 0 ? (deductible / rentalLoss * 100) + '%' : '0%';
+  document.getElementById('bar-suspended').style.width    = rentalLoss > 0 ? (suspended  / rentalLoss * 100) + '%' : '0%';
+}
+
+// =========================================================
+// Init
+// =========================================================
+recalculate();
+</script>
+</body>
+</html>
