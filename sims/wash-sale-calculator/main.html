@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wash Sale Rule Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    color: #fff;
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+  }
+
+  header h1 {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 310px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 780px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px;
+  }
+
+  .panel-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94a3b8;
+    margin: 16px 0 10px;
+  }
+
+  .input-group { margin-bottom: 12px; }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 5px;
+  }
+
+  .number-input, .date-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.15s;
+    background: #fff;
+  }
+
+  .number-input:focus, .date-input:focus { border-color: #2563eb; }
+
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 18px 0;
+  }
+
+  /* Verdict */
+  .verdict-box {
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .verdict-box.wash-sale { background: #fef2f2; border: 2px solid #f87171; }
+  .verdict-box.clean-sale { background: #f0fdf4; border: 2px solid #4ade80; }
+  .verdict-box.no-loss { background: #f8fafc; border: 2px solid #cbd5e1; }
+
+  .verdict-icon { font-size: 1.8rem; }
+  .verdict-label {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-top: 4px;
+  }
+  .verdict-box.wash-sale .verdict-label { color: #dc2626; }
+  .verdict-box.clean-sale .verdict-label { color: #16a34a; }
+  .verdict-box.no-loss .verdict-label { color: #64748b; }
+
+  .verdict-sub {
+    font-size: 0.78rem;
+    margin-top: 5px;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  /* Timeline */
+  .timeline-section { margin-bottom: 14px; }
+
+  .timeline-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94a3b8;
+    margin-bottom: 8px;
+  }
+
+  #timeline-svg {
+    width: 100%;
+    height: 110px;
+    display: block;
+  }
+
+  /* Results table */
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.81rem;
+  }
+
+  .results-table th {
+    padding: 7px 10px;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .results-table th:last-child { text-align: right; }
+
+  .results-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #374151;
+  }
+
+  .results-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+    color: #1e293b;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .results-table tr.row-warn td { background: #fef2f2; }
+  .results-table tr.row-warn td:last-child { color: #dc2626; }
+
+  .results-table tr.row-good td { background: #f0fdf4; }
+  .results-table tr.row-good td:last-child { color: #16a34a; }
+
+  .results-table tr.row-total td {
+    border-top: 2px solid #e2e8f0;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #1e293b;
+    background: #f8fafc;
+  }
+
+  .results-table tr.spacer-row td {
+    padding: 3px;
+    border-bottom: none;
+  }
+
+  .info-note {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    color: #0369a1;
+    line-height: 1.55;
+    margin-top: 14px;
+  }
+
+  .info-note strong { color: #0c4a6e; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Wash Sale Rule Calculator</h1>
+  <p>Enter your sale and repurchase details to see if the 61-day wash sale window applies — and what it does to your loss deduction.</p>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: Inputs -->
+  <div class="panel">
+    <div class="panel-title">Transaction Details</div>
+
+    <div class="section-label">Sale Details</div>
+
+    <div class="input-group">
+      <label for="sale-date">Sale Date</label>
+      <input type="date" id="sale-date" class="date-input" value="2024-12-15">
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label for="shares-sold">Shares Sold</label>
+        <input type="number" id="shares-sold" class="number-input" value="100" min="1" step="1">
+      </div>
+      <div class="input-group">
+        <label for="cost-basis">Cost Basis / Share ($)</label>
+        <input type="number" id="cost-basis" class="number-input" value="50.00" min="0.01" step="0.01">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="sale-price">Sale Price / Share ($)</label>
+      <input type="number" id="sale-price" class="number-input" value="42.00" min="0.01" step="0.01">
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-label">Repurchase Details</div>
+
+    <div class="input-group">
+      <label for="repurchase-date">Repurchase Date</label>
+      <input type="date" id="repurchase-date" class="date-input" value="2025-01-05">
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label for="shares-repurchased">Shares Bought</label>
+        <input type="number" id="shares-repurchased" class="number-input" value="100" min="1" step="1">
+      </div>
+      <div class="input-group">
+        <label for="repurchase-price">Repurchase Price / Share ($)</label>
+        <input type="number" id="repurchase-price" class="number-input" value="43.50" min="0.01" step="0.01">
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div class="panel">
+    <div class="panel-title">Wash Sale Analysis</div>
+
+    <div id="verdict-box" class="verdict-box">
+      <div class="verdict-icon" id="verdict-icon"></div>
+      <div class="verdict-label" id="verdict-label"></div>
+      <div class="verdict-sub" id="verdict-sub"></div>
+    </div>
+
+    <div class="timeline-section">
+      <div class="timeline-heading">61-Day Window Timeline</div>
+      <svg id="timeline-svg" viewBox="0 0 600 110" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <hr class="divider">
+
+    <table class="results-table">
+      <thead>
+        <tr><th>Item</th><th>Amount</th></tr>
+      </thead>
+      <tbody id="results-body"></tbody>
+    </table>
+
+    <div id="info-note" class="info-note"></div>
+  </div>
+
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function fmt(n) {
+    return '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  function dayDiff(d1, d2) {
+    return Math.round((d2 - d1) / 86400000);
+  }
+
+  function addDays(date, days) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }
+
+  function fmtDate(d) {
+    return d.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+  }
+
+  function drawTimeline(saleDate, windowStart, windowEnd, repDate, isWash, isLoss) {
+    const svg = $('timeline-svg');
+    svg.innerHTML = '';
+    const ns = 'http://www.w3.org/2000/svg';
+
+    function el(tag, attrs, text) {
+      const e = document.createElementNS(ns, tag);
+      Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+
+    const W = 600, H = 110;
+    const PAD = 30;
+    const lineY = 62;
+
+    // Determine view range: pad 12 days on each side of the window
+    const viewStart = addDays(windowStart, -12);
+    const viewEnd = addDays(windowEnd, 12);
+
+    // Expand view if repurchase date is outside
+    const effectiveStart = repDate < viewStart ? addDays(repDate, -8) : viewStart;
+    const effectiveEnd = repDate > viewEnd ? addDays(repDate, 8) : viewEnd;
+    const totalDays = dayDiff(effectiveStart, effectiveEnd);
+
+    function xOf(date) {
+      return PAD + (dayDiff(effectiveStart, date) / totalDays) * (W - 2 * PAD);
+    }
+
+    // Background
+    svg.appendChild(el('rect', {x:0, y:0, width:W, height:H, fill:'#f8fafc', rx:6}));
+
+    // Wash sale window band
+    const wx1 = xOf(windowStart);
+    const wx2 = xOf(windowEnd);
+    svg.appendChild(el('rect', {x:wx1, y:42, width:wx2-wx1, height:26, fill:'#fee2e2', rx:2}));
+    svg.appendChild(el('rect', {x:wx1, y:42, width:wx2-wx1, height:26, fill:'none', stroke:'#fca5a5', 'stroke-width':1.2, rx:2}));
+    const midW = (wx1 + wx2) / 2;
+    svg.appendChild(el('text', {x:midW, y:59, 'text-anchor':'middle', 'font-size':'8.5', fill:'#dc2626', 'font-weight':'700', 'font-family':'inherit'}, '61-DAY WASH SALE WINDOW'));
+
+    // Main timeline line
+    svg.appendChild(el('line', {x1:PAD, y1:lineY, x2:W-PAD, y2:lineY, stroke:'#cbd5e1', 'stroke-width':2.5}));
+
+    // Window boundary ticks + labels
+    svg.appendChild(el('line', {x1:wx1, y1:lineY-4, x2:wx1, y2:lineY+4, stroke:'#f87171', 'stroke-width':2}));
+    svg.appendChild(el('line', {x1:wx2, y1:lineY-4, x2:wx2, y2:lineY+4, stroke:'#f87171', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:wx1, y:82, 'text-anchor':'middle', 'font-size':'7.5', fill:'#ef4444', 'font-weight':'600', 'font-family':'inherit'}, fmtDate(windowStart)));
+    svg.appendChild(el('text', {x:wx2, y:82, 'text-anchor':'middle', 'font-size':'7.5', fill:'#ef4444', 'font-weight':'600', 'font-family':'inherit'}, fmtDate(windowEnd)));
+
+    // Sale date dot
+    const sx = xOf(saleDate);
+    svg.appendChild(el('line', {x1:sx, y1:28, x2:sx, y2:lineY-8, stroke:'#1e40af', 'stroke-width':1.2, 'stroke-dasharray':'3,2'}));
+    svg.appendChild(el('circle', {cx:sx, cy:lineY, r:7, fill:'#1e40af', stroke:'#fff', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:sx, y:20, 'text-anchor':'middle', 'font-size':'8.5', fill:'#1e40af', 'font-weight':'800', 'font-family':'inherit'}, 'SALE'));
+    svg.appendChild(el('text', {x:sx, y:29, 'text-anchor':'middle', 'font-size':'7.5', fill:'#475569', 'font-family':'inherit'}, fmtDate(saleDate)));
+
+    // Repurchase date dot
+    const rx = xOf(repDate);
+    const repCol = !isLoss ? '#64748b' : (isWash ? '#dc2626' : '#16a34a');
+    const repStroke = !isLoss ? '#94a3b8' : (isWash ? '#f87171' : '#4ade80');
+
+    // Offset label above/below to avoid overlap with sale label if they're close
+    const labelAbove = Math.abs(rx - sx) < 80;
+    const repLabelY = labelAbove ? 96 : 20;
+    const repSubY = labelAbove ? 105 : 29;
+    const tickY1 = labelAbove ? lineY + 8 : 28;
+    const tickY2 = labelAbove ? repLabelY - 4 : lineY - 8;
+    const repLabel = repDate <= saleDate ? 'BUY (before)' : 'BUY (after)';
+
+    svg.appendChild(el('line', {x1:rx, y1:tickY1, x2:rx, y2:tickY2, stroke:repCol, 'stroke-width':1.2, 'stroke-dasharray':'3,2'}));
+    svg.appendChild(el('circle', {cx:rx, cy:lineY, r:7, fill:repCol, stroke:'#fff', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:rx, y:repLabelY, 'text-anchor':'middle', 'font-size':'8.5', fill:repCol, 'font-weight':'800', 'font-family':'inherit'}, repLabel));
+    svg.appendChild(el('text', {x:rx, y:repSubY, 'text-anchor':'middle', 'font-size':'7.5', fill:'#475569', 'font-family':'inherit'}, fmtDate(repDate)));
+  }
+
+  function addRow(tbody, label, value, cls) {
+    const tr = document.createElement('tr');
+    if (cls) tr.className = cls;
+    const td1 = document.createElement('td');
+    const td2 = document.createElement('td');
+    td1.innerHTML = label;
+    td2.textContent = value;
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tbody.appendChild(tr);
+  }
+
+  function spacerRow(tbody) {
+    const tr = document.createElement('tr');
+    tr.className = 'spacer-row';
+    tr.innerHTML = '<td colspan="2"></td>';
+    tbody.appendChild(tr);
+  }
+
+  function calculate() {
+    const saleDateVal = $('sale-date').value;
+    const repDateVal = $('repurchase-date').value;
+    const sharesSold = parseFloat($('shares-sold').value) || 0;
+    const costPerShare = parseFloat($('cost-basis').value) || 0;
+    const salePerShare = parseFloat($('sale-price').value) || 0;
+    const sharesRep = parseFloat($('shares-repurchased').value) || 0;
+    const repPerShare = parseFloat($('repurchase-price').value) || 0;
+
+    if (!saleDateVal || !repDateVal || sharesSold <= 0) return;
+
+    const saleDate = new Date(saleDateVal + 'T00:00:00');
+    const repDate = new Date(repDateVal + 'T00:00:00');
+    const windowStart = addDays(saleDate, -30);
+    const windowEnd = addDays(saleDate, 30);
+
+    const daysFromSale = dayDiff(saleDate, repDate);
+    const inWindow = daysFromSale >= -30 && daysFromSale <= 30;
+
+    const lossPerShare = costPerShare - salePerShare;
+    const isLoss = lossPerShare > 0;
+    const totalRealizedLoss = lossPerShare * sharesSold;
+
+    const washSale = isLoss && inWindow && sharesRep > 0;
+
+    const sharesSubject = Math.min(sharesSold, sharesRep);
+    const disallowedLoss = washSale ? lossPerShare * sharesSubject : 0;
+    const deductibleLoss = washSale ? totalRealizedLoss - disallowedLoss : (isLoss ? totalRealizedLoss : 0);
+    const adjBasisPerShare = washSale ? repPerShare + (disallowedLoss / sharesRep) : repPerShare;
+    const totalAdjBasis = washSale ? sharesRep * repPerShare + disallowedLoss : sharesRep * repPerShare;
+
+    // Timeline
+    drawTimeline(saleDate, windowStart, windowEnd, repDate, washSale, isLoss);
+
+    // Verdict
+    const box = $('verdict-box');
+    box.className = 'verdict-box';
+    const absDays = Math.abs(daysFromSale);
+    const dirStr = daysFromSale < 0 ? 'before' : 'after';
+
+    if (!isLoss) {
+      box.classList.add('no-loss');
+      $('verdict-icon').textContent = '✓';
+      $('verdict-label').textContent = 'NO LOSS — RULE DOES NOT APPLY';
+      $('verdict-sub').textContent = 'You sold at a gain (or break-even). The wash sale rule only disallows losses, so there is nothing to restrict here.';
+    } else if (washSale) {
+      box.classList.add('wash-sale');
+      $('verdict-icon').textContent = '⛔';
+      $('verdict-label').textContent = 'WASH SALE TRIGGERED';
+      $('verdict-sub').textContent = `Repurchase was ${absDays} day${absDays !== 1 ? 's' : ''} ${dirStr} the sale — inside the 30-day window. Loss is fully or partially disallowed.`;
+    } else {
+      box.classList.add('clean-sale');
+      $('verdict-icon').textContent = '✓';
+      $('verdict-label').textContent = 'CLEAN SALE — LOSS ALLOWED';
+      $('verdict-sub').textContent = `Repurchase was ${absDays} day${absDays !== 1 ? 's' : ''} ${dirStr} the sale — outside the 30-day window. Full loss is deductible.`;
+    }
+
+    // Results table
+    const tbody = $('results-body');
+    tbody.innerHTML = '';
+
+    addRow(tbody, 'Shares sold', sharesSold.toLocaleString());
+    addRow(tbody, 'Cost basis per share', fmt(costPerShare));
+    addRow(tbody, 'Sale price per share', fmt(salePerShare));
+    const gainLoss = (salePerShare - costPerShare) * sharesSold;
+    addRow(tbody, `Total realized ${isLoss ? 'loss' : 'gain'}`,
+      (gainLoss < 0 ? '−' : '+') + fmt(Math.abs(gainLoss)),
+      isLoss ? 'row-warn' : 'row-good');
+
+    spacerRow(tbody);
+    addRow(tbody, 'Repurchase date', fmtDate(repDate));
+    addRow(tbody, 'Days from sale date',
+      absDays + ' day' + (absDays !== 1 ? 's' : '') + ' ' + dirStr);
+    addRow(tbody, 'Within 61-day wash sale window?',
+      inWindow ? '⛔ Yes' : '✓ No');
+
+    if (isLoss) {
+      spacerRow(tbody);
+      if (washSale) {
+        if (sharesRep !== sharesSold) {
+          addRow(tbody, 'Shares subject to wash sale (lesser of sold/bought)', sharesSubject.toLocaleString());
+        }
+        addRow(tbody, '⛔ Disallowed loss (deferred to replacement basis)', '−' + fmt(disallowedLoss), 'row-warn');
+        if (deductibleLoss > 0) {
+          addRow(tbody, '✓ Loss deductible this year (excess shares)', '−' + fmt(deductibleLoss), 'row-good');
+        } else {
+          addRow(tbody, 'Loss deductible this year', '$0.00');
+        }
+        spacerRow(tbody);
+        addRow(tbody, 'Repurchase price per share', fmt(repPerShare));
+        addRow(tbody, 'Disallowed loss added to replacement basis / share', '+' + fmt(disallowedLoss / sharesRep));
+        addRow(tbody, 'Adjusted cost basis per replacement share', fmt(adjBasisPerShare), 'row-total');
+        addRow(tbody, `Total adjusted basis (${sharesRep.toLocaleString()} replacement shares)`, fmt(totalAdjBasis), 'row-total');
+      } else {
+        addRow(tbody, '✓ Full loss deductible this year', '−' + fmt(totalRealizedLoss), 'row-good');
+      }
+    }
+
+    // Info note
+    const note = $('info-note');
+    if (washSale) {
+      let html = `<strong>The disallowed loss is not gone.</strong> It is added to the cost basis of your replacement shares. When you eventually sell those shares (outside a wash sale window), you will recover the deferred loss at that time.`;
+      if (sharesRep !== sharesSold) {
+        const which = sharesRep < sharesSold ? 'fewer' : 'more';
+        html += `<br><br><strong>Partial wash sale:</strong> You repurchased ${which} shares than you sold. The disallowed portion is proportional to the ${sharesSubject.toLocaleString()} replacement shares — the remainder (${(sharesSold - sharesSubject).toLocaleString()} shares) is deductible.`;
+      }
+      html += `<br><br><strong>IRA trap:</strong> If the repurchase is inside a traditional or Roth IRA, the deferred loss is <em>permanently lost</em> — it cannot be added to the IRA's cost basis.`;
+      note.innerHTML = html;
+    } else if (isLoss) {
+      note.innerHTML = `<strong>Your loss is fully deductible.</strong> To stay invested without triggering a wash sale, you can immediately replace with a <em>similar but not identical</em> security — e.g., swap a Vanguard S&P 500 fund for a Vanguard Total Market fund. Different index, similar exposure, no wash sale.`;
+    } else {
+      note.innerHTML = `<strong>The wash sale rule only restricts losses.</strong> A gain or break-even sale is unaffected — you can immediately repurchase the same security without any restriction.`;
+    }
+  }
+
+  const ids = ['sale-date','repurchase-date','shares-sold','cost-basis','sale-price','shares-repurchased','repurchase-price'];
+  ids.forEach(id => {
+    $(id).addEventListener('input', calculate);
+    $(id).addEventListener('change', calculate);
+  });
+
+  calculate();
+</script>
+</body>
+</html>

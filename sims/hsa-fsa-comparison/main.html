@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSA vs. FSA Cost-Benefit Analyzer — 2025</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #E65100;
+    --primary-light: #FF8A50;
+    --primary-bg: #FFF3E0;
+    --teal: #00695C;
+    --teal-light: #4DB6AC;
+    --teal-bg: #E0F2F1;
+    --gray: #455A64;
+    --gray-light: #ECEFF1;
+    --gray-bg: #F5F7F8;
+    --text: #212121;
+    --text-muted: #607D8B;
+    --border: #CFD8DC;
+    --white: #FFFFFF;
+    --shadow: 0 2px 12px rgba(0,0,0,0.10);
+    --radius: 10px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #F0F4F5;
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #BF360C 100%);
+    color: var(--white);
+    padding: 28px 24px 22px;
+    text-align: center;
+  }
+  header h1 { font-size: clamp(1.3rem, 4vw, 1.9rem); font-weight: 700; letter-spacing: -0.3px; }
+  header p  { font-size: 0.92rem; opacity: 0.88; margin-top: 6px; }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  /* ── Main layout ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 16px 40px; }
+
+  /* ── Inputs panel ── */
+  .inputs-panel {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 28px 22px;
+    margin: 24px 0 20px;
+  }
+  .inputs-panel h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-bg);
+  }
+
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 28px;
+  }
+  @media (max-width: 600px) {
+    .input-grid { grid-template-columns: 1fr; }
+    .inputs-panel { padding: 20px 16px; }
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .field select, .field input[type="number"] {
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field select:focus, .field input[type="number"]:focus {
+    outline: none;
+    border-color: var(--teal);
+  }
+
+  /* slider row */
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  .slider-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--teal);
+    height: 4px;
+  }
+  .slider-row input[type="number"] {
+    width: 90px;
+    flex-shrink: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 0.9rem;
+    text-align: right;
+  }
+
+  /* checkbox field */
+  .field-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--gray-bg);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .field-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--teal); cursor: pointer; }
+  .field-check span { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+
+  .limit-note {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  .limit-note.warn { color: var(--primary); font-weight: 600; }
+
+  /* ── Cards ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 640px) {
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px 14px;
+    color: var(--white);
+  }
+  .card-header h3 { font-size: 1.15rem; font-weight: 700; }
+  .card-header .subtitle { font-size: 0.82rem; opacity: 0.85; margin-top: 3px; }
+
+  .hsa .card-header { background: linear-gradient(135deg, var(--teal) 0%, #004D40 100%); }
+  .fsa .card-header { background: linear-gradient(135deg, #546E7A 0%, #37474F 100%); }
+
+  .card-body {
+    background: var(--white);
+    padding: 18px 20px;
+  }
+
+  .row-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px solid #ECEFF1;
+    font-size: 0.9rem;
+  }
+  .row-item:last-child { border-bottom: none; }
+  .row-item .label { color: var(--text-muted); }
+  .row-item .value { font-weight: 600; color: var(--text); }
+  .row-item .value.accent-teal { color: var(--teal); }
+  .row-item .value.accent-orange { color: var(--primary); }
+
+  .section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 14px 0 6px;
+  }
+
+  .tax-block {
+    background: var(--gray-bg);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 10px 0;
+  }
+  .tax-block .tax-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.87rem;
+    padding: 4px 0;
+  }
+  .tax-block .tax-row.total {
+    font-weight: 700;
+    border-top: 1.5px solid var(--border);
+    margin-top: 6px;
+    padding-top: 8px;
+    font-size: 0.93rem;
+  }
+  .tax-block.teal { background: var(--teal-bg); }
+  .tax-block.orange { background: var(--primary-bg); }
+
+  .benefit-list { list-style: none; margin: 8px 0; }
+  .benefit-list li {
+    font-size: 0.87rem;
+    padding: 4px 0;
+    display: flex;
+    gap: 7px;
+    align-items: flex-start;
+  }
+  .benefit-list li .icon { flex-shrink: 0; font-style: normal; }
+  .benefit-list li .icon.yes { color: var(--teal); }
+  .benefit-list li .icon.no  { color: #D32F2F; }
+
+  .projection-box {
+    margin-top: 12px;
+    background: linear-gradient(135deg, #E0F2F1 0%, #B2EBE0 100%);
+    border-radius: 8px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .projection-box .big-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--teal);
+    line-height: 1.2;
+  }
+  .projection-box .label { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── Results ── */
+  .results-panel {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .results-panel h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 18px;
+  }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    margin-bottom: 20px;
+  }
+  .comparison-table th {
+    background: var(--gray-bg);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+  }
+  .comparison-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #ECEFF1;
+  }
+  .comparison-table tr:last-child td { border-bottom: none; }
+  .comparison-table td.num { text-align: right; font-weight: 600; }
+  .comparison-table td.winner { text-align: center; }
+  .winner-badge {
+    display: inline-block;
+    background: var(--teal);
+    color: white;
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .recommendation {
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-top: 6px;
+  }
+  .recommendation.hsa-wins {
+    background: var(--teal-bg);
+    border-left: 4px solid var(--teal);
+  }
+  .recommendation.fsa-wins {
+    background: var(--primary-bg);
+    border-left: 4px solid var(--primary);
+  }
+  .recommendation.neutral {
+    background: var(--gray-bg);
+    border-left: 4px solid var(--gray);
+  }
+  .recommendation h3 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .recommendation p { font-size: 0.92rem; line-height: 1.6; }
+
+  .fica-note {
+    background: #FFF8E1;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: #5D4037;
+    margin-top: 16px;
+    border-left: 3px solid #F9A825;
+  }
+  .fica-note strong { display: block; margin-bottom: 3px; }
+
+  /* Payroll toggle */
+  .payroll-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: #FFF8E1;
+    border-radius: 8px;
+    border: 1px solid #FFE082;
+  }
+  .payroll-toggle label { font-size: 0.87rem; font-weight: 500; cursor: pointer; }
+  .payroll-toggle input { accent-color: var(--primary); width: 16px; height: 16px; }
+
+  @media (max-width: 600px) {
+    .results-panel { padding: 18px 14px; }
+    .comparison-table th, .comparison-table td { padding: 8px 10px; font-size: 0.83rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>HSA vs. FSA Cost-Benefit Analyzer</h1>
+  <p>Compare Health Savings Account and Flexible Spending Account tax advantages</p>
+  <div class="badge">2025 Tax Year</div>
+</header>
+
+<div class="container">
+
+  <!-- ── INPUTS ── -->
+  <div class="inputs-panel">
+    <h2>Your Situation</h2>
+    <div class="input-grid">
+
+      <div class="field">
+        <label>Federal Marginal Tax Rate</label>
+        <select id="fedRate">
+          <option value="0.10">10%</option>
+          <option value="0.12">12%</option>
+          <option value="0.22" selected>22%</option>
+          <option value="0.24">24%</option>
+          <option value="0.32">32%</option>
+          <option value="0.35">35%</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>State Income Tax Rate</label>
+        <div class="slider-row">
+          <input type="range" id="stateSlider" min="0" max="13" step="0.5" value="0">
+          <input type="number" id="stateNum" min="0" max="13" step="0.5" value="0" style="width:72px;">
+          <span style="font-size:0.9rem;color:var(--text-muted);">%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Account Type</label>
+        <select id="accountType">
+          <option value="hsa_self">HSA — Self-Only (HDHP required)</option>
+          <option value="hsa_family">HSA — Family (HDHP required)</option>
+          <option value="fsa">FSA — Health (any plan)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Age 55+? (HSA catch-up)</label>
+        <div class="field-check" onclick="toggleCheck('age55')">
+          <input type="checkbox" id="age55">
+          <span>Yes, I am 55 or older — adds $1,000 to HSA limit</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Annual Medical Expenses Expected</label>
+        <div class="slider-row">
+          <input type="range" id="medSlider" min="0" max="10000" step="100" value="2000">
+          <input type="number" id="medNum" min="0" max="10000" step="100" value="2000">
+        </div>
+        <span class="limit-note">How much you expect to spend on medical care this year</span>
+      </div>
+
+      <div class="field">
+        <label>Your Contribution Amount</label>
+        <div class="slider-row">
+          <input type="range" id="contribSlider" min="0" max="8550" step="50" value="3000">
+          <input type="number" id="contribNum" min="0" max="8550" step="50" value="3000">
+        </div>
+        <span class="limit-note" id="limitNote">HSA self-only limit: $4,300 · HSA family: $8,550 · FSA: $3,300</span>
+      </div>
+
+      <div class="field">
+        <label>Employer Contribution ($)</label>
+        <input type="number" id="employerContrib" min="0" max="5000" step="50" value="0" placeholder="0">
+        <span class="limit-note">Employer adds this to your account (counts toward HSA limit)</span>
+      </div>
+
+      <div class="field" style="align-self:end;">
+        <div class="payroll-toggle">
+          <input type="checkbox" id="payrollDeduct" checked>
+          <label for="payrollDeduct">Contributions via payroll deduction (saves FICA tax)</label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── CARDS ── -->
+  <div class="cards-grid">
+
+    <!-- HSA Card -->
+    <div class="card hsa">
+      <div class="card-header">
+        <h3>Health Savings Account (HSA)</h3>
+        <div class="subtitle">Requires High Deductible Health Plan (HDHP)</div>
+      </div>
+      <div class="card-body">
+
+        <div class="section-title">Contribution Details</div>
+        <div class="row-item">
+          <span class="label">2025 Contribution Limit</span>
+          <span class="value accent-teal" id="hsa-limit">$4,300</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Your Contribution</span>
+          <span class="value" id="hsa-your-contrib">$3,000</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Employer Contribution</span>
+          <span class="value" id="hsa-employer">$0</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Total HSA Funds</span>
+          <span class="value accent-teal" id="hsa-total">$3,000</span>
+        </div>
+
+        <div class="section-title">Tax Savings This Year</div>
+        <div class="tax-block teal">
+          <div class="tax-row">
+            <span>Federal income tax</span>
+            <span id="hsa-fed-tax">$660</span>
+          </div>
+          <div class="tax-row">
+            <span>State income tax</span>
+            <span id="hsa-state-tax">$0</span>
+          </div>
+          <div class="tax-row">
+            <span>FICA (payroll) savings</span>
+            <span id="hsa-fica">$230</span>
+          </div>
+          <div class="tax-row total">
+            <span>Total Tax Savings</span>
+            <span id="hsa-total-tax">$890</span>
+          </div>
+        </div>
+
+        <div class="section-title">Key Benefits</div>
+        <ul class="benefit-list">
+          <li><i class="icon yes">✓</i><span>Unused funds <strong>roll over forever</strong> — no expiration</span></li>
+          <li><i class="icon yes">✓</i><span>Can be <strong>invested</strong> (like a 401k) for long-term growth</span></li>
+          <li><i class="icon yes">✓</i><span>After age 65: use for <strong>any expense</strong> (like a traditional IRA)</span></li>
+          <li><i class="icon yes">✓</i><span><strong>Triple tax advantage:</strong> pre-tax in, grows tax-free, tax-free withdrawals for medical</span></li>
+          <li><i class="icon no">✗</i><span>Requires enrollment in an HDHP</span></li>
+        </ul>
+
+        <div class="section-title">10-Year Projection (6% annual growth)</div>
+        <div class="projection-box">
+          <div class="big-num" id="hsa-projection">$40,279</div>
+          <div class="label">If you invest and don't spend your contributions</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FSA Card -->
+    <div class="card fsa">
+      <div class="card-header">
+        <h3>Flexible Spending Account (FSA)</h3>
+        <div class="subtitle">Works with any health insurance plan</div>
+      </div>
+      <div class="card-body">
+
+        <div class="section-title">Contribution Details</div>
+        <div class="row-item">
+          <span class="label">2025 Contribution Limit</span>
+          <span class="value accent-orange">$3,300</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Your Contribution</span>
+          <span class="value" id="fsa-your-contrib">$3,000</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Employer Contribution</span>
+          <span class="value" id="fsa-employer">$0</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Total FSA Funds</span>
+          <span class="value accent-orange" id="fsa-total">$3,000</span>
+        </div>
+
+        <div class="section-title">Tax Savings This Year</div>
+        <div class="tax-block orange">
+          <div class="tax-row">
+            <span>Federal income tax</span>
+            <span id="fsa-fed-tax">$660</span>
+          </div>
+          <div class="tax-row">
+            <span>State income tax</span>
+            <span id="fsa-state-tax">$0</span>
+          </div>
+          <div class="tax-row">
+            <span>FICA (payroll) savings</span>
+            <span id="fsa-fica">$230</span>
+          </div>
+          <div class="tax-row total">
+            <span>Total Tax Savings</span>
+            <span id="fsa-total-tax">$890</span>
+          </div>
+        </div>
+
+        <div class="section-title">Key Limitations</div>
+        <ul class="benefit-list">
+          <li><i class="icon no">✗</i><span><strong>"Use it or lose it"</strong> — only $660 rolls over to next year</span></li>
+          <li><i class="icon no">✗</i><span>Cannot invest funds — no long-term growth</span></li>
+          <li><i class="icon no">✗</i><span>Must be spent on qualified medical expenses</span></li>
+          <li><i class="icon yes">✓</i><span>Works with <strong>any health insurance plan</strong> — no HDHP required</span></li>
+          <li><i class="icon yes">✓</i><span>Still saves <strong>FICA tax</strong> when through payroll deduction</span></li>
+        </ul>
+
+        <div class="section-title">10-Year Projection</div>
+        <div class="projection-box" style="background: linear-gradient(135deg,#FFF3E0 0%,#FFE0B2 100%);">
+          <div class="big-num" style="color:var(--primary);">$0</div>
+          <div class="label">FSA funds must be spent on medical expenses — no investment growth</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div class="results-panel">
+    <h2>Comparison Summary</h2>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th style="text-align:right">HSA</th>
+          <th style="text-align:right">FSA</th>
+          <th style="text-align:center">Better</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Your Contribution</td>
+          <td class="num" id="cmp-hsa-contrib">$3,000</td>
+          <td class="num" id="cmp-fsa-contrib">$3,000</td>
+          <td class="winner">—</td>
+        </tr>
+        <tr>
+          <td>Federal Tax Savings</td>
+          <td class="num" id="cmp-hsa-fed">$660</td>
+          <td class="num" id="cmp-fsa-fed">$660</td>
+          <td class="winner" id="cmp-fed-win">—</td>
+        </tr>
+        <tr>
+          <td>Total Tax Savings (incl. FICA)</td>
+          <td class="num" id="cmp-hsa-total">$890</td>
+          <td class="num" id="cmp-fsa-total">$890</td>
+          <td class="winner" id="cmp-total-win">—</td>
+        </tr>
+        <tr>
+          <td>10-Year Wealth Building</td>
+          <td class="num" id="cmp-hsa-10yr">$40,279</td>
+          <td class="num" style="color:var(--text-muted)">$0 (must spend)</td>
+          <td class="winner"><span class="winner-badge" style="background:var(--teal)">HSA</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="recommendation" id="recommendation">
+      <h3>Recommendation</h3>
+      <p id="rec-text"></p>
+    </div>
+
+    <div class="fica-note">
+      <strong>About FICA Savings</strong>
+      FICA savings (7.65% = 6.2% Social Security + 1.45% Medicare) apply only when contributions are made through payroll deduction. Self-employed HSA contributions save federal and state income tax but not FICA. If you earn above $176,100, Social Security (6.2%) no longer applies to wages above that amount.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Helpers ──
+  const $ = id => document.getElementById(id);
+  const fmt = n => '$' + Math.round(n).toLocaleString();
+
+  // ── Limits ──
+  const LIMITS = {
+    hsa_self:   4300,
+    hsa_family: 8550,
+    fsa:        3300
+  };
+  const FSA_MAX = 3300;
+  const FICA_RATE = 0.0765;
+
+  function toggleCheck(id) {
+    const el = $(id);
+    el.checked = !el.checked;
+    calc();
+  }
+
+  // ── Sync sliders & number inputs ──
+  function syncPair(sliderId, numId, cb) {
+    const slider = $(sliderId), num = $(numId);
+    slider.addEventListener('input', () => { num.value = slider.value; cb(); });
+    num.addEventListener('input',   () => { slider.value = num.value;  cb(); });
+  }
+
+  syncPair('stateSlider', 'stateNum', calc);
+  syncPair('medSlider',   'medNum',   calc);
+  syncPair('contribSlider', 'contribNum', calc);
+
+  $('fedRate').addEventListener('change', calc);
+  $('accountType').addEventListener('change', calc);
+  $('age55').addEventListener('change', calc);
+  $('employerContrib').addEventListener('input', calc);
+  $('payrollDeduct').addEventListener('change', calc);
+
+  // ── Main calculation ──
+  function calc() {
+    const fedRate    = parseFloat($('fedRate').value);
+    const stateRate  = parseFloat($('stateNum').value) / 100;
+    const accountType = $('accountType').value;
+    const age55      = $('age55').checked;
+    const medExp     = Math.max(0, parseFloat($('medNum').value)  || 0);
+    const rawContrib = Math.max(0, parseFloat($('contribNum').value) || 0);
+    const employerC  = Math.max(0, parseFloat($('employerContrib').value) || 0);
+    const payroll    = $('payrollDeduct').checked;
+
+    // ── HSA limits ──
+    let hsaBaseLimit = (accountType === 'hsa_family') ? 8550 : 4300;
+    if (age55 && accountType !== 'fsa') hsaBaseLimit += 1000;
+    const hsaContribLimit = Math.max(0, hsaBaseLimit - employerC);
+
+    // ── FSA limit ──
+    const fsaContribLimit = Math.max(0, FSA_MAX - Math.min(employerC, FSA_MAX));
+
+    // ── Effective contributions ──
+    const hsaUserContrib = Math.min(rawContrib, hsaContribLimit);
+    const fsaUserContrib = Math.min(rawContrib, fsaContribLimit);
+
+    // ── Update limit note ──
+    const noteEl = $('limitNote');
+    const limitForType = accountType === 'fsa' ? FSA_MAX :
+                         accountType === 'hsa_family' ? (age55 ? 9550 : 8550) :
+                                                        (age55 ? 5300 : 4300);
+    if (rawContrib > limitForType) {
+      noteEl.textContent = `⚠ Exceeds 2025 limit of ${fmt(limitForType)} — capped automatically.`;
+      noteEl.className = 'limit-note warn';
+    } else {
+      noteEl.textContent = `2025 limits: HSA self-only $4,300 · HSA family $8,550 · FSA $3,300 · HSA 55+ adds $1,000`;
+      noteEl.className = 'limit-note';
+    }
+
+    // ── HSA card ──
+    const hsaLimit = accountType === 'hsa_family' ? (age55 ? '$9,550' : '$8,550') :
+                     (age55 ? '$5,300' : '$4,300');
+    $('hsa-limit').textContent = hsaLimit;
+    $('hsa-your-contrib').textContent = fmt(hsaUserContrib);
+    $('hsa-employer').textContent = fmt(employerC);
+    const hsaTotalFunds = hsaUserContrib + employerC;
+    $('hsa-total').textContent = fmt(hsaTotalFunds);
+
+    const hsaFedTax   = hsaUserContrib * fedRate;
+    const hsaStateTax = hsaUserContrib * stateRate;
+    const hsaFica     = payroll ? hsaUserContrib * FICA_RATE : 0;
+    const hsaTotalTax = hsaFedTax + hsaStateTax + hsaFica;
+
+    $('hsa-fed-tax').textContent   = fmt(hsaFedTax);
+    $('hsa-state-tax').textContent = fmt(hsaStateTax);
+    $('hsa-fica').textContent      = payroll ? fmt(hsaFica) : '$0 (not payroll)';
+    $('hsa-total-tax').textContent = fmt(hsaTotalTax);
+
+    // 10-year projection: annual contribution grows at 6%
+    let hsaProjection = 0;
+    for (let y = 1; y <= 10; y++) {
+      hsaProjection = (hsaProjection + hsaTotalFunds) * 1.06;
+    }
+    $('hsa-projection').textContent = fmt(hsaProjection);
+
+    // ── FSA card ──
+    $('fsa-your-contrib').textContent = fmt(fsaUserContrib);
+    $('fsa-employer').textContent     = fmt(employerC);
+    const fsaTotalFunds = fsaUserContrib + employerC;
+    $('fsa-total').textContent = fmt(fsaTotalFunds);
+
+    const fsaFedTax   = fsaUserContrib * fedRate;
+    const fsaStateTax = fsaUserContrib * stateRate;
+    const fsaFica     = payroll ? fsaUserContrib * FICA_RATE : 0;
+    const fsaTotalTax = fsaFedTax + fsaStateTax + fsaFica;
+
+    $('fsa-fed-tax').textContent   = fmt(fsaFedTax);
+    $('fsa-state-tax').textContent = fmt(fsaStateTax);
+    $('fsa-fica').textContent      = payroll ? fmt(fsaFica) : '$0 (not payroll)';
+    $('fsa-total-tax').textContent = fmt(fsaTotalTax);
+
+    // ── Comparison table ──
+    $('cmp-hsa-contrib').textContent = fmt(hsaUserContrib);
+    $('cmp-fsa-contrib').textContent = fmt(fsaUserContrib);
+    $('cmp-hsa-fed').textContent     = fmt(hsaFedTax);
+    $('cmp-fsa-fed').textContent     = fmt(fsaFedTax);
+    $('cmp-hsa-total').textContent   = fmt(hsaTotalTax);
+    $('cmp-fsa-total').textContent   = fmt(fsaTotalTax);
+    $('cmp-hsa-10yr').textContent    = fmt(hsaProjection);
+
+    // winner badges
+    const fedWinEl = $('cmp-fed-win');
+    if (hsaFedTax > fsaFedTax) fedWinEl.innerHTML = '<span class="winner-badge" style="background:var(--teal)">HSA</span>';
+    else if (fsaFedTax > hsaFedTax) fedWinEl.innerHTML = '<span class="winner-badge" style="background:var(--primary)">FSA</span>';
+    else fedWinEl.textContent = 'Tie';
+
+    const totWinEl = $('cmp-total-win');
+    if (hsaTotalTax > fsaTotalTax) totWinEl.innerHTML = '<span class="winner-badge" style="background:var(--teal)">HSA</span>';
+    else if (fsaTotalTax > hsaTotalTax) totWinEl.innerHTML = '<span class="winner-badge" style="background:var(--primary)">FSA</span>';
+    else totWinEl.textContent = 'Tie';
+
+    // ── Recommendation ──
+    const recBox = $('recommendation');
+    const recText = $('rec-text');
+    const taxDiff = hsaTotalTax - fsaTotalTax;
+    const hsaCoversExpenses = hsaTotalFunds >= medExp;
+    const fsaCoversExpenses = fsaTotalFunds >= medExp;
+
+    if (accountType === 'fsa') {
+      // User selected FSA type — compare assuming they could have chosen HSA self
+      recBox.className = 'recommendation neutral';
+      recText.textContent = `You selected FSA — this works with any health plan and saves ${fmt(fsaTotalTax)} in taxes this year. If your employer offers an HDHP, consider switching to an HSA for long-term wealth building and potentially higher contribution limits.`;
+    } else if (taxDiff > 50) {
+      recBox.className = 'recommendation hsa-wins';
+      recText.textContent = `For your situation, the HSA saves ${fmt(taxDiff)} more in taxes this year than the FSA (${fmt(hsaTotalTax)} vs. ${fmt(fsaTotalTax)}). The HSA also builds long-term wealth — projected ${fmt(hsaProjection)} over 10 years if invested at 6% growth. Consider the HSA if you are healthy and can manage the higher HDHP deductible.`;
+    } else if (medExp > hsaTotalFunds && !hsaCoversExpenses) {
+      recBox.className = 'recommendation fsa-wins';
+      recText.textContent = `Your expected medical expenses (${fmt(medExp)}) exceed your HSA funds. Both accounts offer similar tax savings, but the FSA's use-it-or-lose-it rule means you'll spend what you contribute — which matches your high expense year. The FSA is simpler and works with any health plan.`;
+    } else {
+      recBox.className = 'recommendation hsa-wins';
+      recText.textContent = `Both accounts offer similar tax savings this year (HSA: ${fmt(hsaTotalTax)}, FSA: ${fmt(fsaTotalTax)}). The HSA is the better long-term choice — unused funds roll over and can be invested. Your expected medical expenses of ${fmt(medExp)} are ${hsaCoversExpenses ? 'covered' : 'not fully covered'} by your HSA balance.`;
+    }
+  }
+
+  // ── Init ──
+  calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mileage vs. Actual Vehicle Expense Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #E65100;
+    --primary-dark: #BF360C;
+    --primary-light: #FBE9E7;
+    --secondary: #00695C;
+    --secondary-light: #E0F2F1;
+    --text: #212121;
+    --text-light: #616161;
+    --border: #BDBDBD;
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --shadow: 0 2px 8px rgba(0,0,0,0.10);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 18px 24px;
+  }
+  header h1 { font-size: 1.25rem; font-weight: 700; }
+  header p { font-size: 0.85rem; opacity: 0.88; margin-top: 3px; }
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  @media (max-width: 720px) {
+    .main-grid { grid-template-columns: 1fr; padding: 12px; gap: 14px; }
+  }
+  .card {
+    background: var(--card);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+  .section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+  }
+  .field { margin-bottom: 14px; }
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .prefix {
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  input[type="number"] {
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 0.95rem;
+    width: 100%;
+    color: var(--text);
+    background: #fff;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus { outline: none; border-color: var(--primary); }
+  input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+  .helper { font-size: 0.78rem; color: var(--secondary); font-weight: 600; margin-top: 4px; }
+  .radio-group { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .radio-group label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-weight: 400;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 7px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .radio-group label:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .radio-group input[type="radio"] { margin-top: 2px; accent-color: var(--primary); flex-shrink: 0; }
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 0.83rem;
+    color: var(--text-light);
+  }
+  .checkbox-row input[type="checkbox"] { accent-color: var(--primary); width: 15px; height: 15px; }
+  select {
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 0.95rem;
+    width: 100%;
+    color: var(--text);
+    background: #fff;
+    cursor: pointer;
+  }
+  select:focus { outline: none; border-color: var(--primary); }
+
+  /* Results */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+  }
+  .compare-table th {
+    background: var(--primary);
+    color: #fff;
+    padding: 9px 12px;
+    text-align: center;
+    font-size: 0.8rem;
+  }
+  .compare-table th:first-child { text-align: left; }
+  .compare-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #EEEEEE;
+    text-align: center;
+  }
+  .compare-table td:first-child { text-align: left; font-weight: 500; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:nth-child(even) td { background: #F9F9F9; }
+  .checkmark { color: var(--secondary); font-size: 1.1rem; font-weight: 700; }
+  .winner-box {
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .winner-mileage { background: var(--primary-light); border-left: 4px solid var(--primary); color: var(--primary-dark); }
+  .winner-actual { background: var(--secondary-light); border-left: 4px solid var(--secondary); color: var(--secondary); }
+  .winner-tie { background: #FFF8E1; border-left: 4px solid #F9A825; color: #795548; }
+
+  /* Bar chart */
+  .bar-section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-light);
+    margin-bottom: 10px;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 0.8rem;
+  }
+  .bar-label { width: 110px; flex-shrink: 0; color: var(--text-light); }
+  .bar-amount { width: 68px; flex-shrink: 0; text-align: right; font-weight: 600; }
+  .bar-track { flex: 1; background: #EEEEEE; border-radius: 4px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.4s ease; min-width: 0; }
+  .bar-fill.dep { background: var(--secondary); }
+
+  /* Notes */
+  .notes {
+    background: #F5F5F5;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
+  .notes ul { padding-left: 16px; }
+  .notes li { margin-bottom: 5px; }
+  .notes strong { color: var(--text); }
+  .badge {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .spacer { height: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mileage vs. Actual Vehicle Expense Calculator</h1>
+  <p>Compare IRS standard mileage vs. actual expense method for self-employed vehicle deductions &mdash; 2025 tax year</p>
+</header>
+
+<div class="main-grid">
+  <!-- LEFT: INPUTS -->
+  <div>
+    <!-- Mileage Info -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title">Mileage Info</div>
+
+      <div class="field">
+        <label for="biz-miles">Business miles driven per year</label>
+        <div class="input-row">
+          <input type="number" id="biz-miles" min="0" max="50000" value="12000" step="100">
+        </div>
+        <input type="range" id="biz-miles-slider" min="0" max="50000" value="12000" step="100">
+      </div>
+
+      <div class="field">
+        <label for="total-miles">Total miles driven per year</label>
+        <div class="input-row">
+          <input type="number" id="total-miles" min="0" max="200000" value="20000" step="100">
+        </div>
+        <input type="range" id="total-miles-slider" min="0" max="100000" value="20000" step="100">
+        <div class="helper" id="biz-pct-label">Business use: 60.0%</div>
+      </div>
+    </div>
+
+    <!-- Actual Vehicle Costs -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title">Actual Vehicle Costs (Annual)</div>
+
+      <div class="field">
+        <label for="fuel">Fuel / Gas</label>
+        <div class="input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="fuel" min="0" value="3200" step="50">
+        </div>
+      </div>
+      <div class="field">
+        <label for="insurance">Insurance</label>
+        <div class="input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="insurance" min="0" value="1800" step="50">
+        </div>
+      </div>
+      <div class="field">
+        <label for="maintenance">Maintenance &amp; Repairs</label>
+        <div class="input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="maintenance" min="0" value="800" step="50">
+        </div>
+      </div>
+      <div class="field">
+        <label for="registration">Registration &amp; Taxes</label>
+        <div class="input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="registration" min="0" value="250" step="10">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label for="interest">Loan Interest <span style="font-weight:400;color:var(--text-light)">(only business % deductible)</span></label>
+        <div class="input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="interest" min="0" value="900" step="50">
+        </div>
+      </div>
+    </div>
+
+    <!-- Depreciation -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title">Depreciation</div>
+
+      <div class="field">
+        <label for="vehicle-value">Vehicle Value</label>
+        <div class="input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="vehicle-value" min="0" value="28000" step="500">
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <label>Depreciation Method</label>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="dep-method" value="macrs" checked>
+            <span>Standard MACRS 5-year <span style="color:var(--text-light)">(20%/yr, limited to $12,200/yr for most cars)</span></span>
+          </label>
+          <label>
+            <input type="radio" name="dep-method" value="sec179">
+            <span>Section 179 first-year expensing <span style="color:var(--text-light)">(limited to $12,200; $30,500 for heavy SUVs &gt;6,000 lbs)</span></span>
+          </label>
+        </div>
+        <div class="checkbox-row" id="suv-row" style="display:none;">
+          <input type="checkbox" id="heavy-suv">
+          <label for="heavy-suv" style="font-weight:400;">Heavy SUV / truck &gt; 6,000 lbs (raises Section 179 cap to $30,500)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax Rate -->
+    <div class="card">
+      <div class="section-title">Tax Rate</div>
+      <div class="field" style="margin-bottom:0;">
+        <label for="tax-rate">Marginal Tax Rate</label>
+        <select id="tax-rate">
+          <option value="0.10">10%</option>
+          <option value="0.12">12%</option>
+          <option value="0.22" selected>22%</option>
+          <option value="0.24">24%</option>
+          <option value="0.32">32%</option>
+          <option value="0.35">35%</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div>
+    <div class="card" style="margin-bottom:16px;">
+      <span class="badge">2025 IRS Rate: $0.70/mile</span>
+      <div class="section-title">Comparison Results</div>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Standard Mileage</th>
+            <th>Actual Expenses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Total Deduction</td>
+            <td id="res-mileage-deduction">—</td>
+            <td id="res-actual-deduction">—</td>
+          </tr>
+          <tr>
+            <td>Tax Savings</td>
+            <td id="res-mileage-savings">—</td>
+            <td id="res-actual-savings">—</td>
+          </tr>
+          <tr>
+            <td>Better Method</td>
+            <td id="res-mileage-winner"></td>
+            <td id="res-actual-winner"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="winner-box" id="winner-box">Enter your information to see results.</div>
+    </div>
+
+    <!-- Breakdown Bar Chart -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title">Actual Expense Breakdown</div>
+      <div class="bar-section-title">Business-allocated amounts</div>
+
+      <div class="bar-row">
+        <span class="bar-label">Fuel</span>
+        <span class="bar-amount" id="bar-fuel-amt">$0</span>
+        <div class="bar-track"><div class="bar-fill" id="bar-fuel" style="width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Insurance</span>
+        <span class="bar-amount" id="bar-ins-amt">$0</span>
+        <div class="bar-track"><div class="bar-fill" id="bar-ins" style="width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Maintenance</span>
+        <span class="bar-amount" id="bar-maint-amt">$0</span>
+        <div class="bar-track"><div class="bar-fill" id="bar-maint" style="width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Registration</span>
+        <span class="bar-amount" id="bar-reg-amt">$0</span>
+        <div class="bar-track"><div class="bar-fill" id="bar-reg" style="width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Interest</span>
+        <span class="bar-amount" id="bar-int-amt">$0</span>
+        <div class="bar-track"><div class="bar-fill" id="bar-int" style="width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Depreciation</span>
+        <span class="bar-amount" id="bar-dep-amt">$0</span>
+        <div class="bar-track"><div class="bar-fill dep" id="bar-dep" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Key Notes -->
+    <div class="card">
+      <div class="section-title">Key Notes</div>
+      <div class="notes">
+        <ul>
+          <li><strong>2025 IRS standard mileage rate: $0.70/mile</strong></li>
+          <li>You must choose your method in the <strong>first year</strong> you use the vehicle for business. Standard &rarr; Actual is generally allowed; <strong>Actual &rarr; Standard is NOT allowed</strong> for the same vehicle.</li>
+          <li>Keep a <strong>mileage log</strong> regardless of method (IRS requires contemporaneous records).</li>
+          <li><strong>Commuting</strong> to a regular workplace is <strong>never deductible</strong>.</li>
+          <li>Section 179 and MACRS deductions are subject to luxury auto limits even if business use &gt; 50%.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // Sync sliders and number inputs
+  function syncPair(numId, sliderId, onUpdate) {
+    const num = document.getElementById(numId);
+    const slider = document.getElementById(sliderId);
+    num.addEventListener('input', function () {
+      slider.value = num.value;
+      onUpdate();
+    });
+    slider.addEventListener('input', function () {
+      num.value = slider.value;
+      onUpdate();
+    });
+  }
+
+  syncPair('biz-miles', 'biz-miles-slider', calculate);
+  syncPair('total-miles', 'total-miles-slider', calculate);
+
+  // All other inputs
+  ['fuel','insurance','maintenance','registration','interest','vehicle-value','tax-rate'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.addEventListener('input', calculate);
+    el.addEventListener('change', calculate);
+  });
+
+  document.querySelectorAll('input[name="dep-method"]').forEach(function(r) {
+    r.addEventListener('change', function() {
+      var suvRow = document.getElementById('suv-row');
+      suvRow.style.display = (r.value === 'sec179' && r.checked) ? 'flex' : 'none';
+      calculate();
+    });
+  });
+
+  document.getElementById('heavy-suv').addEventListener('change', calculate);
+
+  function fmt(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function calculate() {
+    var bizMiles   = Math.max(0, parseFloat(document.getElementById('biz-miles').value) || 0);
+    var totalMiles = Math.max(0, parseFloat(document.getElementById('total-miles').value) || 0);
+
+    // Enforce total >= biz
+    if (totalMiles < bizMiles) {
+      totalMiles = bizMiles;
+      document.getElementById('total-miles').value = totalMiles;
+      document.getElementById('total-miles-slider').value = totalMiles;
+    }
+
+    var bizPct = (totalMiles > 0) ? (bizMiles / totalMiles) : 0;
+    var pctLabel = document.getElementById('biz-pct-label');
+    pctLabel.textContent = 'Business use: ' + (bizPct * 100).toFixed(1) + '%';
+
+    var fuel         = Math.max(0, parseFloat(document.getElementById('fuel').value) || 0);
+    var insurance    = Math.max(0, parseFloat(document.getElementById('insurance').value) || 0);
+    var maintenance  = Math.max(0, parseFloat(document.getElementById('maintenance').value) || 0);
+    var registration = Math.max(0, parseFloat(document.getElementById('registration').value) || 0);
+    var interest     = Math.max(0, parseFloat(document.getElementById('interest').value) || 0);
+    var vehicleVal   = Math.max(0, parseFloat(document.getElementById('vehicle-value').value) || 0);
+    var taxRate      = parseFloat(document.getElementById('tax-rate').value) || 0.22;
+
+    var depMethod = document.querySelector('input[name="dep-method"]:checked').value;
+    var isHeavySUV = document.getElementById('heavy-suv').checked;
+
+    // Standard Mileage
+    var mileageDeduction = bizMiles * 0.70;
+    var mileageSavings   = mileageDeduction * taxRate;
+
+    // Actual Expense
+    var bFuel         = fuel         * bizPct;
+    var bIns          = insurance    * bizPct;
+    var bMaint        = maintenance  * bizPct;
+    var bReg          = registration * bizPct;
+    var bInt          = interest     * bizPct;
+
+    var depAmount = 0;
+    if (depMethod === 'macrs') {
+      // MACRS: 20% × vehicle value × biz%, capped at $12,200 × biz%
+      var macrsFull = vehicleVal * 0.20 * bizPct;
+      var macrsCap  = 12200 * bizPct;
+      depAmount = Math.min(macrsFull, macrsCap);
+    } else {
+      // Section 179: min(vehicle × biz%, cap)
+      var cap179 = isHeavySUV ? 30500 : 12200;
+      depAmount = Math.min(vehicleVal * bizPct, cap179);
+    }
+
+    var totalActual     = bFuel + bIns + bMaint + bReg + bInt + depAmount;
+    var actualSavings   = totalActual * taxRate;
+
+    // Update table
+    document.getElementById('res-mileage-deduction').textContent = fmt(mileageDeduction);
+    document.getElementById('res-actual-deduction').textContent  = fmt(totalActual);
+    document.getElementById('res-mileage-savings').textContent   = fmt(mileageSavings);
+    document.getElementById('res-actual-savings').textContent    = fmt(actualSavings);
+
+    var wb = document.getElementById('winner-box');
+    var mw = document.getElementById('res-mileage-winner');
+    var aw = document.getElementById('res-actual-winner');
+
+    mw.innerHTML = '';
+    aw.innerHTML = '';
+
+    var diff = mileageDeduction - totalActual;
+    var savDiff = Math.abs(mileageSavings - actualSavings);
+
+    if (Math.abs(diff) < 1) {
+      mw.innerHTML = '<span class="checkmark">&#8776;</span>';
+      aw.innerHTML = '<span class="checkmark">&#8776;</span>';
+      wb.className = 'winner-box winner-tie';
+      wb.textContent = 'Both methods yield approximately the same deduction.';
+    } else if (mileageDeduction > totalActual) {
+      mw.innerHTML = '<span class="checkmark">&#10003;</span>';
+      wb.className = 'winner-box winner-mileage';
+      wb.innerHTML = 'Standard Mileage gives you ' + fmt(diff) + ' MORE in deductions &mdash; saving ' + fmt(savDiff) + ' more in taxes.';
+    } else {
+      aw.innerHTML = '<span class="checkmark">&#10003;</span>';
+      wb.className = 'winner-box winner-actual';
+      wb.innerHTML = 'Actual Expenses gives you ' + fmt(-diff) + ' MORE in deductions &mdash; saving ' + fmt(savDiff) + ' more in taxes.';
+    }
+
+    // Bar chart
+    var items = [bFuel, bIns, bMaint, bReg, bInt, depAmount];
+    var ids   = ['fuel','ins','maint','reg','int','dep'];
+    var amtIds= ['bar-fuel-amt','bar-ins-amt','bar-maint-amt','bar-reg-amt','bar-int-amt','bar-dep-amt'];
+    var maxVal = Math.max.apply(null, items.concat([1]));
+
+    items.forEach(function(val, i) {
+      document.getElementById('bar-' + ids[i] + '-amt').textContent = fmt(val);
+      var pct = (val / maxVal * 100).toFixed(1);
+      document.getElementById('bar-' + ids[i]).style.width = pct + '%';
+    });
+  }
+
+  calculate();
+})();
+</script>
+</body>
+</html>

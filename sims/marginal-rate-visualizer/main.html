@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marginal vs. Effective Tax Rate — 2025</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #E65100;
+    --primary-light: #FF8A65;
+    --secondary: #00695C;
+    --secondary-light: #4DB6AC;
+    --bg: #F5F5F5;
+    --card: #FFFFFF;
+    --text: #212121;
+    --text-muted: #757575;
+    --border: #E0E0E0;
+    --shadow: 0 2px 8px rgba(0,0,0,0.10);
+    --radius: 10px;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #BF360C 100%);
+    color: #fff;
+    padding: 24px 32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+
+  header h1 {
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  header p {
+    font-size: 0.97rem;
+    margin-top: 4px;
+    opacity: 0.88;
+  }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 28px auto;
+    padding: 0 20px;
+  }
+
+  @media (max-width: 800px) {
+    .main-layout {
+      grid-template-columns: 1fr;
+      margin: 16px auto;
+      padding: 0 12px;
+    }
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+  }
+
+  .card h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 10px;
+  }
+
+  /* --- Inputs --- */
+  .field-group {
+    margin-bottom: 22px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+    color: var(--text);
+    background: #FAFAFA;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  select:focus, input[type="number"]:focus {
+    border-color: var(--primary);
+    background: #fff;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--primary) 0%, var(--primary) var(--pct, 0%), var(--border) var(--pct, 0%));
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.22);
+    cursor: pointer;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.22);
+    cursor: pointer;
+  }
+
+  .income-text-input {
+    width: 120px;
+    flex-shrink: 0;
+  }
+
+  .slider-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2px;
+  }
+
+  /* --- Rate Badges --- */
+  .badge-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .badge {
+    flex: 1;
+    border-radius: var(--radius);
+    padding: 18px 12px;
+    text-align: center;
+    color: #fff;
+  }
+
+  .badge.marginal { background: var(--primary); }
+  .badge.effective { background: var(--secondary); }
+
+  .badge .rate-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.9;
+    margin-bottom: 6px;
+  }
+
+  .badge .rate-value {
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  /* --- Insight Box --- */
+  .insight-box {
+    background: #FFF8E1;
+    border-left: 4px solid #FFC107;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 0.93rem;
+    line-height: 1.55;
+    margin-bottom: 20px;
+    color: #4E342E;
+  }
+
+  /* --- Summary --- */
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+  }
+
+  .summary-row:last-child { border-bottom: none; }
+
+  .summary-row .summary-label { color: var(--text-muted); }
+  .summary-row .summary-value { font-weight: 700; font-size: 1.05rem; }
+
+  /* --- Stacked Bar --- */
+  .stacked-bar-wrap {
+    margin: 20px 0 8px;
+  }
+
+  .stacked-bar-wrap h3 {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .stacked-bar {
+    display: flex;
+    height: 36px;
+    border-radius: 6px;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    background: var(--border);
+  }
+
+  .bar-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #fff;
+    overflow: hidden;
+    transition: width 0.4s ease;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    min-width: 0;
+  }
+
+  .bar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* --- Bracket Table --- */
+  .table-wrap {
+    overflow-x: auto;
+    margin-top: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.87rem;
+  }
+
+  thead th {
+    background: #F5F5F5;
+    padding: 9px 10px;
+    text-align: right;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border);
+  }
+
+  thead th:first-child { text-align: left; }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody td {
+    padding: 9px 10px;
+    text-align: right;
+    vertical-align: middle;
+  }
+
+  tbody td:first-child { text-align: left; }
+
+  tbody tr.inactive td { color: #BDBDBD; }
+
+  tbody tr.active-row td { font-weight: 600; }
+
+  tbody tr.marginal-row { background: #FFF3E0; }
+
+  .rate-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Marginal vs. Effective Tax Rate — 2025</h1>
+  <p>Understanding how tax brackets actually work</p>
+</header>
+
+<div class="main-layout">
+  <!-- LEFT: Inputs -->
+  <div class="card">
+    <h2>Your Information</h2>
+
+    <div class="field-group">
+      <label for="filingStatus">Filing Status</label>
+      <select id="filingStatus">
+        <option value="single">Single</option>
+        <option value="mfj">Married Filing Jointly</option>
+        <option value="hoh">Head of Household</option>
+        <option value="mfs">Married Filing Separately</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label for="incomeSlider">Annual Gross Income</label>
+      <div class="slider-row">
+        <input type="range" id="incomeSlider" min="0" max="600000" step="1000" value="75000">
+        <input type="number" id="incomeText" class="income-text-input" min="0" max="9999999" step="1000" value="75000">
+      </div>
+      <div class="slider-label">
+        <span>$0</span><span>$600,000</span>
+      </div>
+    </div>
+
+    <div class="summary-row" style="margin-top:8px;">
+      <span class="summary-label">Gross Income</span>
+      <span class="summary-value" id="dispGross">$75,000</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">Standard Deduction</span>
+      <span class="summary-value" id="dispDeduction" style="color:var(--secondary);">− $15,000</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">Taxable Income</span>
+      <span class="summary-value" id="dispTaxable">$60,000</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">Total Federal Tax</span>
+      <span class="summary-value" id="dispTax" style="color:var(--primary);">$—</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">Monthly Take-Home Est.</span>
+      <span class="summary-value" id="dispMonthly" style="color:var(--secondary);">$—</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div>
+    <!-- Rate Badges -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="badge-row">
+        <div class="badge marginal">
+          <div class="rate-label">Marginal Rate</div>
+          <div class="rate-value" id="marginalBadge">22%</div>
+        </div>
+        <div class="badge effective">
+          <div class="rate-label">Effective Rate</div>
+          <div class="rate-value" id="effectiveBadge">8.2%</div>
+        </div>
+      </div>
+
+      <div class="insight-box" id="insightBox">
+        Loading...
+      </div>
+
+      <!-- Stacked Bar -->
+      <div class="stacked-bar-wrap">
+        <h3>Income Distribution Across Brackets</h3>
+        <div class="stacked-bar" id="stackedBar"></div>
+        <div class="bar-legend" id="barLegend"></div>
+      </div>
+    </div>
+
+    <!-- Bracket Table -->
+    <div class="card">
+      <h2>Bracket Breakdown</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bracket</th>
+              <th>Rate</th>
+              <th>Income in Bracket</th>
+              <th>Tax in Bracket</th>
+              <th>Running Total</th>
+            </tr>
+          </thead>
+          <tbody id="bracketTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── 2025 Tax Data ───────────────────────────────────────────────
+  const STD_DEDUCTIONS = {
+    single: 15000,
+    mfj:    30000,
+    hoh:    22500,
+    mfs:    15000
+  };
+
+  const BRACKETS = {
+    single: [
+      { min: 0,       max: 11925,   rate: 0.10 },
+      { min: 11925,   max: 48475,   rate: 0.12 },
+      { min: 48475,   max: 103350,  rate: 0.22 },
+      { min: 103350,  max: 197300,  rate: 0.24 },
+      { min: 197300,  max: 250525,  rate: 0.32 },
+      { min: 250525,  max: 626350,  rate: 0.35 },
+      { min: 626350,  max: Infinity,rate: 0.37 }
+    ],
+    mfj: [
+      { min: 0,       max: 23850,   rate: 0.10 },
+      { min: 23850,   max: 96950,   rate: 0.12 },
+      { min: 96950,   max: 206700,  rate: 0.22 },
+      { min: 206700,  max: 394600,  rate: 0.24 },
+      { min: 394600,  max: 501050,  rate: 0.32 },
+      { min: 501050,  max: 751600,  rate: 0.35 },
+      { min: 751600,  max: Infinity,rate: 0.37 }
+    ],
+    hoh: [
+      { min: 0,       max: 17000,   rate: 0.10 },
+      { min: 17000,   max: 64850,   rate: 0.12 },
+      { min: 64850,   max: 103350,  rate: 0.22 },
+      { min: 103350,  max: 197300,  rate: 0.24 },
+      { min: 197300,  max: 250500,  rate: 0.32 },
+      { min: 250500,  max: 626350,  rate: 0.35 },
+      { min: 626350,  max: Infinity,rate: 0.37 }
+    ],
+    mfs: [
+      { min: 0,       max: 11925,   rate: 0.10 },
+      { min: 11925,   max: 48475,   rate: 0.12 },
+      { min: 48475,   max: 103350,  rate: 0.22 },
+      { min: 103350,  max: 197300,  rate: 0.24 },
+      { min: 197300,  max: 250525,  rate: 0.32 },
+      { min: 250525,  max: 626350,  rate: 0.35 },
+      { min: 626350,  max: Infinity,rate: 0.37 }
+    ]
+  };
+
+  const BRACKET_COLORS = {
+    0.10: '#4CAF50',
+    0.12: '#8BC34A',
+    0.22: '#FFC107',
+    0.24: '#FF9800',
+    0.32: '#F44336',
+    0.35: '#E91E63',
+    0.37: '#9C27B0'
+  };
+
+  // ── Helpers ─────────────────────────────────────────────────────
+  const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+  const fmtPct = n => (n * 100).toFixed(1) + '%';
+  const pct = n => (n * 100).toFixed(0) + '%';
+
+  function calcTax(taxableIncome, status) {
+    const brackets = BRACKETS[status];
+    let totalTax = 0;
+    const segments = [];
+
+    for (const b of brackets) {
+      if (taxableIncome <= b.min) break;
+      const incomeInBracket = Math.min(taxableIncome, b.max === Infinity ? taxableIncome : b.max) - b.min;
+      const taxInBracket = incomeInBracket * b.rate;
+      totalTax += taxInBracket;
+      segments.push({
+        bracket: b,
+        incomeInBracket,
+        taxInBracket,
+        runningTotal: totalTax
+      });
+    }
+    return { totalTax, segments };
+  }
+
+  function getMarginalRate(taxableIncome, status) {
+    if (taxableIncome <= 0) return 0;
+    const brackets = BRACKETS[status];
+    for (let i = brackets.length - 1; i >= 0; i--) {
+      if (taxableIncome > brackets[i].min) return brackets[i].rate;
+    }
+    return 0;
+  }
+
+  // ── DOM refs ─────────────────────────────────────────────────────
+  const elFilingStatus = document.getElementById('filingStatus');
+  const elSlider       = document.getElementById('incomeSlider');
+  const elText         = document.getElementById('incomeText');
+  const elDispGross    = document.getElementById('dispGross');
+  const elDispDed      = document.getElementById('dispDeduction');
+  const elDispTaxable  = document.getElementById('dispTaxable');
+  const elDispTax      = document.getElementById('dispTax');
+  const elDispMonthly  = document.getElementById('dispMonthly');
+  const elMarginal     = document.getElementById('marginalBadge');
+  const elEffective    = document.getElementById('effectiveBadge');
+  const elInsight      = document.getElementById('insightBox');
+  const elBar          = document.getElementById('stackedBar');
+  const elLegend       = document.getElementById('barLegend');
+  const elTableBody    = document.getElementById('bracketTableBody');
+
+  // ── Slider gradient update ────────────────────────────────────────
+  function updateSliderGradient(slider) {
+    const min = Number(slider.min);
+    const max = Number(slider.max);
+    const val = Number(slider.value);
+    const pctVal = ((val - min) / (max - min)) * 100;
+    slider.style.setProperty('--pct', pctVal + '%');
+  }
+
+  // ── Main Render ──────────────────────────────────────────────────
+  function render() {
+    const status = elFilingStatus.value;
+    const grossIncome = Math.max(0, Number(elText.value) || 0);
+    const deduction = STD_DEDUCTIONS[status];
+    const taxableIncome = Math.max(0, grossIncome - deduction);
+
+    const { totalTax, segments } = calcTax(taxableIncome, status);
+    const marginalRate = getMarginalRate(taxableIncome, status);
+    const effectiveRate = grossIncome > 0 ? totalTax / grossIncome : 0;
+    const nextK = marginalRate * 1000;
+    const monthlyTakeHome = (grossIncome - totalTax) / 12;
+
+    // Summary
+    elDispGross.textContent    = fmt(grossIncome);
+    elDispDed.textContent      = '− ' + fmt(deduction);
+    elDispTaxable.textContent  = fmt(taxableIncome);
+    elDispTax.textContent      = fmt(totalTax);
+    elDispMonthly.textContent  = fmt(monthlyTakeHome);
+
+    // Badges
+    elMarginal.textContent  = pct(marginalRate);
+    elEffective.textContent = fmtPct(effectiveRate);
+
+    // Insight
+    elInsight.innerHTML = `You're in the <strong>${pct(marginalRate)} bracket</strong>, but you only pay an average of <strong>${fmtPct(effectiveRate)}</strong> across all your income. Your next $1,000 of earnings costs <strong>${fmt(nextK)}</strong> in federal tax.`;
+
+    // Stacked Bar
+    elBar.innerHTML  = '';
+    elLegend.innerHTML = '';
+    if (grossIncome > 0) {
+      segments.forEach(seg => {
+        const widthPct = (seg.incomeInBracket / grossIncome) * 100;
+        if (widthPct < 0.1) return;
+        const color = BRACKET_COLORS[seg.bracket.rate];
+        const div = document.createElement('div');
+        div.className = 'bar-segment';
+        div.style.width = widthPct + '%';
+        div.style.background = color;
+        div.title = `${pct(seg.bracket.rate)}: ${fmt(seg.incomeInBracket)} of income, ${fmt(seg.taxInBracket)} tax`;
+        div.textContent = widthPct > 5 ? pct(seg.bracket.rate) : '';
+        elBar.appendChild(div);
+
+        const li = document.createElement('div');
+        li.className = 'legend-item';
+        li.innerHTML = `<span class="legend-dot" style="background:${color}"></span>${pct(seg.bracket.rate)} bracket`;
+        elLegend.appendChild(li);
+      });
+    } else {
+      elBar.innerHTML = '<div style="width:100%;background:#E0E0E0;height:100%;border-radius:6px;"></div>';
+    }
+
+    // Bracket Table
+    const brackets = BRACKETS[status];
+    elTableBody.innerHTML = '';
+    let runningTotal = 0;
+    brackets.forEach((b, i) => {
+      const seg = segments.find(s => s.bracket === b);
+      const isActive = !!seg;
+      const isMarginal = isActive && b.rate === marginalRate;
+      const incomeInBracket = seg ? seg.incomeInBracket : 0;
+      const taxInBracket    = seg ? seg.taxInBracket    : 0;
+      if (isActive) runningTotal = seg.runningTotal;
+
+      const displayMin = b.min === 0 ? '$0' : fmt(b.min);
+      const displayMax = b.max === Infinity ? 'and above' : fmt(b.max);
+      const bracketLabel = `${displayMin} – ${displayMax}`;
+
+      const tr = document.createElement('tr');
+      tr.className = !isActive
+        ? 'inactive'
+        : isMarginal
+          ? 'active-row marginal-row'
+          : 'active-row';
+
+      const color = BRACKET_COLORS[b.rate];
+      tr.innerHTML = `
+        <td>${bracketLabel}</td>
+        <td><span class="rate-chip" style="background:${isActive ? color : '#BDBDBD'}">${pct(b.rate)}</span></td>
+        <td>${isActive ? fmt(incomeInBracket) : '—'}</td>
+        <td>${isActive ? fmt(taxInBracket)    : '—'}</td>
+        <td>${isActive ? fmt(seg.runningTotal) : '—'}</td>
+      `;
+      elTableBody.appendChild(tr);
+    });
+  }
+
+  // ── Event Wiring ─────────────────────────────────────────────────
+  elSlider.addEventListener('input', () => {
+    elText.value = elSlider.value;
+    updateSliderGradient(elSlider);
+    render();
+  });
+
+  elText.addEventListener('input', () => {
+    const v = Math.min(Math.max(Number(elText.value) || 0, 0), 9999999);
+    elSlider.value = Math.min(v, 600000);
+    updateSliderGradient(elSlider);
+    render();
+  });
+
+  elFilingStatus.addEventListener('change', render);
+
+  // Init
+  updateSliderGradient(elSlider);
+  render();
+</script>
+</body>
+</html>
