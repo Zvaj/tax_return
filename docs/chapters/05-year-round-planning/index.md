@@ -269,7 +269,7 @@ Choosing which retirement account to prioritize is one of the highest-leverage f
 
 #### Diagram: Retirement Plan Optimizer
 
-<iframe src="../../sims/retirement-plan-optimizer/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/retirement-plan-optimizer/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Retirement Plan Optimizer — MicroSim Specification</summary>

@@ -149,7 +149,7 @@ The practical advice: if you are looking for a completely free TurboTax experien
 
 #### Diagram: Free Filing Option Selector
 
-<iframe src="../../sims/free-filing-selector/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/free-filing-selector/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Free Filing Option Selector — MicroSim Specification</summary>

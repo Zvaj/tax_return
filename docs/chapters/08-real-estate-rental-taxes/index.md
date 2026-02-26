@@ -181,7 +181,7 @@ Real property trades or businesses include development, construction, acquisitio
 
 #### Diagram: Passive Loss Decision Tree
 
-<iframe src="../../sims/passive-loss-decision/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/passive-loss-decision/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Passive Loss Decision Tree — MicroSim Specification</summary>
@@ -365,7 +365,7 @@ The gross profit percentage drives the gain calculation:
 
 #### Diagram: Rental Property Annual Tax Summary
 
-<iframe src="../../sims/rental-tax-calculator/main.html" width="100%" height="580px" scrolling="no"></iframe>
+<iframe src="../../sims/rental-tax-calculator/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Rental Property Annual Tax Summary — MicroSim Specification</summary>

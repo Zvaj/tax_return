@@ -137,6 +137,54 @@ A wash sale occurs when you sell a security at a loss *and* buy a "substantially
 
 The fix is straightforward: wait 31 days before repurchasing the same security, or replace it with a *similar but not identical* investment. For example, if you sell an S&P 500 index fund at a loss, you can immediately buy a total market index fund and stay fully invested while preserving the loss deduction.
 
+#### Diagram: Wash Sale Rule Calculator
+
+<iframe src="../../sims/wash-sale-calculator/main.html" width="100%" height="680px" style="border:none;"></iframe>
+
+<details markdown="1">
+<summary>Wash Sale Rule Calculator — MicroSim Specification</summary>
+Type: microsim
+
+Bloom Level: Apply
+Bloom Verb: Calculate
+
+Learning Objective: Given a sale date, cost basis, sale price, repurchase date, and share counts, determine whether the 61-day wash sale window is triggered, calculate the disallowed and deductible loss, and compute the adjusted cost basis of replacement shares.
+
+Layout:
+- Left panel (inputs): Sale date, shares sold, cost basis per share, sale price per share; repurchase date, shares bought, repurchase price per share
+- Right panel (outputs): Verdict badge (Wash Sale / Clean Sale / No Loss), SVG timeline showing the 61-day window with sale and repurchase date markers, results table with loss breakdown and adjusted basis calculation, educational info note
+
+Inputs:
+- Sale date: date picker
+- Shares sold: number input
+- Cost basis per share: number input (dollars)
+- Sale price per share: number input (dollars)
+- Repurchase date: date picker
+- Shares bought: number input
+- Repurchase price per share: number input (dollars)
+
+Outputs:
+- Verdict badge: color-coded (red for wash sale, green for clean sale, gray for no loss)
+- SVG timeline: 61-day window shaded in red, sale date as blue dot, repurchase date as red/green dot, date labels
+- Results table: realized gain/loss, days from sale, window status, disallowed loss, deductible loss, adjusted basis per replacement share, total adjusted basis
+- Info note: contextual explanation (IRA trap warning for wash sales; replacement security tip for clean sales)
+
+Behavior:
+- Wash sale triggered when: loss exists AND repurchase date within 30 days before or after sale date AND shares repurchased > 0
+- Partial wash sale: disallowed portion = loss per share × min(shares sold, shares repurchased)
+- Adjusted basis = repurchase price per share + (disallowed loss ÷ shares repurchased)
+- All calculations update in real time
+
+Colors:
+- Header: linear-gradient(135deg, #1e3a5f, #2563eb)
+- Wash sale window band: #fee2e2 fill, #fca5a5 border
+- Sale date dot: #1e40af
+- Wash sale repurchase dot: #dc2626
+- Clean repurchase dot: #16a34a
+
+Implementation: Vanilla HTML/CSS/JavaScript with inline SVG timeline drawn dynamically
+</details>
+
 ---
 
 ## Part 4: Dividends — Ordinary vs. Qualified
@@ -320,7 +368,7 @@ The key is the **"similar but not identical"** replacement. You want to maintain
 
 #### Diagram: Capital Gains Rate Optimizer
 
-<iframe src="../../sims/capital-gains-optimizer/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/capital-gains-optimizer/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Capital Gains Rate Optimizer — MicroSim Specification</summary>

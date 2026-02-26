@@ -328,7 +328,7 @@ This means if the IRS reclassifies your freelance photography "business" as a ho
 
 #### Diagram: Quarterly Estimated Tax Calculator
 
-<iframe src="../../sims/quarterly-tax-estimator/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/quarterly-tax-estimator/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Quarterly Estimated Tax Calculator — MicroSim Specification</summary>

@@ -159,7 +159,7 @@ States that apply the convenience doctrine (as of 2025):
 
 #### Diagram: Remote Worker State Tax Explainer
 
-<iframe src="../../sims/remote-worker-state-tax/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/remote-worker-state-tax/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Remote Worker State Tax Explainer — MicroSim Specification</summary>

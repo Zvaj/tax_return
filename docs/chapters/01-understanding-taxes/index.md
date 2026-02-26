@@ -265,7 +265,7 @@ Jordan would then compare this total to the amount already withheld from the stu
 
 #### Diagram: Interactive Tax Liability Calculator
 
-<iframe src="../../sims/tax-liability-calculator/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/tax-liability-calculator/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Tax Liability Calculator MicroSim Specification</summary>

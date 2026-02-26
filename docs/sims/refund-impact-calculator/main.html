@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refund Impact Calculator — 2025</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1a3a5c;
+    --teal: #2a9d8f;
+    --teal-light: #e8f7f5;
+    --light-gray: #f5f5f5;
+    --mid-gray: #e0e0e0;
+    --dark-gray: #555;
+    --text: #222;
+    --red: #c0392b;
+    --green: #27ae60;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.10);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em; }
+  header span { font-size: 0.85rem; opacity: 0.75; }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 800px) {
+    .main-layout { grid-template-columns: 1fr; padding: 12px; }
+  }
+
+  .panel {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .panel h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--teal);
+  }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap .prefix {
+    position: absolute;
+    left: 10px;
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+    pointer-events: none;
+  }
+  input[type="number"], select {
+    width: 100%;
+    padding: 9px 10px 9px 22px;
+    border: 1.5px solid var(--mid-gray);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: var(--light-gray);
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+  input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: var(--teal);
+    background: var(--white);
+  }
+  select { padding-left: 10px; }
+
+  .section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--teal);
+    margin: 18px 0 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--teal-light);
+  }
+
+  /* Results panel */
+  .result-hero {
+    text-align: center;
+    padding: 24px 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .result-hero.refund { background: linear-gradient(135deg, #1a7a4a, #27ae60); color: var(--white); }
+  .result-hero.owe   { background: linear-gradient(135deg, #8b1a1a, #c0392b); color: var(--white); }
+  .result-hero.even  { background: linear-gradient(135deg, #1a3a5c, #2a6496); color: var(--white); }
+
+  .result-hero .label { font-size: 0.9rem; font-weight: 600; opacity: 0.85; margin-bottom: 6px; }
+  .result-hero .amount { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .result-hero .sub { font-size: 0.8rem; opacity: 0.75; margin-top: 6px; }
+
+  .breakdown-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  .breakdown-table td {
+    padding: 7px 10px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--mid-gray);
+  }
+  .breakdown-table td:first-child { color: var(--dark-gray); }
+  .breakdown-table td:last-child { text-align: right; font-weight: 600; }
+  .breakdown-table .total-row td {
+    font-weight: 700;
+    border-top: 2px solid var(--navy);
+    border-bottom: none;
+    color: var(--navy);
+    font-size: 0.95rem;
+  }
+
+  /* Scenario bar chart */
+  .chart-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .scenario-bars { display: flex; flex-direction: column; gap: 8px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; font-size: 0.82rem; }
+  .bar-row .bar-label { width: 120px; flex-shrink: 0; color: var(--dark-gray); font-weight: 600; }
+  .bar-track {
+    flex: 1;
+    height: 22px;
+    background: var(--light-gray);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    display: flex;
+    align-items: center;
+    padding-left: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--white);
+    white-space: nowrap;
+  }
+  .bar-fill.refund-bar { background: var(--green); }
+  .bar-fill.owe-bar    { background: var(--red); }
+  .bar-fill.base-bar   { background: var(--teal); }
+  .bar-row .bar-val { width: 80px; text-align: right; font-weight: 700; font-size: 0.82rem; }
+
+  .tip-box {
+    background: var(--teal-light);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 0.83rem;
+    color: #1a5a52;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+  .tip-box strong { display: block; margin-bottom: 4px; }
+
+  .reset-btn {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    padding: 10px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s;
+  }
+  .reset-btn:hover { background: var(--teal); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Refund Impact Calculator</h1>
+  <span>2025 Tax Year</span>
+</header>
+
+<div class="main-layout">
+  <!-- LEFT: Inputs -->
+  <div class="panel">
+    <h2>Your Tax Situation</h2>
+
+    <div class="field">
+      <label>Filing Status</label>
+      <select id="filingStatus">
+        <option value="single">Single</option>
+        <option value="mfj">Married Filing Jointly</option>
+        <option value="hoh">Head of Household</option>
+        <option value="mfs">Married Filing Separately</option>
+      </select>
+    </div>
+
+    <div class="section-label">Income</div>
+
+    <div class="field">
+      <label>W-2 / Wages</label>
+      <div class="input-wrap"><span class="prefix">$</span>
+        <input type="number" id="wages" value="65000" min="0" step="1000">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Other Income (1099, side gig, etc.)</label>
+      <div class="input-wrap"><span class="prefix">$</span>
+        <input type="number" id="otherIncome" value="0" min="0" step="500">
+      </div>
+    </div>
+
+    <div class="section-label">Tax Withheld &amp; Paid</div>
+
+    <div class="field">
+      <label>Federal Tax Withheld (W-2 Box 2)</label>
+      <div class="input-wrap"><span class="prefix">$</span>
+        <input type="number" id="withheld" value="7500" min="0" step="100">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Estimated Tax Payments Made</label>
+      <div class="input-wrap"><span class="prefix">$</span>
+        <input type="number" id="estimatedPaid" value="0" min="0" step="100">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Refundable Credits (EITC, CTC, etc.)</label>
+      <div class="input-wrap"><span class="prefix">$</span>
+        <input type="number" id="refundableCredits" value="0" min="0" step="100">
+      </div>
+    </div>
+
+    <div class="section-label">Deductions &amp; Adjustments</div>
+
+    <div class="field">
+      <label>Deduction Method</label>
+      <select id="deductionType">
+        <option value="standard">Standard Deduction</option>
+        <option value="itemized">Itemize Deductions</option>
+      </select>
+    </div>
+
+    <div class="field" id="itemizedRow" style="display:none;">
+      <label>Total Itemized Deductions</label>
+      <div class="input-wrap"><span class="prefix">$</span>
+        <input type="number" id="itemizedAmount" value="0" min="0" step="500">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Above-the-Line Adjustments (IRA, HSA, etc.)</label>
+      <div class="input-wrap"><span class="prefix">$</span>
+        <input type="number" id="aboveLine" value="0" min="0" step="500">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Non-Refundable Credits</label>
+      <div class="input-wrap"><span class="prefix">$</span>
+        <input type="number" id="nonRefCredits" value="0" min="0" step="100">
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetDefaults()">Reset to Defaults</button>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div class="panel">
+    <h2>Results</h2>
+
+    <div class="result-hero" id="resultHero">
+      <div class="label" id="heroLabel">Estimated Refund</div>
+      <div class="amount" id="heroAmount">$0</div>
+      <div class="sub" id="heroSub">Based on 2025 tax brackets</div>
+    </div>
+
+    <table class="breakdown-table" id="breakdownTable">
+      <tbody>
+        <tr><td>Gross Income</td><td id="bGross">—</td></tr>
+        <tr><td>Above-the-Line Adjustments</td><td id="bAdj">—</td></tr>
+        <tr><td>Adjusted Gross Income (AGI)</td><td id="bAGI">—</td></tr>
+        <tr><td>Deduction (<span id="bDeductLabel">Standard</span>)</td><td id="bDeduct">—</td></tr>
+        <tr><td>Taxable Income</td><td id="bTaxable">—</td></tr>
+        <tr><td>Income Tax (brackets)</td><td id="bTax">—</td></tr>
+        <tr><td>Non-Refundable Credits</td><td id="bNRC">—</td></tr>
+        <tr><td>Tax After Credits</td><td id="bAfterCredits">—</td></tr>
+        <tr><td>Total Payments &amp; Refundable Credits</td><td id="bPaid">—</td></tr>
+        <tr class="total-row"><td id="finalLabel">Refund / Amount Owed</td><td id="bResult">—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="chart-title">Scenario Comparison: What Changes Your Outcome</div>
+    <div class="scenario-bars" id="scenarioBars"></div>
+
+    <div class="tip-box" id="tipBox">
+      <strong>Tip</strong>
+      Enter your numbers on the left to see your estimated refund or balance due.
+    </div>
+  </div>
+</div>
+
+<script>
+// 2025 Tax Brackets
+const BRACKETS = {
+  single: [
+    [11925,  0.10],
+    [48475,  0.12],
+    [103350, 0.22],
+    [197300, 0.24],
+    [250525, 0.32],
+    [626350, 0.35],
+    [Infinity, 0.37]
+  ],
+  mfj: [
+    [23850,  0.10],
+    [96950,  0.12],
+    [206700, 0.22],
+    [394600, 0.24],
+    [501050, 0.32],
+    [751600, 0.35],
+    [Infinity, 0.37]
+  ],
+  hoh: [
+    [17000,  0.10],
+    [64850,  0.12],
+    [103350, 0.22],
+    [197300, 0.24],
+    [250500, 0.32],
+    [626350, 0.35],
+    [Infinity, 0.37]
+  ],
+  mfs: [
+    [11925,  0.10],
+    [48475,  0.12],
+    [103350, 0.22],
+    [197300, 0.24],
+    [250525, 0.32],
+    [375800, 0.35],
+    [Infinity, 0.37]
+  ]
+};
+
+const STANDARD_DEDUCTIONS = { single: 15000, mfj: 30000, hoh: 22500, mfs: 15000 };
+
+function calcTax(taxable, status) {
+  const brackets = BRACKETS[status];
+  let tax = 0, prev = 0;
+  for (const [limit, rate] of brackets) {
+    if (taxable <= prev) break;
+    const chunk = Math.min(taxable, limit) - prev;
+    tax += chunk * rate;
+    prev = limit;
+  }
+  return Math.max(0, tax);
+}
+
+function fmt(n) {
+  const abs = Math.abs(n);
+  return (n < 0 ? '-' : '') + '$' + abs.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function val(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+function update() {
+  const status = document.getElementById('filingStatus').value;
+  const deductType = document.getElementById('deductionType').value;
+  document.getElementById('itemizedRow').style.display = deductType === 'itemized' ? '' : 'none';
+
+  const wages = val('wages');
+  const other = val('otherIncome');
+  const withheld = val('withheld');
+  const estimated = val('estimatedPaid');
+  const refundable = val('refundableCredits');
+  const aboveLine = val('aboveLine');
+  const nonRef = val('nonRefCredits');
+  const itemized = val('itemizedAmount');
+
+  const gross = wages + other;
+  const agi = Math.max(0, gross - aboveLine);
+
+  const stdDed = STANDARD_DEDUCTIONS[status];
+  const deduction = deductType === 'itemized' ? Math.max(itemized, 0) : stdDed;
+  const taxable = Math.max(0, agi - deduction);
+
+  const incomeTax = calcTax(taxable, status);
+  const afterNRC = Math.max(0, incomeTax - nonRef);
+  const totalPaid = withheld + estimated + refundable;
+  const result = totalPaid - afterNRC; // positive = refund, negative = owe
+
+  // Update breakdown
+  document.getElementById('bGross').textContent = fmt(gross);
+  document.getElementById('bAdj').textContent = aboveLine > 0 ? '−' + fmt(aboveLine) : '—';
+  document.getElementById('bAGI').textContent = fmt(agi);
+  document.getElementById('bDeductLabel').textContent = deductType === 'itemized' ? 'Itemized' : 'Standard';
+  document.getElementById('bDeduct').textContent = '−' + fmt(deduction);
+  document.getElementById('bTaxable').textContent = fmt(taxable);
+  document.getElementById('bTax').textContent = fmt(incomeTax);
+  document.getElementById('bNRC').textContent = nonRef > 0 ? '−' + fmt(Math.min(nonRef, incomeTax)) : '—';
+  document.getElementById('bAfterCredits').textContent = fmt(afterNRC);
+  document.getElementById('bPaid').textContent = fmt(totalPaid);
+  document.getElementById('bResult').textContent = result >= 0 ? fmt(result) + ' REFUND' : fmt(Math.abs(result)) + ' OWED';
+
+  // Hero
+  const hero = document.getElementById('resultHero');
+  const heroAmount = document.getElementById('heroAmount');
+  const heroLabel = document.getElementById('heroLabel');
+  const heroSub = document.getElementById('heroSub');
+
+  hero.className = 'result-hero';
+  if (result > 50) {
+    hero.classList.add('refund');
+    heroLabel.textContent = 'Estimated Refund';
+    heroAmount.textContent = fmt(result);
+    heroSub.textContent = 'The IRS owes you money — consider adjusting withholding';
+  } else if (result < -50) {
+    hero.classList.add('owe');
+    heroLabel.textContent = 'Amount Owed';
+    heroAmount.textContent = fmt(Math.abs(result));
+    heroSub.textContent = 'You owe the IRS — increase withholding or make estimated payments';
+  } else {
+    hero.classList.add('even');
+    heroLabel.textContent = 'Approximately Even';
+    heroAmount.textContent = result >= 0 ? fmt(result) : '−' + fmt(Math.abs(result));
+    heroSub.textContent = 'Great W-4 calibration!';
+  }
+
+  // Scenario comparison
+  buildScenarios(wages, other, withheld, estimated, refundable, aboveLine, nonRef, deductType, itemized, stdDed, status, result);
+
+  // Tip
+  updateTip(result, withheld, wages, deductType, stdDed, itemized);
+}
+
+function buildScenarios(wages, other, withheld, estimated, refundable, aboveLine, nonRef, deductType, itemized, stdDed, status, baseResult) {
+  // Scenario: extra $1,000 withholding
+  const r1 = baseResult + 1000;
+  // Scenario: maxing IRA ($7,000 deduction)
+  const agi2 = Math.max(0, wages + other - aboveLine - 7000);
+  const ded2 = deductType === 'itemized' ? Math.max(itemized, 0) : stdDed;
+  const t2 = Math.max(0, agi2 - ded2);
+  const r2 = (withheld + estimated + refundable) - Math.max(0, calcTax(t2, status) - nonRef);
+  // Scenario: itemize if not already, or standard
+  let r3;
+  if (deductType === 'standard') {
+    const agi3 = Math.max(0, wages + other - aboveLine);
+    const t3 = Math.max(0, agi3 - itemized);
+    r3 = (withheld + estimated + refundable) - Math.max(0, calcTax(t3, status) - nonRef);
+  } else {
+    const agi3 = Math.max(0, wages + other - aboveLine);
+    const t3 = Math.max(0, agi3 - stdDed);
+    r3 = (withheld + estimated + refundable) - Math.max(0, calcTax(t3, status) - nonRef);
+  }
+
+  const scenarios = [
+    { label: 'Current', val: baseResult, base: true },
+    { label: '+$1K Withheld', val: r1, base: false },
+    { label: 'Max IRA', val: r2, base: false },
+    { label: deductType === 'standard' ? 'If Itemized' : 'If Standard', val: r3, base: false },
+  ];
+
+  const maxAbs = Math.max(...scenarios.map(s => Math.abs(s.val)), 1);
+  const container = document.getElementById('scenarioBars');
+  container.innerHTML = '';
+
+  for (const s of scenarios) {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    const pct = Math.min(100, (Math.abs(s.val) / maxAbs) * 100);
+    const isRefund = s.val >= 0;
+    const barClass = s.base ? 'base-bar' : (isRefund ? 'refund-bar' : 'owe-bar');
+    row.innerHTML = `
+      <div class="bar-label">${s.label}</div>
+      <div class="bar-track">
+        <div class="bar-fill ${barClass}" style="width:${pct.toFixed(1)}%">
+          ${pct > 20 ? (isRefund ? 'Refund' : 'Owe') : ''}
+        </div>
+      </div>
+      <div class="bar-val" style="color:${isRefund ? 'var(--green)' : 'var(--red)'}">
+        ${isRefund ? '+' : '−'}${fmt(Math.abs(s.val))}
+      </div>`;
+    container.appendChild(row);
+  }
+}
+
+function updateTip(result, withheld, wages, deductType, stdDed, itemized) {
+  const tipBox = document.getElementById('tipBox');
+  let msg = '';
+  if (result > 3000) {
+    msg = '<strong>Large Refund — Adjust Your W-4</strong>A big refund means you overpaid all year — the IRS held your money interest-free. Submit a new W-4 to your employer to reduce withholding and boost your paycheck.';
+  } else if (result < -1000) {
+    msg = '<strong>You Owe — Avoid an Underpayment Penalty</strong>If you owe more than $1,000 and haven\'t paid at least 90% of this year\'s tax (or 100% of last year\'s), the IRS charges an underpayment penalty. Make a Q4 estimated payment or adjust your W-4 now.';
+  } else if (deductType === 'standard' && itemized > stdDed) {
+    msg = '<strong>Switch to Itemizing</strong>Your itemized deductions exceed the standard deduction. Switch to "Itemize Deductions" to lower your taxable income and potentially increase your refund.';
+  } else if (wages > 0 && withheld / wages < 0.10) {
+    msg = '<strong>Low Withholding Rate</strong>Your withholding is less than 10% of wages. Most people need 15–22%. Consider filing a new W-4 with your employer to avoid a surprise tax bill.';
+  } else {
+    msg = '<strong>Well-Calibrated</strong>Your withholding closely matches your estimated tax liability. To optimize further, explore above-the-line deductions like IRA contributions, HSA deposits, or student loan interest.';
+  }
+  tipBox.innerHTML = msg;
+}
+
+function resetDefaults() {
+  document.getElementById('filingStatus').value = 'single';
+  document.getElementById('wages').value = 65000;
+  document.getElementById('otherIncome').value = 0;
+  document.getElementById('withheld').value = 7500;
+  document.getElementById('estimatedPaid').value = 0;
+  document.getElementById('refundableCredits').value = 0;
+  document.getElementById('deductionType').value = 'standard';
+  document.getElementById('itemizedAmount').value = 0;
+  document.getElementById('aboveLine').value = 0;
+  document.getElementById('nonRefCredits').value = 0;
+  update();
+}
+
+// Wire up all inputs
+document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', update));
+update();
+</script>
+</body>
+</html>

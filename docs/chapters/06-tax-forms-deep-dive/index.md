@@ -230,7 +230,7 @@ If the result is negative, you get a refund. If positive, you owe the difference
 
 #### Diagram: 1040 Tax Flow Simulator
 
-<iframe src="../../sims/1040-tax-flow/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/1040-tax-flow/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>1040 Tax Flow Simulator — MicroSim Specification</summary>

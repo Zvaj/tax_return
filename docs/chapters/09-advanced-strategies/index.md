@@ -231,7 +231,7 @@ Without an HRA structure, an S-Corp owner-employee's health insurance premiums a
 
 #### Diagram: S-Corp vs. Sole Proprietor Tax Savings Calculator
 
-<iframe src="../../sims/scorp-tax-calculator/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/scorp-tax-calculator/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>S-Corp vs. Sole Proprietor Tax Savings Calculator — MicroSim Specification</summary>

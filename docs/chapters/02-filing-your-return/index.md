@@ -261,7 +261,7 @@ One important clarification: if your return has a straightforward math error, th
 
 #### Diagram: Standard vs. Itemized Deduction Calculator
 
-<iframe src="../../sims/standard-vs-itemized/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/standard-vs-itemized/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Standard vs. Itemized Deduction Calculator Specification</summary>

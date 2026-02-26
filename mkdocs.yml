@@ -54,6 +54,27 @@ nav:
     - 10. State Taxes: chapters/10-state-taxes/index.md
     - 11. IRS Audits: chapters/11-irs-audits/index.md
     - 12. Free Filing Resources: chapters/12-free-filing-resources/index.md
+  - Simulations:
+    - All Calculators: sims/index.md
+    - Full Tax Return Calculator: sims/full-tax-return-calculator/index.md
+    - Tax Liability Calculator: sims/tax-liability-calculator/index.md
+    - Refund Impact Calculator: sims/refund-impact-calculator/index.md
+    - 1040 Tax Flow Simulator: sims/1040-tax-flow/index.md
+    - Marginal vs. Effective Rate: sims/marginal-rate-visualizer/index.md
+    - Standard vs. Itemized: sims/standard-vs-itemized/index.md
+    - W-4 Withholding Tool: sims/w4-withholding-calculator/index.md
+    - Free Filing Selector: sims/free-filing-selector/index.md
+    - Retirement Plan Optimizer: sims/retirement-plan-optimizer/index.md
+    - IRA Comparison Calculator: sims/ira-comparison-calculator/index.md
+    - HSA vs. FSA Analyzer: sims/hsa-fsa-comparison/index.md
+    - Quarterly Tax Estimator: sims/quarterly-tax-estimator/index.md
+    - Mileage vs. Actual Expense: sims/mileage-vs-actual-expense/index.md
+    - S-Corp vs. Sole Proprietor: sims/scorp-tax-calculator/index.md
+    - Capital Gains Optimizer: sims/capital-gains-optimizer/index.md
+    - Passive Loss Decision Tree: sims/passive-loss-decision/index.md
+    - Rental Property Tax Summary: sims/rental-tax-calculator/index.md
+    - Remote Worker State Tax: sims/remote-worker-state-tax/index.md
+    - Audit Risk Meter: sims/audit-risk-meter/index.md
   - FAQ: faq.md
   - Glossary: glossary.md
   - Learning Graph:

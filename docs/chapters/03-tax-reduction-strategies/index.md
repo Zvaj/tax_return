@@ -187,7 +187,7 @@ The federal government provides significant tax incentives for energy-efficient 
 **Energy Efficient Home Credit (Section 45L):** This credit is primarily designed for builders and developers who construct or substantially improve energy-efficient homes for sale. As a typical homeowner or renter, this credit generally does not apply to you — but if you are building new construction or are a real estate developer, it is worth investigating.
 
 #### Diagram: Tax Savings Calculator — Traditional vs. Roth IRA
-<iframe src="../../sims/ira-comparison-calculator/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/ira-comparison-calculator/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>IRA Comparison Calculator — MicroSim Specification</summary>

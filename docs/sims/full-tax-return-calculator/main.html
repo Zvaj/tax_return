@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2025 Full Federal Tax Return Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #F5F5F5;
+    color: #212121;
+    min-height: 100vh;
+  }
+
+  /* ===== COLOR VARIABLES ===== */
+  :root {
+    --primary: #E65100;
+    --primary-dark: #BF360C;
+    --primary-light: #FF8A50;
+    --secondary: #00695C;
+    --secondary-dark: #004D40;
+    --secondary-light: #4DB6AC;
+    --surface: #FFFFFF;
+    --bg: #F5F5F5;
+    --text: #212121;
+    --text-secondary: #757575;
+    --border: #E0E0E0;
+    --success: #2E7D32;
+    --success-bg: #E8F5E9;
+    --danger: #C62828;
+    --danger-bg: #FFEBEE;
+    --info: #1565C0;
+    --info-bg: #E3F2FD;
+    --warning-bg: #FFF8E1;
+  }
+
+  /* ===== HEADER ===== */
+  .app-header {
+    background: var(--primary);
+    color: white;
+    padding: 16px 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .app-header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; }
+  .app-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
+
+  /* ===== STEP PROGRESS BAR ===== */
+  .progress-container {
+    background: var(--primary-dark);
+    padding: 12px 20px 0;
+    display: flex;
+    justify-content: center;
+  }
+  .steps-indicator {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    max-width: 600px;
+    width: 100%;
+  }
+  .step-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding-bottom: 8px;
+  }
+  .step-item::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.3);
+    z-index: 0;
+  }
+  .step-item:last-child::before { display: none; }
+  .step-circle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+    position: relative; z-index: 1;
+    border: 2px solid rgba(255,255,255,0.5);
+    transition: all 0.3s;
+  }
+  .step-item.active .step-circle {
+    background: white; color: var(--primary); border-color: white;
+  }
+  .step-item.completed .step-circle {
+    background: var(--secondary-light); border-color: var(--secondary-light);
+  }
+  .step-item.completed .step-circle::after { content: '✓'; }
+  .step-item.completed .step-circle span { display: none; }
+  .step-label {
+    font-size: 0.6rem; color: rgba(255,255,255,0.7);
+    margin-top: 4px; text-align: center; line-height: 1.2;
+  }
+  .step-item.active .step-label { color: white; font-weight: 600; }
+
+  /* ===== MAIN CONTAINER ===== */
+  .main-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* ===== WIZARD CARDS ===== */
+  .wizard-step { display: none; }
+  .wizard-step.active { display: block; }
+
+  .step-card {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .step-card-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 20px 24px;
+  }
+  .step-card-header h2 { font-size: 1.2rem; font-weight: 700; }
+  .step-card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
+  .step-card-body { padding: 20px 24px; }
+
+  /* ===== FORM ELEMENTS ===== */
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .input-wrapper {
+    position: relative;
+    display: flex; align-items: center;
+  }
+  .input-prefix {
+    position: absolute; left: 12px;
+    font-weight: 600; color: var(--text-secondary);
+    pointer-events: none;
+  }
+  input[type="number"] {
+    width: 100%;
+    padding: 10px 12px 10px 26px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(230,81,0,0.15);
+  }
+
+  /* Tooltip */
+  .tooltip-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .tooltip-icon {
+    width: 18px; height: 18px;
+    background: var(--secondary);
+    color: white; border-radius: 50%;
+    font-size: 0.65rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: help; flex-shrink: 0;
+    position: relative;
+  }
+  .tooltip-icon:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%; transform: translateX(-50%);
+    background: #333; color: white;
+    padding: 6px 10px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 400;
+    white-space: normal; min-width: 200px; max-width: 260px;
+    z-index: 100; line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .tooltip-icon:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%; transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #333;
+    z-index: 101;
+  }
+
+  /* Radio and Checkbox groups */
+  .radio-group, .checkbox-group { display: flex; flex-direction: column; gap: 10px; }
+  .radio-option, .checkbox-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.925rem;
+  }
+  .radio-option:hover, .checkbox-option:hover {
+    border-color: var(--primary-light);
+    background: #FFF3E0;
+  }
+  .radio-option input, .checkbox-option input { width: 18px; height: 18px; accent-color: var(--primary); }
+  .radio-option.selected { border-color: var(--primary); background: #FFF3E0; }
+  .checkbox-option.checked { border-color: var(--secondary); background: #E0F2F1; }
+
+  /* ===== LIVE TOTALS ===== */
+  .live-total {
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .live-total .label { font-size: 0.875rem; opacity: 0.9; }
+  .live-total .value { font-size: 1.5rem; font-weight: 700; }
+
+  .live-totals-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 20px;
+  }
+  .mini-total {
+    background: var(--info-bg);
+    border: 1px solid #BBDEFB;
+    border-radius: 8px; padding: 10px 14px;
+  }
+  .mini-total .label { font-size: 0.75rem; color: var(--info); font-weight: 600; }
+  .mini-total .value { font-size: 1.1rem; font-weight: 700; color: var(--info); }
+
+  /* Section dividers */
+  .section-title {
+    font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 6px; margin: 20px 0 14px;
+  }
+
+  /* Info box */
+  .info-box {
+    background: var(--info-bg);
+    border-left: 4px solid var(--info);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 0.8rem; color: var(--info);
+    margin-bottom: 14px; line-height: 1.5;
+  }
+  .warning-box {
+    background: var(--warning-bg);
+    border-left: 4px solid #F57F17;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 0.8rem; color: #5D4037;
+    margin-bottom: 14px; line-height: 1.5;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn-row {
+    display: flex; gap: 12px; margin-top: 24px;
+    justify-content: space-between;
+  }
+  .btn {
+    padding: 12px 24px; border: none; border-radius: 8px;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary {
+    background: var(--primary); color: white;
+    box-shadow: 0 2px 8px rgba(230,81,0,0.35);
+  }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-secondary {
+    background: white; color: var(--text);
+    border: 2px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-success {
+    background: var(--secondary); color: white;
+    box-shadow: 0 2px 8px rgba(0,105,92,0.35);
+  }
+  .btn-success:hover { background: var(--secondary-dark); transform: translateY(-1px); }
+  .btn-lg { padding: 14px 32px; font-size: 1.05rem; }
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* ===== RESULTS PAGE ===== */
+  #results-page { display: none; }
+
+  .results-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white; text-align: center;
+    padding: 24px 20px;
+  }
+  .results-header h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: 1px; }
+  .results-header p { font-size: 0.875rem; opacity: 0.85; margin-top: 4px; }
+
+  .results-section {
+    background: var(--surface); border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    padding: 20px 24px; margin-bottom: 16px;
+  }
+  .results-section h3 {
+    font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 8px; margin-bottom: 14px;
+  }
+
+  .summary-line {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px solid #F5F5F5;
+    font-size: 0.925rem;
+  }
+  .summary-line:last-child { border-bottom: none; }
+  .summary-line .line-label { color: var(--text-secondary); }
+  .summary-line .line-value { font-weight: 600; }
+  .summary-line.total {
+    border-top: 2px solid var(--border);
+    padding-top: 10px; margin-top: 4px;
+    font-weight: 700; font-size: 1rem;
+  }
+  .summary-line .negative { color: var(--secondary); }
+  .summary-line .bold-value { font-size: 1.1rem; font-weight: 800; }
+
+  /* Bracket table */
+  .bracket-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.85rem; margin-top: 10px;
+  }
+  .bracket-table th {
+    background: var(--bg); text-align: left;
+    padding: 8px 10px; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+  .bracket-table td { padding: 7px 10px; border-bottom: 1px solid #F5F5F5; }
+  .bracket-table tr:last-child td { border-bottom: none; font-weight: 700; }
+  .bracket-table .rate-cell {
+    font-weight: 700; color: var(--primary);
+    background: #FFF3E0; border-radius: 4px;
+    padding: 2px 6px; display: inline-block;
+  }
+
+  /* Refund / owe box */
+  .outcome-box {
+    border-radius: 12px; padding: 24px;
+    text-align: center; margin: 16px 0;
+  }
+  .outcome-box.refund {
+    background: var(--success-bg);
+    border: 3px solid var(--success);
+  }
+  .outcome-box.owe {
+    background: var(--danger-bg);
+    border: 3px solid var(--danger);
+  }
+  .outcome-box .outcome-label {
+    font-size: 0.9rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .outcome-box.refund .outcome-label { color: var(--success); }
+  .outcome-box.owe .outcome-label { color: var(--danger); }
+  .outcome-box .outcome-amount {
+    font-size: 3rem; font-weight: 800; line-height: 1;
+  }
+  .outcome-box.refund .outcome-amount { color: var(--success); }
+  .outcome-box.owe .outcome-amount { color: var(--danger); }
+  .outcome-box .outcome-sub { font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px; }
+
+  .rates-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 12px;
+  }
+  .rate-badge {
+    background: var(--bg); border-radius: 8px;
+    padding: 10px 14px; text-align: center;
+  }
+  .rate-badge .rb-label { font-size: 0.75rem; color: var(--text-secondary); }
+  .rate-badge .rb-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+
+  /* Chart */
+  .chart-container {
+    max-width: 320px; margin: 16px auto; position: relative;
+  }
+
+  /* Disclaimer */
+  .disclaimer {
+    background: var(--warning-bg);
+    border: 1px solid #FFE082;
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 0.775rem; color: #5D4037;
+    line-height: 1.5; margin-top: 16px; text-align: center;
+  }
+
+  /* ===== HIDDEN ELEMENTS ===== */
+  .hidden { display: none !important; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 480px) {
+    .app-header h1 { font-size: 1.1rem; }
+    .step-label { display: none; }
+    .step-card-body { padding: 16px; }
+    .live-totals-row { grid-template-columns: 1fr; }
+    .btn-row { flex-direction: column-reverse; }
+    .btn { width: 100%; justify-content: center; }
+    .rates-row { grid-template-columns: 1fr; }
+    .outcome-box .outcome-amount { font-size: 2.2rem; }
+    .bracket-table { font-size: 0.78rem; }
+    .bracket-table th, .bracket-table td { padding: 6px 6px; }
+  }
+
+  /* Deduction radio toggle */
+  .deduction-toggle {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .deduction-toggle button {
+    flex: 1; padding: 10px; border: 2px solid var(--border);
+    border-radius: 8px; background: white; cursor: pointer;
+    font-size: 0.875rem; font-weight: 600; transition: all 0.2s;
+  }
+  .deduction-toggle button.active {
+    border-color: var(--primary); background: #FFF3E0; color: var(--primary);
+  }
+
+  /* Std deduction display */
+  .std-deduction-display {
+    background: var(--bg); border-radius: 8px;
+    padding: 14px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .std-deduction-display .sd-label { font-size: 0.875rem; color: var(--text-secondary); }
+  .std-deduction-display .sd-value { font-size: 1.3rem; font-weight: 800; color: var(--secondary); }
+
+  /* EIC result display */
+  .credit-result {
+    background: var(--success-bg); border-radius: 6px;
+    padding: 6px 12px; font-size: 0.85rem;
+    font-weight: 600; color: var(--success);
+    display: inline-block; margin-top: 4px;
+  }
+
+  /* Medical deductible calc */
+  .medical-calc {
+    background: var(--bg); border-radius: 6px;
+    padding: 8px 12px; font-size: 0.8rem;
+    color: var(--text-secondary); margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<header class="app-header">
+  <h1>2025 Federal Tax Return Calculator</h1>
+  <p>Estimate your refund or amount owed — for educational purposes</p>
+</header>
+
+<!-- Step Progress Indicator -->
+<div class="progress-container" id="progress-bar">
+  <div class="steps-indicator">
+    <div class="step-item active" id="step-ind-1">
+      <div class="step-circle"><span>1</span></div>
+      <div class="step-label">Filing<br>Status</div>
+    </div>
+    <div class="step-item" id="step-ind-2">
+      <div class="step-circle"><span>2</span></div>
+      <div class="step-label">Income</div>
+    </div>
+    <div class="step-item" id="step-ind-3">
+      <div class="step-circle"><span>3</span></div>
+      <div class="step-label">Deductions</div>
+    </div>
+    <div class="step-item" id="step-ind-4">
+      <div class="step-circle"><span>4</span></div>
+      <div class="step-label">Credits</div>
+    </div>
+    <div class="step-item" id="step-ind-5">
+      <div class="step-circle"><span>5</span></div>
+      <div class="step-label">Payments</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     WIZARD CONTAINER
+     =================================================== -->
+<div class="main-container">
+
+  <!-- =================== STEP 1: FILING STATUS =================== -->
+  <div class="wizard-step active" id="step-1">
+    <div class="step-card">
+      <div class="step-card-header">
+        <h2>Step 1 of 5: Who's Filing?</h2>
+        <p>Your filing status determines your tax brackets and standard deduction.</p>
+      </div>
+      <div class="step-card-body">
+
+        <div class="form-group">
+          <label>Select your filing status:</label>
+          <div class="radio-group" id="filing-status-group">
+            <label class="radio-option">
+              <input type="radio" name="filingStatus" value="single" checked> Single
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="filingStatus" value="mfj"> Married Filing Jointly
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="filingStatus" value="mfs"> Married Filing Separately
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="filingStatus" value="hoh"> Head of Household
+            </label>
+          </div>
+        </div>
+
+        <div class="section-title">Age & Blindness Adjustments</div>
+        <div class="info-box">
+          These increase your standard deduction. For Single/HOH: +$1,600 each. For MFJ: +$1,350 each qualifying person.
+        </div>
+
+        <div class="checkbox-group" id="age-blind-group">
+          <label class="checkbox-option" id="cb-taxpayer-65-wrap">
+            <input type="checkbox" id="cb-taxpayer-65"> Taxpayer is 65 or older
+          </label>
+          <label class="checkbox-option hidden" id="cb-spouse-65-wrap">
+            <input type="checkbox" id="cb-spouse-65"> Spouse is 65 or older <em style="font-size:0.8em; color:var(--text-secondary)">(MFJ only)</em>
+          </label>
+          <label class="checkbox-option" id="cb-taxpayer-blind-wrap">
+            <input type="checkbox" id="cb-taxpayer-blind"> Taxpayer is legally blind
+          </label>
+          <label class="checkbox-option hidden" id="cb-spouse-blind-wrap">
+            <input type="checkbox" id="cb-spouse-blind"> Spouse is legally blind <em style="font-size:0.8em; color:var(--text-secondary)">(MFJ only)</em>
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <div></div><!-- spacer -->
+          <button class="btn btn-primary" onclick="goToStep(2)">Next: Income &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /step-1 -->
+
+
+  <!-- =================== STEP 2: INCOME =================== -->
+  <div class="wizard-step" id="step-2">
+    <div class="step-card">
+      <div class="step-card-header">
+        <h2>Step 2 of 5: Your Income</h2>
+        <p>Enter amounts from your tax documents. Leave blank if not applicable.</p>
+      </div>
+      <div class="step-card-body">
+
+        <!-- Live total counter -->
+        <div class="live-total">
+          <div class="label">Total Gross Income</div>
+          <div class="value" id="live-gross-income">$0</div>
+        </div>
+
+        <div class="section-title">Wages &amp; Salary</div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="wages-you">W-2 Wages (You)</label>
+            <span class="tooltip-icon" data-tip="From Box 1 of your W-2 form. Includes salary, tips, and other compensation.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="wages-you" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <div class="form-group" id="wages-spouse-wrap">
+          <div class="tooltip-wrapper">
+            <label for="wages-spouse">W-2 Wages (Spouse)</label>
+            <span class="tooltip-icon" data-tip="Box 1 from your spouse's W-2. Only applies to Married Filing Jointly.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="wages-spouse" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <div class="section-title">Investment &amp; Interest Income</div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="interest">Taxable Interest (1099-INT)</label>
+            <span class="tooltip-icon" data-tip="Interest from bank accounts, savings bonds, CDs. From Box 1 of 1099-INT.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="interest" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="ord-dividends">Ordinary Dividends (1099-DIV Box 1a)</label>
+            <span class="tooltip-icon" data-tip="Total dividends from Box 1a of Form 1099-DIV.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="ord-dividends" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="qual-dividends">Qualified Dividends (1099-DIV Box 1b)</label>
+            <span class="tooltip-icon" data-tip="Portion of ordinary dividends taxed at lower capital gains rates. Must be ≤ ordinary dividends.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="qual-dividends" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <div class="section-title">Self-Employment &amp; Business</div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="biz-profit">Net Business Profit/Loss (Schedule C)</label>
+            <span class="tooltip-icon" data-tip="Revenue minus expenses for freelance or self-employment work. Use negative for a net loss.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="biz-profit" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+        <div id="se-tax-display" class="hidden warning-box">
+          Self-Employment Tax: <strong id="se-tax-amount">$0</strong>
+          <span style="font-size:0.75em"> (92.35% × 15.3% = 14.13% of gross SE income)</span>
+        </div>
+
+        <div class="section-title">Capital Gains</div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="st-gains">Short-Term Capital Gains</label>
+            <span class="tooltip-icon" data-tip="Gains from assets held 1 year or less. Taxed as ordinary income at your regular rate.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="st-gains" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="lt-gains">Long-Term Capital Gains</label>
+            <span class="tooltip-icon" data-tip="Gains from assets held more than 1 year. Taxed at preferential 0%, 15%, or 20% rates.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="lt-gains" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <div class="section-title">Retirement &amp; Other Income</div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="ira-pension">Taxable IRA/Pension Distributions (1099-R)</label>
+            <span class="tooltip-icon" data-tip="Taxable portion of distributions from IRAs, 401(k)s, pensions. From Box 2a of 1099-R.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="ira-pension" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="ss-benefits">Social Security Benefits Received</label>
+            <span class="tooltip-icon" data-tip="Total Social Security benefits from Box 5 of SSA-1099. Up to 85% may be taxable depending on your combined income.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="ss-benefits" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+        <div id="ss-taxable-display" class="hidden info-box">
+          Taxable Social Security: <strong id="ss-taxable-amount">$0</strong>
+          <span id="ss-taxable-pct" style="font-size:0.8em"> (0% taxable)</span>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="other-income">Other Income (1099-MISC, gambling, etc.)</label>
+            <span class="tooltip-icon" data-tip="Miscellaneous income including gambling winnings, prizes, alimony received (pre-2019 divorces), rental income, etc.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="other-income" min="0" placeholder="0" oninput="calcIncome()">
+          </div>
+        </div>
+
+        <!-- Income summary mini-totals -->
+        <div class="live-totals-row">
+          <div class="mini-total">
+            <div class="label">Gross Income</div>
+            <div class="value" id="mini-gross">$0</div>
+          </div>
+          <div class="mini-total">
+            <div class="label">SE Tax (half deductible)</div>
+            <div class="value" id="mini-se-tax">$0</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goToStep(1)">&larr; Back</button>
+          <button class="btn btn-primary" onclick="goToStep(3)">Next: Deductions &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /step-2 -->
+
+
+  <!-- =================== STEP 3: ADJUSTMENTS & DEDUCTIONS =================== -->
+  <div class="wizard-step" id="step-3">
+    <div class="step-card">
+      <div class="step-card-header">
+        <h2>Step 3 of 5: Reduce Your Income</h2>
+        <p>Adjustments reduce income before calculating AGI. Deductions further reduce taxable income.</p>
+      </div>
+      <div class="step-card-body">
+
+        <div class="section-title">Section A: Above-the-Line Adjustments</div>
+        <div class="info-box">These adjustments are available even if you don't itemize.</div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="student-loan-int">Student Loan Interest Paid</label>
+            <span class="tooltip-icon" data-tip="Max $2,500. Phases out from $80k–$95k AGI (single) or $165k–$195k (MFJ). From 1098-E form.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="student-loan-int" min="0" placeholder="0" oninput="calcAGI()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="ira-contrib">Traditional IRA Contribution</label>
+            <span class="tooltip-icon" data-tip="Max $7,000 if under 65; $8,000 if 65+. Deductibility may be limited if you or your spouse are covered by a workplace retirement plan.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="ira-contrib" min="0" placeholder="0" oninput="calcAGI()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="hsa-contrib">HSA Contribution</label>
+            <span class="tooltip-icon" data-tip="2025 limits: $4,300 (self-only) or $8,550 (family coverage). Must have a qualifying high-deductible health plan.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="hsa-contrib" min="0" placeholder="0" oninput="calcAGI()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="se-health-ins">Self-Employed Health Insurance</label>
+            <span class="tooltip-icon" data-tip="If self-employed, you may deduct 100% of health insurance premiums. Cannot exceed your net self-employment profit.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="se-health-ins" min="0" placeholder="0" oninput="calcAGI()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="other-adj">Other Adjustments</label>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="other-adj" min="0" placeholder="0" oninput="calcAGI()">
+          </div>
+        </div>
+
+        <!-- AGI live display -->
+        <div class="live-total" style="margin-top:10px">
+          <div>
+            <div class="label">Adjusted Gross Income (AGI)</div>
+            <div style="font-size:0.75rem; opacity:0.8">Gross Income − Adjustments</div>
+          </div>
+          <div class="value" id="live-agi">$0</div>
+        </div>
+
+        <!-- ---- Section B: Standard vs Itemized ---- -->
+        <div class="section-title">Section B: Standard vs. Itemized Deduction</div>
+
+        <div class="deduction-toggle">
+          <button id="btn-standard" class="active" onclick="setDeductionMode('standard')">
+            Standard Deduction
+          </button>
+          <button id="btn-itemize" onclick="setDeductionMode('itemize')">
+            Itemize Deductions
+          </button>
+        </div>
+
+        <!-- Standard deduction panel -->
+        <div id="panel-standard">
+          <div class="std-deduction-display">
+            <div class="sd-label" id="std-ded-label">Your Standard Deduction:</div>
+            <div class="sd-value" id="std-ded-value">$15,000</div>
+          </div>
+          <div class="info-box" style="margin-top:10px">
+            <span id="std-ded-breakdown">Base: $15,000 (Single)</span>
+          </div>
+        </div>
+
+        <!-- Itemized deduction panel -->
+        <div id="panel-itemize" class="hidden">
+          <div class="form-group">
+            <div class="tooltip-wrapper">
+              <label for="salt">State &amp; Local Taxes (SALT)</label>
+              <span class="tooltip-icon" data-tip="Maximum $10,000 deductible. Includes state income taxes (or sales taxes) plus property taxes.">?</span>
+            </div>
+            <div class="input-wrapper"><span class="input-prefix">$</span>
+              <input type="number" id="salt" min="0" placeholder="0" oninput="calcAGI()">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="mortgage-int">Mortgage Interest Paid</label>
+            <div class="input-wrapper"><span class="input-prefix">$</span>
+              <input type="number" id="mortgage-int" min="0" placeholder="0" oninput="calcAGI()">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="charity-cash">Charitable Contributions (Cash)</label>
+            <div class="input-wrapper"><span class="input-prefix">$</span>
+              <input type="number" id="charity-cash" min="0" placeholder="0" oninput="calcAGI()">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="tooltip-wrapper">
+              <label for="medical-exp">Medical Expenses (total paid)</label>
+              <span class="tooltip-icon" data-tip="Only the amount exceeding 7.5% of your AGI is deductible. Enter your total unreimbursed medical expenses.">?</span>
+            </div>
+            <div class="input-wrapper"><span class="input-prefix">$</span>
+              <input type="number" id="medical-exp" min="0" placeholder="0" oninput="calcAGI()">
+            </div>
+            <div class="medical-calc" id="medical-calc-display">
+              Deductible portion (over 7.5% of AGI): <strong id="medical-deductible">$0</strong>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="other-itemized">Other Itemized Deductions</label>
+            <div class="input-wrapper"><span class="input-prefix">$</span>
+              <input type="number" id="other-itemized" min="0" placeholder="0" oninput="calcAGI()">
+            </div>
+          </div>
+
+          <div class="info-box">
+            Total Itemized: <strong id="total-itemized-display">$0</strong>
+            <span id="std-vs-item-msg" style="display:block; margin-top:4px; font-size:0.8em"></span>
+          </div>
+        </div>
+
+        <!-- Taxable Income live display -->
+        <div class="live-total" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); margin-top:16px">
+          <div>
+            <div class="label">Taxable Income</div>
+            <div style="font-size:0.75rem; opacity:0.8">AGI − Deduction</div>
+          </div>
+          <div class="value" id="live-taxable-income">$0</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goToStep(2)">&larr; Back</button>
+          <button class="btn btn-primary" onclick="goToStep(4)">Next: Credits &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /step-3 -->
+
+
+  <!-- =================== STEP 4: CREDITS =================== -->
+  <div class="wizard-step" id="step-4">
+    <div class="step-card">
+      <div class="step-card-header">
+        <h2>Step 4 of 5: Credits That Reduce Your Tax</h2>
+        <p>Credits reduce your tax dollar-for-dollar, unlike deductions.</p>
+      </div>
+      <div class="step-card-body">
+
+        <!-- Live total credits -->
+        <div class="live-total" style="background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);">
+          <div class="label">Total Estimated Credits</div>
+          <div class="value" id="live-total-credits">$0</div>
+        </div>
+
+        <!-- Child Tax Credit -->
+        <div class="section-title">Child Tax Credit</div>
+        <div class="form-group">
+          <label for="num-children-ctc">Number of qualifying children under age 17:</label>
+          <div class="input-wrapper" style="max-width:120px">
+            <input type="number" id="num-children-ctc" min="0" max="20" placeholder="0"
+              style="padding-left:12px" oninput="calcCredits()">
+          </div>
+        </div>
+        <div class="info-box" id="ctc-display">
+          CTC: $0 &nbsp;|&nbsp; Phase-out: $200k (single) / $400k (MFJ)
+        </div>
+        <div class="info-box" id="actc-display" style="display:none">
+          Additional Child Tax Credit (refundable): <strong id="actc-amount">$0</strong>
+        </div>
+
+        <!-- Child & Dependent Care -->
+        <div class="section-title">Child &amp; Dependent Care Credit</div>
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="care-expenses">Care expenses paid</label>
+            <span class="tooltip-icon" data-tip="Expenses paid for care of a child under 13 or a qualifying dependent so you could work or look for work.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="care-expenses" min="0" placeholder="0" oninput="calcCredits()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Number of qualifying dependents for care credit:</label>
+          <div class="radio-group" style="flex-direction:row; gap:10px">
+            <label class="radio-option" style="flex:1">
+              <input type="radio" name="care-dep-count" value="1" checked onchange="calcCredits()"> 1
+            </label>
+            <label class="radio-option" style="flex:1">
+              <input type="radio" name="care-dep-count" value="2" onchange="calcCredits()"> 2+
+            </label>
+          </div>
+        </div>
+        <div class="info-box" id="care-credit-display">
+          Care Credit: $0 (20% of eligible expenses up to $3,000/$6,000)
+        </div>
+
+        <!-- Education Credits -->
+        <div class="section-title">Education Credits (choose one)</div>
+        <div class="radio-group" style="margin-bottom:12px">
+          <label class="radio-option">
+            <input type="radio" name="edu-credit" value="none" checked onchange="toggleEduCredit()"> None
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="edu-credit" value="aoc" onchange="toggleEduCredit()">
+            American Opportunity Credit (first 4 years of college)
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="edu-credit" value="llc" onchange="toggleEduCredit()">
+            Lifetime Learning Credit
+          </label>
+        </div>
+        <div id="edu-credit-panel" class="hidden">
+          <div class="form-group">
+            <div class="tooltip-wrapper">
+              <label for="edu-expenses" id="edu-expenses-label">Qualifying education expenses</label>
+              <span class="tooltip-icon" id="edu-tip"
+                data-tip="AOC: 100% of first $2,000 + 25% of next $2,000 = max $2,500. 40% is refundable (up to $1,000). LLC: 20% of expenses up to $10,000 = max $2,000. Not refundable.">?</span>
+            </div>
+            <div class="input-wrapper"><span class="input-prefix">$</span>
+              <input type="number" id="edu-expenses" min="0" placeholder="0" oninput="calcCredits()">
+            </div>
+          </div>
+          <div class="info-box" id="edu-credit-display">Credit: $0</div>
+        </div>
+
+        <!-- EIC -->
+        <div class="section-title">Earned Income Credit (EIC)</div>
+        <div class="info-box">
+          Auto-estimated based on your earned income and number of qualifying children.
+          <span id="eic-display"><br><strong>Estimated EIC: $0</strong></span>
+        </div>
+
+        <!-- Saver's Credit -->
+        <div class="section-title">Saver's Credit (Retirement Contributions)</div>
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="savers-contrib">Contributions to IRA / 401(k) / etc.</label>
+            <span class="tooltip-icon" data-tip="Voluntary contributions to a qualifying retirement plan (IRA, 401k, 403b, SIMPLE, SEP). Your employer match doesn't count.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="savers-contrib" min="0" placeholder="0" oninput="calcCredits()">
+          </div>
+        </div>
+        <div class="info-box" id="savers-display">
+          Saver's Credit: $0 (rate depends on AGI)
+        </div>
+
+        <!-- Other Credits -->
+        <div class="section-title">Other Credits</div>
+        <div class="form-group">
+          <label for="other-credits">Other credits (residential energy, foreign tax, etc.)</label>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="other-credits" min="0" placeholder="0" oninput="calcCredits()">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goToStep(3)">&larr; Back</button>
+          <button class="btn btn-primary" onclick="goToStep(5)">Next: Payments &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /step-4 -->
+
+
+  <!-- =================== STEP 5: WITHHOLDING & PAYMENTS =================== -->
+  <div class="wizard-step" id="step-5">
+    <div class="step-card">
+      <div class="step-card-header">
+        <h2>Step 5 of 5: What You've Already Paid</h2>
+        <p>Enter taxes already withheld or paid — these reduce what you owe (or increase your refund).</p>
+      </div>
+      <div class="step-card-body">
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="w2-withheld">Federal income tax withheld (W-2 Box 2)</label>
+            <span class="tooltip-icon" data-tip="Add up Box 2 from all your W-2 forms. This is the federal income tax your employer withheld throughout the year.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="w2-withheld" min="0" placeholder="0" oninput="calcPayments()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="other-withheld">Federal tax withheld from 1099s</label>
+            <span class="tooltip-icon" data-tip="Some 1099 forms (1099-R, 1099-G, etc.) may show federal tax withheld in Box 4. Add them up here.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="other-withheld" min="0" placeholder="0" oninput="calcPayments()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="estimated-payments">Quarterly estimated tax payments made</label>
+            <span class="tooltip-icon" data-tip="Total of all 4 quarterly estimated tax payments (Form 1040-ES) made during 2025. Due April, June, September, January.">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="estimated-payments" min="0" placeholder="0" oninput="calcPayments()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="tooltip-wrapper">
+            <label for="premium-tax-credit">Premium Tax Credit received (advance)</label>
+            <span class="tooltip-icon" data-tip="If you enrolled in health insurance through the Marketplace and received advance payments of the Premium Tax Credit, enter the total amount here (Form 1095-A).">?</span>
+          </div>
+          <div class="input-wrapper"><span class="input-prefix">$</span>
+            <input type="number" id="premium-tax-credit" min="0" placeholder="0" oninput="calcPayments()">
+          </div>
+        </div>
+
+        <!-- Total payments live display -->
+        <div class="live-total">
+          <div class="label">Total Payments &amp; Withholding</div>
+          <div class="value" id="live-total-payments">$0</div>
+        </div>
+
+        <div class="info-box">
+          Once you click "Calculate", we'll compute your tax bracket breakdown, credits, and determine your refund or amount owed.
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goToStep(4)">&larr; Back</button>
+          <button class="btn btn-success btn-lg" onclick="calculateAndShowResults()">
+            Calculate My Refund!
+          </button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /step-5 -->
+
+</div><!-- /main-container (wizard) -->
+
+
+<!-- ===================================================
+     RESULTS PAGE
+     =================================================== -->
+<div id="results-page">
+
+  <div class="results-header">
+    <h1>YOUR 2025 TAX SUMMARY</h1>
+    <p>Estimated federal tax return based on information provided</p>
+  </div>
+
+  <div class="main-container" style="padding-top:20px">
+
+    <!-- Income Summary -->
+    <div class="results-section">
+      <h3>Income Summary</h3>
+      <div class="summary-line">
+        <span class="line-label">Gross Income</span>
+        <span class="line-value" id="r-gross-income">$0</span>
+      </div>
+      <div class="summary-line">
+        <span class="line-label">Above-Line Adjustments</span>
+        <span class="line-value negative" id="r-adjustments">−$0</span>
+      </div>
+      <div class="summary-line total">
+        <span class="line-label">Adjusted Gross Income (AGI)</span>
+        <span class="line-value bold-value" id="r-agi">$0</span>
+      </div>
+    </div>
+
+    <!-- Deductions -->
+    <div class="results-section">
+      <h3>Deductions</h3>
+      <div class="summary-line">
+        <span class="line-label" id="r-ded-label">Standard Deduction</span>
+        <span class="line-value negative" id="r-deduction">−$0</span>
+      </div>
+      <div class="summary-line total">
+        <span class="line-label">Taxable Income</span>
+        <span class="line-value bold-value" id="r-taxable-income">$0</span>
+      </div>
+    </div>
+
+    <!-- Tax Calculation -->
+    <div class="results-section">
+      <h3>Tax Calculation</h3>
+      <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px">Ordinary income bracket breakdown:</p>
+      <table class="bracket-table">
+        <thead>
+          <tr>
+            <th>Rate</th>
+            <th>Income in Bracket</th>
+            <th>Tax</th>
+          </tr>
+        </thead>
+        <tbody id="bracket-table-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+
+      <div style="margin-top:16px">
+        <div class="summary-line">
+          <span class="line-label">Ordinary Income Tax</span>
+          <span class="line-value" id="r-ordinary-tax">$0</span>
+        </div>
+        <div class="summary-line" id="r-ltcg-row">
+          <span class="line-label">Long-Term Capital Gains Tax</span>
+          <span class="line-value" id="r-ltcg-tax">$0</span>
+        </div>
+        <div class="summary-line" id="r-se-tax-row">
+          <span class="line-label">Self-Employment Tax</span>
+          <span class="line-value" id="r-se-tax">$0</span>
+        </div>
+        <div class="summary-line" id="r-niit-row">
+          <span class="line-label">Net Investment Income Tax (3.8%)</span>
+          <span class="line-value" id="r-niit">$0</span>
+        </div>
+        <div class="summary-line">
+          <span class="line-label">Alternative Minimum Tax</span>
+          <span class="line-value" style="color:var(--text-secondary); font-size:0.85rem">
+            $0 <em>(simplified — consult a professional)</em>
+          </span>
+        </div>
+        <div class="summary-line total">
+          <span class="line-label">Total Tax Before Credits</span>
+          <span class="line-value bold-value" id="r-total-before-credits">$0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credits -->
+    <div class="results-section">
+      <h3>Credits</h3>
+      <div id="r-credits-breakdown">
+        <!-- Populated by JS -->
+      </div>
+      <div class="summary-line total">
+        <span class="line-label">Total Credits Applied</span>
+        <span class="line-value negative bold-value" id="r-total-credits">−$0</span>
+      </div>
+    </div>
+
+    <!-- Tax Liability -->
+    <div class="results-section">
+      <h3>Tax Liability</h3>
+      <div class="summary-line total" style="border-top: 3px solid var(--primary)">
+        <span class="line-label">Net Tax Liability</span>
+        <span class="line-value bold-value" id="r-tax-liability">$0</span>
+      </div>
+      <div class="rates-row">
+        <div class="rate-badge">
+          <div class="rb-label">Effective Tax Rate</div>
+          <div class="rb-value" id="r-effective-rate">0.0%</div>
+        </div>
+        <div class="rate-badge">
+          <div class="rb-label">Marginal Tax Rate</div>
+          <div class="rb-value" id="r-marginal-rate">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payments -->
+    <div class="results-section">
+      <h3>Your Payments</h3>
+      <div class="summary-line">
+        <span class="line-label">Total Withheld &amp; Payments</span>
+        <span class="line-value" id="r-total-payments">$0</span>
+      </div>
+    </div>
+
+    <!-- Outcome Box (Refund or Owe) -->
+    <div id="outcome-box" class="outcome-box refund">
+      <div class="outcome-label" id="outcome-label">REFUND</div>
+      <div class="outcome-amount" id="outcome-amount">$0</div>
+      <div class="outcome-sub" id="outcome-sub">Federal income tax refund estimate</div>
+    </div>
+
+    <!-- Donut Chart -->
+    <div class="results-section">
+      <h3>How Your Income Is Allocated</h3>
+      <div class="chart-container">
+        <canvas id="tax-chart"></canvas>
+      </div>
+      <p style="font-size:0.75rem; color:var(--text-secondary); text-align:center; margin-top:8px">
+        * Estimated state tax shown at ~5% of taxable income. Actual rate varies significantly by state.
+      </p>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> This calculator provides estimates for educational purposes only.
+      Tax law is complex and individual circumstances vary. Actual tax liability may differ due to
+      AMT, phase-outs, special rules, and other factors not modeled here. This is not tax advice.
+      Consult a qualified tax professional (CPA or enrolled agent) for advice specific to your situation.
+    </div>
+
+    <div style="text-align:center; margin-top:24px">
+      <button class="btn btn-primary btn-lg" onclick="startOver()">Start Over</button>
+    </div>
+
+  </div>
+</div><!-- /results-page -->
+
+
+<script>
+/* ===================================================================
+   FULL TAX RETURN CALCULATOR — 2025 TAX YEAR
+   All calculations are estimates for educational purposes.
+   =================================================================== */
+
+// -----------------------------------------------------------------------
+// 2025 TAX BRACKETS
+// -----------------------------------------------------------------------
+const TAX_BRACKETS = {
+  single: [
+    { rate: 0.10, min: 0,       max: 11925 },
+    { rate: 0.12, min: 11925,   max: 48475 },
+    { rate: 0.22, min: 48475,   max: 103350 },
+    { rate: 0.24, min: 103350,  max: 197300 },
+    { rate: 0.32, min: 197300,  max: 250525 },
+    { rate: 0.35, min: 250525,  max: 626350 },
+    { rate: 0.37, min: 626350,  max: Infinity }
+  ],
+  mfj: [
+    { rate: 0.10, min: 0,       max: 23850 },
+    { rate: 0.12, min: 23850,   max: 96950 },
+    { rate: 0.22, min: 96950,   max: 206700 },
+    { rate: 0.24, min: 206700,  max: 394600 },
+    { rate: 0.32, min: 394600,  max: 501050 },
+    { rate: 0.35, min: 501050,  max: 751600 },
+    { rate: 0.37, min: 751600,  max: Infinity }
+  ],
+  mfs: [
+    { rate: 0.10, min: 0,       max: 11925 },
+    { rate: 0.12, min: 11925,   max: 48475 },
+    { rate: 0.22, min: 48475,   max: 103350 },
+    { rate: 0.24, min: 103350,  max: 197300 },
+    { rate: 0.32, min: 197300,  max: 250525 },
+    { rate: 0.35, min: 250525,  max: 501050 },
+    { rate: 0.37, min: 501050,  max: Infinity }
+  ],
+  hoh: [
+    { rate: 0.10, min: 0,       max: 17000 },
+    { rate: 0.12, min: 17000,   max: 64850 },
+    { rate: 0.22, min: 64850,   max: 103350 },
+    { rate: 0.24, min: 103350,  max: 197300 },
+    { rate: 0.32, min: 197300,  max: 250500 },
+    { rate: 0.35, min: 250500,  max: 626350 },
+    { rate: 0.37, min: 626350,  max: Infinity }
+  ]
+};
+
+// 2025 Long-term capital gains brackets
+const LTCG_BRACKETS = {
+  single: [
+    { rate: 0.00, min: 0,      max: 48350 },
+    { rate: 0.15, min: 48350,  max: 533400 },
+    { rate: 0.20, min: 533400, max: Infinity }
+  ],
+  mfj: [
+    { rate: 0.00, min: 0,      max: 96700 },
+    { rate: 0.15, min: 96700,  max: 600050 },
+    { rate: 0.20, min: 600050, max: Infinity }
+  ],
+  mfs: [
+    { rate: 0.00, min: 0,      max: 48350 },
+    { rate: 0.15, min: 48350,  max: 300025 },
+    { rate: 0.20, min: 300025, max: Infinity }
+  ],
+  hoh: [
+    { rate: 0.00, min: 0,      max: 64750 },
+    { rate: 0.15, min: 64750,  max: 553850 },
+    { rate: 0.20, min: 553850, max: Infinity }
+  ]
+};
+
+// 2025 Standard deductions
+const STD_DEDUCTION = { single: 15000, mfj: 30000, mfs: 15000, hoh: 22500 };
+
+// Standard deduction add-on amounts
+const STD_ADD_SINGLE_HOH = 1600;  // per qualifying event (65+, blind)
+const STD_ADD_MFJ        = 1350;  // per qualifying person
+
+// -----------------------------------------------------------------------
+// GLOBAL STATE — collected across all wizard steps
+// -----------------------------------------------------------------------
+let state = {};
+let taxChart = null;  // Chart.js instance
+
+// -----------------------------------------------------------------------
+// UTILITY FUNCTIONS
+// -----------------------------------------------------------------------
+
+/** Return a numeric value from an input element (default 0 if blank/NaN) */
+function val(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? 0 : v;
+}
+
+/** Format a number as currency: $1,234 */
+function fmt(n) {
+  if (n < 0) return '−$' + Math.abs(Math.round(n)).toLocaleString();
+  return '$' + Math.round(n).toLocaleString();
+}
+
+/** Format with sign for display */
+function fmtSigned(n) {
+  return n >= 0 ? fmt(n) : '−$' + Math.abs(Math.round(n)).toLocaleString();
+}
+
+/** Clamp a value between min and max */
+function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
+
+/** Get the currently selected filing status */
+function getFilingStatus() {
+  const radio = document.querySelector('input[name="filingStatus"]:checked');
+  return radio ? radio.value : 'single';
+}
+
+/** Get deduction mode: 'standard' or 'itemize' */
+function getDeductionMode() {
+  return document.getElementById('btn-itemize').classList.contains('active') ? 'itemize' : 'standard';
+}
+
+// -----------------------------------------------------------------------
+// STEP 1: FILING STATUS LOGIC
+// -----------------------------------------------------------------------
+
+/** Show/hide spouse checkboxes based on filing status */
+function updateFilingStatusUI() {
+  const fs = getFilingStatus();
+  const isMFJ = fs === 'mfj';
+  const spouseAge  = document.getElementById('cb-spouse-65-wrap');
+  const spouseBlind = document.getElementById('cb-spouse-blind-wrap');
+  spouseAge.classList.toggle('hidden', !isMFJ);
+  spouseBlind.classList.toggle('hidden', !isMFJ);
+  if (!isMFJ) {
+    document.getElementById('cb-spouse-65').checked = false;
+    document.getElementById('cb-spouse-blind').checked = false;
+  }
+
+  // Also update spouse wage field
+  const spouseWage = document.getElementById('wages-spouse-wrap');
+  if (spouseWage) spouseWage.classList.toggle('hidden', !isMFJ);
+
+  // Recalculate standard deduction display
+  updateStdDeductionDisplay();
+  calcAGI();
+}
+
+// Attach filing status change handlers
+document.querySelectorAll('input[name="filingStatus"]').forEach(r => {
+  r.addEventListener('change', () => {
+    // Update selected styling
+    document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('selected'));
+    r.parentElement.classList.add('selected');
+    updateFilingStatusUI();
+    calcIncome(); // SS taxability thresholds depend on filing status
+  });
+});
+
+// Checkbox styling handlers
+document.querySelectorAll('.checkbox-option input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.parentElement.classList.toggle('checked', cb.checked);
+    updateStdDeductionDisplay();
+    calcAGI();
+  });
+});
+
+// Initialize first radio as selected
+document.querySelectorAll('.radio-option').forEach(el => {
+  el.addEventListener('click', function() {
+    const grp = this.closest('.radio-group');
+    if (grp) grp.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+
+// -----------------------------------------------------------------------
+// STEP 2: INCOME CALCULATIONS
+// -----------------------------------------------------------------------
+
+/**
+ * Calculate Social Security taxable portion.
+ * Combined income = AGI (before SS) + half of SS benefits.
+ * Returns amount of SS benefits that is taxable.
+ */
+function calcSST taxable(ssTotal, agiBeforeSS, fs) {
+  const halfSS = ssTotal / 2;
+  const combined = agiBeforeSS + halfSS;
+  let taxablePct = 0;
+  let label = '0% taxable';
+
+  if (fs === 'mfj') {
+    if (combined > 44000)       { taxablePct = 0.85; label = '85% taxable (combined income >$44k)'; }
+    else if (combined > 32000)  { taxablePct = 0.50; label = '50% taxable (combined income $32k–$44k)'; }
+  } else {
+    if (combined > 34000)       { taxablePct = 0.85; label = '85% taxable (combined income >$34k)'; }
+    else if (combined > 25000)  { taxablePct = 0.50; label = '50% taxable (combined income $25k–$34k)'; }
+  }
+  return { amount: ssTotal * taxablePct, label };
+}
+
+/** Recalculate income section totals and update live display */
+function calcIncome() {
+  const fs = getFilingStatus();
+  const wagesYou    = val('wages-you');
+  const wagesSpouse = val('wages-spouse');
+  const interest    = val('interest');
+  const ordDiv      = val('ord-dividends');
+  const bizProfit   = val('biz-profit');
+  const stGains     = val('st-gains');
+  const ltGains     = val('lt-gains');
+  const iraPension  = val('ira-pension');
+  const ssTotal     = val('ss-benefits');
+  const otherInc    = val('other-income');
+
+  // Self-employment tax: 92.35% × 15.3% = 14.13% of gross SE income
+  // SE tax applies only if net profit > $400
+  const seBase = bizProfit > 400 ? bizProfit * 0.9235 : 0;
+  const seTax  = seBase * 0.153;  // full SE tax (employer + employee)
+
+  // Show/hide SE tax display
+  const seDisplay = document.getElementById('se-tax-display');
+  seDisplay.classList.toggle('hidden', bizProfit <= 400);
+  document.getElementById('se-tax-amount').textContent = fmt(seTax);
+  document.getElementById('mini-se-tax').textContent   = fmt(seTax / 2); // half is deductible
+
+  // Provisional AGI without SS (used for SS taxability)
+  const agiBeforeSS = wagesYou + wagesSpouse + interest + ordDiv + bizProfit
+                     + stGains + ltGains + iraPension + otherInc;
+
+  // SS taxable amount
+  const ssResult = calcSSTaxable(ssTotal, agiBeforeSS, fs);
+  const ssTaxable = ssResult.amount;
+
+  // Show SS info
+  const ssDisplay = document.getElementById('ss-taxable-display');
+  ssDisplay.classList.toggle('hidden', ssTotal === 0);
+  document.getElementById('ss-taxable-amount').textContent = fmt(ssTaxable);
+  document.getElementById('ss-taxable-pct').textContent    = ' (' + ssResult.label + ')';
+
+  // Gross income = all income sources (using taxable SS amount, not total)
+  const grossIncome = wagesYou + wagesSpouse + interest + ordDiv + stGains
+                    + ltGains + iraPension + ssTaxable + otherInc
+                    + (bizProfit > 0 ? bizProfit : 0);  // Only add positive biz income
+
+  document.getElementById('live-gross-income').textContent = fmt(grossIncome);
+  document.getElementById('mini-gross').textContent        = fmt(grossIncome);
+
+  // Save to state for downstream steps
+  state.grossIncome   = grossIncome;
+  state.seTax         = seTax;
+  state.seTaxDeduct   = seTax / 2;   // half of SE tax is deductible above-the-line
+  state.ltGains       = ltGains;
+  state.qualDividends = Math.min(val('qual-dividends'), ordDiv);
+  state.earnedIncome  = wagesYou + wagesSpouse + (bizProfit > 400 ? bizProfit : 0);
+  state.ssReceived    = ssTotal;
+  state.ssTaxable     = ssTaxable;
+  state.bizProfit     = bizProfit;
+
+  // Trickle down to AGI calc
+  calcAGI();
+}
+
+// -----------------------------------------------------------------------
+// STEP 3: ADJUSTMENTS & DEDUCTIONS
+// -----------------------------------------------------------------------
+
+/** Recalculate AGI and taxable income, update displays */
+function calcAGI() {
+  const fs          = getFilingStatus();
+  const grossIncome = state.grossIncome || 0;
+  const seTaxDeduct = state.seTaxDeduct || 0;
+  const is65        = document.getElementById('cb-taxpayer-65').checked;
+
+  // Student loan interest (max $2,500; simple phase-out approximation)
+  let sliPaid = clamp(val('student-loan-int'), 0, 2500);
+  // Phase-out is applied below after we know AGI — approximate here
+  const sliRaw = sliPaid;
+
+  // IRA contribution (max $7k / $8k if 65+)
+  const iraMax = is65 ? 8000 : 7000;
+  const iraContrib = clamp(val('ira-contrib'), 0, iraMax);
+
+  // HSA contribution (max $4,300 self-only / $8,550 family — user enters amount)
+  const hsaContrib = val('hsa-contrib');
+
+  // Self-employed health insurance (cannot exceed biz profit)
+  const maxSEHI = Math.max(state.bizProfit || 0, 0);
+  const seHI = clamp(val('se-health-ins'), 0, maxSEHI);
+
+  const otherAdj = val('other-adj');
+
+  const totalAdj = seTaxDeduct + sliRaw + iraContrib + hsaContrib + seHI + otherAdj;
+  const agi = Math.max(0, grossIncome - totalAdj);
+
+  // Apply student loan interest phase-out now that we have AGI
+  let sliAdj = sliRaw;
+  if (fs === 'mfj') {
+    if (agi > 195000) sliAdj = 0;
+    else if (agi > 165000) sliAdj = sliRaw * (1 - (agi - 165000) / 30000);
+  } else {
+    if (agi > 95000) sliAdj = 0;
+    else if (agi > 80000) sliAdj = sliRaw * (1 - (agi - 80000) / 15000);
+  }
+  const totalAdjFinal = seTaxDeduct + sliAdj + iraContrib + hsaContrib + seHI + otherAdj;
+  const agiFinal = Math.max(0, grossIncome - totalAdjFinal);
+
+  document.getElementById('live-agi').textContent = fmt(agiFinal);
+
+  state.agi         = agiFinal;
+  state.totalAdj    = totalAdjFinal;
+
+  // --- DEDUCTIONS ---
+  const deductMode = getDeductionMode();
+  let deductionAmount = 0;
+
+  if (deductMode === 'standard') {
+    deductionAmount = calcStdDeduction();
+  } else {
+    // Itemized
+    const salt     = clamp(val('salt'), 0, 10000);
+    const mortInt  = val('mortgage-int');
+    const charity  = val('charity-cash');
+
+    // Medical: only amount exceeding 7.5% of AGI is deductible
+    const medRaw   = val('medical-exp');
+    const medFloor = agiFinal * 0.075;
+    const medDeductible = Math.max(0, medRaw - medFloor);
+    document.getElementById('medical-deductible').textContent  = fmt(medDeductible);
+    document.getElementById('medical-calc-display').textContent =
+      'Deductible portion (amount over 7.5% of AGI = ' + fmt(medFloor) + '): ' + fmt(medDeductible);
+
+    const otherItemized = val('other-itemized');
+    const totalItemized = salt + mortInt + charity + medDeductible + otherItemized;
+
+    document.getElementById('total-itemized-display').textContent = fmt(totalItemized);
+
+    const stdAmt = calcStdDeduction();
+    const msg = document.getElementById('std-vs-item-msg');
+    if (totalItemized >= stdAmt) {
+      msg.textContent = 'Itemizing saves you ' + fmt(totalItemized - stdAmt) + ' vs. standard deduction.';
+      msg.style.color = 'var(--success)';
+    } else {
+      msg.textContent = 'Standard deduction (' + fmt(stdAmt) + ') would save ' + fmt(stdAmt - totalItemized) + ' more.';
+      msg.style.color = 'var(--danger)';
+    }
+
+    deductionAmount = totalItemized;
+    state.itemizedDeduction = totalItemized;
+  }
+
+  state.deduction    = deductionAmount;
+  state.deductMode   = deductMode;
+  const taxableIncome = Math.max(0, agiFinal - deductionAmount);
+  state.taxableIncome = taxableIncome;
+
+  document.getElementById('live-taxable-income').textContent = fmt(taxableIncome);
+
+  // Update standard deduction display
+  updateStdDeductionDisplay();
+
+  // Recalculate credits (EIC, saver's credit use AGI/earned income)
+  calcCredits();
+}
+
+// -----------------------------------------------------------------------
+// STANDARD DEDUCTION CALCULATION
+// -----------------------------------------------------------------------
+
+/** Calculate the standard deduction based on filing status + age/blind adjustments */
+function calcStdDeduction() {
+  const fs    = getFilingStatus();
+  const base  = STD_DEDUCTION[fs];
+  const t65   = document.getElementById('cb-taxpayer-65').checked;
+  const s65   = document.getElementById('cb-spouse-65').checked;
+  const tBlnd = document.getElementById('cb-taxpayer-blind').checked;
+  const sBlnd = document.getElementById('cb-spouse-blind').checked;
+
+  let extra = 0;
+  let breakdown = 'Base: ' + fmt(base) + ' (' + {single:'Single',mfj:'MFJ',mfs:'MFS',hoh:'Head of Household'}[fs] + ')';
+
+  if (fs === 'mfj' || fs === 'mfs') {
+    const addons = (t65 ? 1 : 0) + (s65 ? 1 : 0) + (tBlnd ? 1 : 0) + (sBlnd ? 1 : 0);
+    extra = addons * STD_ADD_MFJ;
+    if (addons > 0) breakdown += ' + ' + addons + ' × $1,350 = +' + fmt(extra);
+  } else {
+    // Single or HOH
+    const addons = (t65 ? 1 : 0) + (tBlnd ? 1 : 0);
+    extra = addons * STD_ADD_SINGLE_HOH;
+    if (addons > 0) breakdown += ' + ' + addons + ' × $1,600 = +' + fmt(extra);
+  }
+
+  const total = base + extra;
+  document.getElementById('std-ded-value').textContent     = fmt(total);
+  document.getElementById('std-ded-breakdown').textContent = breakdown;
+
+  return total;
+}
+
+/** Refresh the standard deduction display (called on filing status/checkbox changes) */
+function updateStdDeductionDisplay() {
+  const stdAmt = calcStdDeduction();
+  state.stdDeduction = stdAmt;
+  return stdAmt;
+}
+
+// -----------------------------------------------------------------------
+// DEDUCTION MODE TOGGLE
+// -----------------------------------------------------------------------
+
+function setDeductionMode(mode) {
+  document.getElementById('btn-standard').classList.toggle('active', mode === 'standard');
+  document.getElementById('btn-itemize').classList.toggle('active',  mode === 'itemize');
+  document.getElementById('panel-standard').classList.toggle('hidden', mode === 'itemize');
+  document.getElementById('panel-itemize').classList.toggle('hidden',  mode === 'standard');
+  calcAGI();
+}
+
+// -----------------------------------------------------------------------
+// STEP 4: CREDITS
+// -----------------------------------------------------------------------
+
+/** Show/hide education expense field */
+function toggleEduCredit() {
+  const eduVal = document.querySelector('input[name="edu-credit"]:checked').value;
+  document.getElementById('edu-credit-panel').classList.toggle('hidden', eduVal === 'none');
+  if (eduVal === 'aoc') {
+    document.getElementById('edu-expenses-label').textContent = 'Qualifying education expenses (AOC)';
+  } else if (eduVal === 'llc') {
+    document.getElementById('edu-expenses-label').textContent = 'Qualifying education expenses (LLC)';
+  }
+  calcCredits();
+}
+
+/**
+ * Calculate Child Tax Credit with phase-out.
+ * Phase-out: $50 reduction per $1,000 over threshold.
+ */
+function calcCTC(numChildren, agi, fs) {
+  if (numChildren <= 0) return { ctc: 0, actc: 0 };
+  const rawCTC   = numChildren * 2000;
+  const threshold = fs === 'mfj' ? 400000 : 200000;
+  const excess    = Math.max(0, agi - threshold);
+  const phaseout  = Math.ceil(excess / 1000) * 50;
+  const ctc       = Math.max(0, rawCTC - phaseout);
+
+  // Additional CTC (refundable): 15% of earned income over $2,500, up to $1,700/child
+  const earnedIncome  = state.earnedIncome || 0;
+  const actcMax       = numChildren * 1700;
+  const actc          = Math.min(actcMax, Math.max(0, (earnedIncome - 2500) * 0.15));
+
+  return { ctc, actc };
+}
+
+/**
+ * Calculate Child & Dependent Care Credit.
+ * Rate: 20%–35% based on AGI (simplified: 20% if AGI > $43k)
+ */
+function calcCareCredit(expenses, depCount, agi) {
+  if (expenses <= 0) return 0;
+  const maxExp = depCount >= 2 ? 6000 : 3000;
+  const eligibleExp = Math.min(expenses, maxExp);
+  // Simplified rate table
+  let rate = 0.20;
+  if (agi < 15000)      rate = 0.35;
+  else if (agi < 17000) rate = 0.34;
+  else if (agi < 19000) rate = 0.33;
+  else if (agi < 21000) rate = 0.32;
+  else if (agi < 23000) rate = 0.31;
+  else if (agi < 25000) rate = 0.30;
+  else if (agi < 27000) rate = 0.29;
+  else if (agi < 29000) rate = 0.28;
+  else if (agi < 31000) rate = 0.27;
+  else if (agi < 33000) rate = 0.26;
+  else if (agi < 35000) rate = 0.25;
+  else if (agi < 37000) rate = 0.24;
+  else if (agi < 39000) rate = 0.23;
+  else if (agi < 41000) rate = 0.22;
+  else if (agi < 43000) rate = 0.21;
+  else                   rate = 0.20;
+  return eligibleExp * rate;
+}
+
+/**
+ * Estimate the Earned Income Credit (EIC).
+ * Simplified lookup based on earned income and number of children.
+ * Thresholds are increased by ~$6,000 for MFJ.
+ */
+function calcEIC(earnedIncome, numChildren, fs, agi) {
+  const mfjBonus = fs === 'mfj' ? 6000 : 0;
+  // Use the lesser of earned income and AGI
+  const income = Math.min(earnedIncome, agi);
+
+  // EIC phase-out tables (simplified — linear phase-in/phase-out)
+  const eicTable = [
+    { max_credit: 650,  phase_out_start: 9820  + mfjBonus, phase_out_end: 18591  + mfjBonus },
+    { max_credit: 4328, phase_out_start: 21560 + mfjBonus, phase_out_end: 49084  + mfjBonus },
+    { max_credit: 7152, phase_out_start: 21560 + mfjBonus, phase_out_end: 55529  + mfjBonus },
+    { max_credit: 8046, phase_out_start: 21560 + mfjBonus, phase_out_end: 59899  + mfjBonus }
+  ];
+
+  const idx = Math.min(numChildren, 3);
+  const entry = eicTable[idx];
+
+  if (income <= 0 || income > entry.phase_out_end) return 0;
+  if (income < entry.phase_out_start) return entry.max_credit;
+
+  // Linear phase-out
+  const phasedOut = (income - entry.phase_out_start) / (entry.phase_out_end - entry.phase_out_start);
+  return Math.max(0, entry.max_credit * (1 - phasedOut));
+}
+
+/**
+ * Calculate Saver's Credit.
+ * Rate depends on AGI:
+ *   50% if AGI < $23,000 (single) / $46,000 (MFJ)
+ *   20% if AGI < $25,000 / $50,000
+ *   10% if AGI < $38,250 / $76,500
+ *    0% above
+ * Max credit: $1,000 (single) / $2,000 (MFJ)
+ */
+function calcSaversCredit(contrib, agi, fs) {
+  if (contrib <= 0) return 0;
+  const isMFJ    = fs === 'mfj';
+  const maxCredit = isMFJ ? 2000 : 1000;
+
+  let rate = 0;
+  if (isMFJ) {
+    if (agi < 46000)      rate = 0.50;
+    else if (agi < 50000) rate = 0.20;
+    else if (agi < 76500) rate = 0.10;
+  } else {
+    if (agi < 23000)      rate = 0.50;
+    else if (agi < 25000) rate = 0.20;
+    else if (agi < 38250) rate = 0.10;
+  }
+  return Math.min(maxCredit, contrib * rate);
+}
+
+/** Recalculate all credits and update displays */
+function calcCredits() {
+  const fs          = getFilingStatus();
+  const agi         = state.agi         || 0;
+  const earnedIncome = state.earnedIncome || 0;
+
+  // --- Child Tax Credit ---
+  const numChildrenCTC = Math.floor(val('num-children-ctc'));
+  const ctcResult      = calcCTC(numChildrenCTC, agi, fs);
+  document.getElementById('ctc-display').innerHTML =
+    'CTC: <strong>' + fmt(ctcResult.ctc) + '</strong> &nbsp;|&nbsp; Phase-out threshold: '
+    + (fs === 'mfj' ? '$400,000' : '$200,000');
+  const actcBox = document.getElementById('actc-display');
+  actcBox.style.display = (ctcResult.actc > 0) ? 'block' : 'none';
+  document.getElementById('actc-amount').textContent = fmt(ctcResult.actc);
+
+  // --- Care Credit ---
+  const careExp    = val('care-expenses');
+  const careDepRaw = document.querySelector('input[name="care-dep-count"]:checked');
+  const careDeps   = careDepRaw ? parseInt(careDepRaw.value) : 1;
+  const careCredit = calcCareCredit(careExp, careDeps, agi);
+  document.getElementById('care-credit-display').innerHTML =
+    'Care Credit: <strong>' + fmt(careCredit) + '</strong>'
+    + ' (' + (agi > 43000 ? '20' : '21–35') + '% of expenses up to '
+    + (careDeps >= 2 ? '$6,000' : '$3,000') + ')';
+
+  // --- Education Credits ---
+  const eduMode = document.querySelector('input[name="edu-credit"]:checked').value;
+  let eduCredit = 0;
+  let eduLabel = '';
+  if (eduMode === 'aoc') {
+    const exp      = val('edu-expenses');
+    const eligible = Math.min(exp, 4000);
+    // 100% of first $2k + 25% of next $2k, max $2,500
+    if (eligible <= 2000) {
+      eduCredit = eligible;
+    } else {
+      eduCredit = 2000 + (eligible - 2000) * 0.25;
+    }
+    eduCredit = Math.min(2500, eduCredit);
+    eduLabel  = 'American Opportunity Credit: ' + fmt(eduCredit) + ' (40% refundable = ' + fmt(eduCredit * 0.4) + ')';
+    document.getElementById('edu-credit-display').innerHTML = eduLabel;
+  } else if (eduMode === 'llc') {
+    const exp = val('edu-expenses');
+    eduCredit = Math.min(2000, exp * 0.20);
+    document.getElementById('edu-credit-display').innerHTML =
+      'Lifetime Learning Credit: ' + fmt(eduCredit) + ' (20% of expenses, max $2,000)';
+  }
+
+  // --- EIC ---
+  const numChildrenEIC = numChildrenCTC; // reuse children count for EIC
+  const eic = calcEIC(earnedIncome, numChildrenEIC, fs, agi);
+  document.getElementById('eic-display').innerHTML =
+    '<br><strong>Estimated EIC: ' + fmt(eic) + '</strong>'
+    + (eic > 0 ? ' (' + numChildrenEIC + ' child' + (numChildrenEIC !== 1 ? 'ren' : '') + ')' : '');
+
+  // --- Saver's Credit ---
+  const saversContrib = val('savers-contrib');
+  const saversCredit  = calcSaversCredit(saversContrib, agi, fs);
+  const saversRate    = saversContrib > 0 ? (saversCredit / saversContrib * 100).toFixed(0) : 0;
+  document.getElementById('savers-display').innerHTML =
+    "Saver's Credit: <strong>" + fmt(saversCredit) + '</strong>'
+    + (saversContrib > 0 ? ' (' + saversRate + '% rate)' : ' (enter contribution above)');
+
+  // --- Other Credits ---
+  const otherCredits = val('other-credits');
+
+  // --- Total ---
+  const totalCredits = ctcResult.ctc + ctcResult.actc + careCredit + eduCredit
+                     + eic + saversCredit + otherCredits;
+
+  document.getElementById('live-total-credits').textContent = fmt(totalCredits);
+
+  // Store for final calculation
+  state.credits = {
+    ctc: ctcResult.ctc, actc: ctcResult.actc,
+    careCredit, eduCredit, eic, saversCredit, otherCredits, total: totalCredits,
+    eduMode, eduLabel
+  };
+}
+
+// -----------------------------------------------------------------------
+// STEP 5: PAYMENTS
+// -----------------------------------------------------------------------
+
+function calcPayments() {
+  const w2Withheld       = val('w2-withheld');
+  const otherWithheld    = val('other-withheld');
+  const estimatedPayments = val('estimated-payments');
+  const premiumTaxCredit = val('premium-tax-credit');
+  const total = w2Withheld + otherWithheld + estimatedPayments + premiumTaxCredit;
+  document.getElementById('live-total-payments').textContent = fmt(total);
+  state.payments = total;
+}
+
+// -----------------------------------------------------------------------
+// TAX BRACKET COMPUTATION
+// -----------------------------------------------------------------------
+
+/**
+ * Compute ordinary income tax using brackets.
+ * Returns { totalTax, brackets: [{rate, min, max, income, tax}] }
+ * For the "stacking" method with LTCG (qualified dividends and LTCG are
+ * taxed at preferential rates — they "sit on top" of ordinary income).
+ */
+function computeOrdinaryTax(ordinaryIncome, fs) {
+  const brackets = TAX_BRACKETS[fs];
+  let totalTax   = 0;
+  let marginalRate = 0;
+  const result   = [];
+
+  for (const b of brackets) {
+    if (ordinaryIncome <= 0) break;
+    const inBracket = Math.min(ordinaryIncome, b.max - b.min);
+    if (inBracket <= 0) continue;
+    const taxInBracket = inBracket * b.rate;
+    totalTax   += taxInBracket;
+    marginalRate = b.rate;
+    result.push({
+      rate: b.rate,
+      rangeMin: b.min,
+      rangeMax: b.max === Infinity ? null : b.max,
+      incomeInBracket: inBracket,
+      tax: taxInBracket
+    });
+    ordinaryIncome -= inBracket;
+  }
+
+  return { totalTax, brackets: result, marginalRate };
+}
+
+/**
+ * Compute long-term capital gains tax (qualified dividends + LTCG).
+ * LTCG sits on top of ordinary income in the bracket stack.
+ */
+function computeLTCGTax(ltGains, qualDividends, ordinaryIncome, fs) {
+  const prefIncome = ltGains + qualDividends;
+  if (prefIncome <= 0) return 0;
+
+  const brackets = LTCG_BRACKETS[fs];
+  let remaining = prefIncome;
+  let totalTax  = 0;
+  // "Stack" starts at where ordinary income left off
+  let stackBase = ordinaryIncome;
+
+  for (const b of brackets) {
+    if (remaining <= 0) break;
+    // How much of this bracket is above the stack base?
+    const available = Math.max(0, b.max - Math.max(stackBase, b.min));
+    const inBracket = Math.min(remaining, available);
+    totalTax  += inBracket * b.rate;
+    remaining -= inBracket;
+    stackBase  = Math.max(stackBase, b.min + inBracket);
+  }
+
+  return totalTax;
+}
+
+/**
+ * Find the marginal rate for a given taxable income.
+ */
+function getMarginalRate(taxableIncome, fs) {
+  const brackets = TAX_BRACKETS[fs];
+  for (let i = brackets.length - 1; i >= 0; i--) {
+    if (taxableIncome > brackets[i].min) return brackets[i].rate;
+  }
+  return brackets[0].rate;
+}
+
+// -----------------------------------------------------------------------
+// MAIN CALCULATION & RESULTS
+// -----------------------------------------------------------------------
+
+function calculateAndShowResults() {
+  const fs            = getFilingStatus();
+  const grossIncome   = state.grossIncome   || 0;
+  const totalAdj      = state.totalAdj      || 0;
+  const agi           = state.agi           || 0;
+  const deduction     = state.deduction     || 0;
+  const taxableIncome = state.taxableIncome || 0;
+  const ltGains       = state.ltGains       || 0;
+  const qualDividends = state.qualDividends || 0;
+  const seTax         = state.seTax         || 0;
+  const payments      = state.payments      || 0;
+  const credits       = state.credits       || { total: 0, ctc: 0, actc: 0, careCredit: 0, eduCredit: 0, eic: 0, saversCredit: 0, otherCredits: 0 };
+
+  // Ordinary income = taxable income minus preferential income (LTCG + qualified dividends)
+  // (To avoid double-taxing qualified dividends already in ordinary dividends)
+  const preferentialIncome = Math.min(taxableIncome, ltGains + qualDividends);
+  const ordinaryIncome     = Math.max(0, taxableIncome - preferentialIncome);
+
+  // Calculate ordinary income tax
+  const ordTaxResult = computeOrdinaryTax(ordinaryIncome, fs);
+  const ordTax       = ordTaxResult.totalTax;
+
+  // Calculate LTCG tax
+  const ltcgTax = computeLTCGTax(ltGains, qualDividends, ordinaryIncome, fs);
+
+  // Net Investment Income Tax: 3.8% on lesser of (net investment income) or (MAGI - threshold)
+  const niitThreshold = fs === 'mfj' ? 250000 : 200000;
+  const investmentIncome = Math.max(0, (state.ltGains || 0) + val('interest') + val('ord-dividends') + val('ira-pension'));
+  const niit = agi > niitThreshold
+    ? Math.min(investmentIncome, agi - niitThreshold) * 0.038
+    : 0;
+
+  // Total tax before credits
+  const totalBeforeCredits = ordTax + ltcgTax + seTax + niit;
+
+  // Apply non-refundable credits (cannot reduce below 0)
+  const nonRefundableCredits = credits.ctc + credits.careCredit + credits.saversCredit + credits.otherCredits
+    + (credits.eduMode !== 'aoc' ? credits.eduCredit : credits.eduCredit * 0.60); // 60% non-refundable portion of AOC
+  const refundableCredits = credits.actc + credits.eic
+    + (credits.eduMode === 'aoc' ? credits.eduCredit * 0.40 : 0); // 40% refundable portion of AOC
+
+  const taxAfterNonRefundable = Math.max(0, totalBeforeCredits - nonRefundableCredits);
+  const taxLiability          = Math.max(0, taxAfterNonRefundable - refundableCredits);
+
+  // Total credits applied = non-refundable limited by tax, plus refundable
+  const nonRefApplied  = Math.min(nonRefundableCredits, totalBeforeCredits);
+  const totalCreditsApplied = nonRefApplied + refundableCredits;
+
+  // Refund or amount owed
+  const netOutcome = payments + refundableCredits - taxAfterNonRefundable;
+  // netOutcome > 0 → refund; < 0 → owe
+
+  // Rates
+  const marginalRate  = getMarginalRate(taxableIncome, fs);
+  const effectiveRate = grossIncome > 0 ? (taxLiability / grossIncome * 100) : 0;
+
+  // ---- POPULATE RESULTS PAGE ----
+
+  // Income summary
+  document.getElementById('r-gross-income').textContent  = fmt(grossIncome);
+  document.getElementById('r-adjustments').textContent   = totalAdj > 0 ? '−' + fmt(totalAdj) : '$0';
+  document.getElementById('r-agi').textContent           = fmt(agi);
+
+  // Deduction
+  const dedLabel = state.deductMode === 'itemize' ? 'Itemized Deduction' : 'Standard Deduction';
+  document.getElementById('r-ded-label').textContent  = dedLabel;
+  document.getElementById('r-deduction').textContent  = '−' + fmt(deduction);
+  document.getElementById('r-taxable-income').textContent = fmt(taxableIncome);
+
+  // Bracket table
+  const tbody = document.getElementById('bracket-table-body');
+  tbody.innerHTML = '';
+  for (const b of ordTaxResult.brackets) {
+    const tr = document.createElement('tr');
+    const rangeStr = b.rangeMax
+      ? fmt(b.rangeMin) + ' – ' + fmt(b.rangeMax)
+      : fmt(b.rangeMin) + '+';
+    tr.innerHTML = `
+      <td><span class="rate-cell">${(b.rate * 100).toFixed(0)}%</span></td>
+      <td>${rangeStr}</td>
+      <td>${fmt(b.tax)}</td>`;
+    tbody.appendChild(tr);
+  }
+  // Total row
+  const totRow = document.createElement('tr');
+  totRow.innerHTML = `<td colspan="2" style="text-align:right; padding-right:8px">Ordinary Income Tax Total</td><td>${fmt(ordTax)}</td>`;
+  tbody.appendChild(totRow);
+
+  // Tax lines
+  document.getElementById('r-ordinary-tax').textContent = fmt(ordTax);
+
+  // Show/hide LTCG row
+  document.getElementById('r-ltcg-row').style.display = ltcgTax > 0 ? 'flex' : 'none';
+  document.getElementById('r-ltcg-tax').textContent    = fmt(ltcgTax);
+
+  // Show/hide SE tax row
+  document.getElementById('r-se-tax-row').style.display = seTax > 0 ? 'flex' : 'none';
+  document.getElementById('r-se-tax').textContent        = fmt(seTax);
+
+  // Show/hide NIIT row
+  document.getElementById('r-niit-row').style.display = niit > 0 ? 'flex' : 'none';
+  document.getElementById('r-niit').textContent        = fmt(niit);
+
+  document.getElementById('r-total-before-credits').textContent = fmt(totalBeforeCredits);
+
+  // Credits breakdown
+  const creditsDiv = document.getElementById('r-credits-breakdown');
+  creditsDiv.innerHTML = '';
+  const creditItems = [
+    { label: 'Child Tax Credit',              val: credits.ctc },
+    { label: 'Additional Child Tax Credit (refundable)', val: credits.actc },
+    { label: 'Child & Dependent Care Credit', val: credits.careCredit },
+    { label: 'Education Credit',              val: credits.eduCredit },
+    { label: 'Earned Income Credit (refundable)', val: credits.eic },
+    { label: "Saver's Credit",                val: credits.saversCredit },
+    { label: 'Other Credits',                 val: credits.otherCredits }
+  ];
+  for (const item of creditItems) {
+    if (item.val > 0) {
+      creditsDiv.innerHTML += `<div class="summary-line">
+        <span class="line-label">${item.label}</span>
+        <span class="line-value negative">−${fmt(item.val)}</span>
+      </div>`;
+    }
+  }
+  if (creditsDiv.innerHTML === '') {
+    creditsDiv.innerHTML = '<div class="summary-line"><span class="line-label" style="color:var(--text-secondary)">No credits claimed</span><span class="line-value">$0</span></div>';
+  }
+  document.getElementById('r-total-credits').textContent = '−' + fmt(totalCreditsApplied);
+
+  // Tax liability
+  document.getElementById('r-tax-liability').textContent  = fmt(taxLiability);
+  document.getElementById('r-effective-rate').textContent = effectiveRate.toFixed(1) + '%';
+  document.getElementById('r-marginal-rate').textContent  = (marginalRate * 100).toFixed(0) + '%';
+
+  // Payments
+  document.getElementById('r-total-payments').textContent = fmt(payments);
+
+  // Outcome box
+  const outcomeBox = document.getElementById('outcome-box');
+  const outcomeLabel = document.getElementById('outcome-label');
+  const outcomeAmount = document.getElementById('outcome-amount');
+  const outcomeSub = document.getElementById('outcome-sub');
+
+  if (netOutcome >= 0) {
+    outcomeBox.className   = 'outcome-box refund';
+    outcomeLabel.textContent = 'REFUND';
+    outcomeAmount.textContent = fmt(netOutcome);
+    outcomeSub.textContent = 'The federal government owes you this estimated refund.';
+  } else {
+    outcomeBox.className   = 'outcome-box owe';
+    outcomeLabel.textContent = 'AMOUNT OWED';
+    outcomeAmount.textContent = fmt(Math.abs(netOutcome));
+    outcomeSub.textContent = 'This is your estimated federal tax balance due by April 15, 2026.';
+  }
+
+  // ---- CHART ----
+  const stateTaxEst    = taxableIncome * 0.05;
+  const federalTaxPaid = taxLiability;
+  const totalGross     = grossIncome > 0 ? grossIncome : 1;
+  const takeHome       = Math.max(0, grossIncome - federalTaxPaid - stateTaxEst);
+
+  if (taxChart) taxChart.destroy();
+
+  taxChart = new Chart(document.getElementById('tax-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: [
+        'Federal Tax (' + fmt(federalTaxPaid) + ')',
+        'Est. State Tax (' + fmt(stateTaxEst) + ')',
+        'Take-Home Pay (' + fmt(takeHome) + ')'
+      ],
+      datasets: [{
+        data: [
+          Math.max(0, federalTaxPaid),
+          Math.max(0, stateTaxEst),
+          Math.max(0, takeHome)
+        ],
+        backgroundColor: ['#E65100', '#00695C', '#B0BEC5'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 11 }, padding: 12 }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const pct = totalGross > 0 ? (ctx.raw / totalGross * 100).toFixed(1) : 0;
+              return ctx.label + ' (' + pct + '% of gross)';
+            }
+          }
+        }
+      },
+      cutout: '60%'
+    }
+  });
+
+  // ---- SHOW RESULTS PAGE ----
+  document.getElementById('progress-bar').style.display  = 'none';
+  document.querySelector('.main-container').style.display = 'none';
+  document.getElementById('results-page').style.display  = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// -----------------------------------------------------------------------
+// NAVIGATION
+// -----------------------------------------------------------------------
+
+let currentStep = 1;
+
+/** Navigate to a specific step */
+function goToStep(n) {
+  // Hide current step
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('step-ind-' + currentStep).classList.remove('active');
+  document.getElementById('step-ind-' + currentStep).classList.add('completed');
+
+  // Show new step
+  currentStep = n;
+  document.getElementById('step-' + n).classList.add('active');
+
+  // Update step indicator
+  for (let i = 1; i <= 5; i++) {
+    const ind = document.getElementById('step-ind-' + i);
+    ind.classList.remove('active', 'completed');
+    if (i < n)      ind.classList.add('completed');
+    else if (i === n) ind.classList.add('active');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/** Reset everything to step 1 */
+function startOver() {
+  // Clear all inputs
+  document.querySelectorAll('input[type="number"]').forEach(el => el.value = '');
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+  document.querySelectorAll('.checkbox-option').forEach(el => el.classList.remove('checked'));
+
+  // Reset filing status to single
+  document.querySelector('input[name="filingStatus"][value="single"]').checked = true;
+  document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('selected'));
+
+  // Reset deduction mode
+  setDeductionMode('standard');
+
+  // Reset education credit
+  document.querySelector('input[name="edu-credit"][value="none"]').checked = true;
+  document.getElementById('edu-credit-panel').classList.add('hidden');
+
+  // Reset care dependent count
+  document.querySelector('input[name="care-dep-count"][value="1"]').checked = true;
+
+  // Clear state
+  state = {};
+
+  // Reset live displays
+  document.getElementById('live-gross-income').textContent = '$0';
+  document.getElementById('mini-gross').textContent        = '$0';
+  document.getElementById('mini-se-tax').textContent       = '$0';
+  document.getElementById('live-agi').textContent          = '$0';
+  document.getElementById('live-taxable-income').textContent = '$0';
+  document.getElementById('live-total-credits').textContent  = '$0';
+  document.getElementById('live-total-payments').textContent = '$0';
+
+  // Hide results
+  document.getElementById('results-page').style.display        = 'none';
+  document.getElementById('progress-bar').style.display        = 'flex';
+  document.querySelector('.main-container').style.display      = 'block';
+
+  // Destroy chart
+  if (taxChart) { taxChart.destroy(); taxChart = null; }
+
+  // Update displays
+  updateFilingStatusUI();
+  updateStdDeductionDisplay();
+
+  // Go to step 1
+  currentStep = 1;
+  for (let i = 1; i <= 5; i++) {
+    const ind = document.getElementById('step-ind-' + i);
+    ind.classList.remove('active', 'completed');
+  }
+  for (let i = 1; i <= 5; i++) {
+    const s = document.getElementById('step-' + i);
+    s.classList.remove('active');
+  }
+  document.getElementById('step-1').classList.add('active');
+  document.getElementById('step-ind-1').classList.add('active');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// -----------------------------------------------------------------------
+// INITIALIZATION
+// -----------------------------------------------------------------------
+
+// Set initial state on page load
+(function init() {
+  // Fix the broken function name (typo guard)
+  updateFilingStatusUI();
+  updateStdDeductionDisplay();
+  calcIncome();
+  calcAGI();
+  calcCredits();
+  calcPayments();
+
+  // Mark first radio as selected visually
+  const firstRadio = document.querySelector('input[name="filingStatus"]:checked');
+  if (firstRadio) firstRadio.parentElement.classList.add('selected');
+})();
+
+// -----------------------------------------------------------------------
+// HELPER: fix for the SS taxable function name typo
+// calcSSTaxable was referenced before definition due to hoisting issue
+// Defining it explicitly here as a regular function (not arrow/const) ensures hoisting.
+// -----------------------------------------------------------------------
+function calcSSTaxable(ssTotal, agiBeforeSS, fs) {
+  const halfSS   = ssTotal / 2;
+  const combined = agiBeforeSS + halfSS;
+  let taxablePct = 0;
+  let label      = '0% taxable';
+
+  if (fs === 'mfj') {
+    if (combined > 44000)      { taxablePct = 0.85; label = '85% taxable (combined income >$44k)'; }
+    else if (combined > 32000) { taxablePct = 0.50; label = '50% taxable (combined income $32k–$44k)'; }
+  } else {
+    if (combined > 34000)      { taxablePct = 0.85; label = '85% taxable (combined income >$34k)'; }
+    else if (combined > 25000) { taxablePct = 0.50; label = '50% taxable (combined income $25k–$34k)'; }
+  }
+  return { amount: ssTotal * taxablePct, label };
+}
+
+</script>
+</body>
+</html>

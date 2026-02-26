@@ -159,7 +159,7 @@ Here are the core practices:
 
 #### Diagram: Audit Risk Assessment Tool
 
-<iframe src="../../sims/audit-risk-meter/main.html" width="100%" height="500px" scrolling="no"></iframe>
+<iframe src="../../sims/audit-risk-meter/main.html" width="100%" height="900px" style="border:none;"></iframe>
 
 <details markdown="1">
 <summary>Audit Risk Assessment Tool — MicroSim Specification</summary>
